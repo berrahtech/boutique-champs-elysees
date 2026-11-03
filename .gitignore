@@ -1,0 +1,45 @@
+# Dependances
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+.angular/
+.nx/
+coverage/
+tmp/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+*.g.dart.tmp
+**/android/.gradle/
+**/android/local.properties
+**/ios/Pods/
+**/ios/Flutter/Generated.xcconfig
+
+# Secrets et configuration locale (ne jamais commiter de cles Orange/Moov ou JWT)
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+key.properties
+google-services.json
+GoogleService-Info.plist
+
+# Editeurs et systeme
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Journaux
+*.log
+npm-debug.log*
