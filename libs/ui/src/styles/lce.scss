@@ -1,0 +1,82 @@
+// Styles globaux LCE, à inclure une fois par application (project.json > styles).
+// Les composants n'utilisent que les variables CSS --lce-* : aucune couleur en dur.
+
+@use 'jetons';
+@use 'typographie' as t;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--lce-surface);
+  color: var(--lce-ink);
+  @include t.texte-body;
+}
+
+h1 {
+  @include t.texte-h1;
+  margin: 0;
+}
+
+h2 {
+  @include t.texte-h2;
+  margin: 0;
+}
+
+h3 {
+  @include t.texte-h3;
+  margin: 0;
+}
+
+a {
+  color: var(--lce-navy-500);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+// Anneau de focus clavier : 2 px, décalé de 2 px (règles d'interface).
+:focus-visible {
+  outline: 2px solid var(--lce-focus);
+  outline-offset: 2px;
+}
+
+// Texte réservé aux lecteurs d'écran.
+.lce-visuellement-masque {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.lce-conteneur {
+  max-width: var(--lce-largeur-max);
+  margin-inline: auto;
+  padding-inline: var(--lce-marge-ordinateur);
+
+  @media (max-width: 767px) {
+    padding-inline: var(--lce-marge-mobile);
+  }
+}
+
+// Animations courtes, coupées si l'utilisateur le demande.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

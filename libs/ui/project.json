@@ -1,0 +1,13 @@
+{
+  "name": "ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ui/src",
+  "prefix": "lce",
+  "projectType": "library",
+  "tags": [
+    "scope:web",
+    "type:ui"
+  ],
+  "// targets": "to see all targets run: nx show project ui --web",
+  "targets": {}
+}

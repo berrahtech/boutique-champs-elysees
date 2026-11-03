@@ -1,0 +1,82 @@
+// Fichier généré par tools/jetons/generer.mjs depuis libs/design-tokens/src : ne pas modifier.
+
+@mixin texte-display {
+  font-family: var(--lce-police-titre);
+  font-size: 56px;
+  line-height: 60px;
+  font-weight: 600;
+  @media (max-width: 767px) {
+    font-size: 36px;
+    line-height: 42px;
+  }
+}
+
+@mixin texte-h1 {
+  font-family: var(--lce-police-titre);
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+  @media (max-width: 767px) {
+    font-size: 30px;
+    line-height: 36px;
+  }
+}
+
+@mixin texte-h2 {
+  font-family: var(--lce-police-titre);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 600;
+}
+
+@mixin texte-h3 {
+  font-family: var(--lce-police-titre);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+@mixin texte-body-lg {
+  font-family: var(--lce-police-texte);
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: 400;
+}
+
+@mixin texte-body {
+  font-family: var(--lce-police-texte);
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+@mixin texte-label {
+  font-family: var(--lce-police-texte);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+@mixin texte-small {
+  font-family: var(--lce-police-texte);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+@mixin texte-surtitre {
+  font-family: var(--lce-police-texte);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@mixin texte-prix {
+  font-family: var(--lce-police-texte);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

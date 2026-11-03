@@ -1,0 +1,607 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+  moduleFormat    = "cjs"
+  runtime         = "nodejs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Adresse {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Unique en base seulement si par_defaut (index ux_adresse_defaut).
+  utilisateurId String      @map("utilisateur_id") @db.Uuid
+  zoneId        String      @map("zone_id") @db.Uuid
+  libelle       String      @db.VarChar(40)
+  quartier      String      @db.VarChar(80)
+  repere        String      @db.VarChar(255)
+  latitude      Decimal?    @db.Decimal(9, 6)
+  longitude     Decimal?    @db.Decimal(9, 6)
+  parDefaut     Boolean     @default(false) @map("par_defaut")
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  zone          Zone        @relation(fields: [zoneId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([utilisateurId], map: "ix_adresse_utilisateur")
+  @@map("adresse")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Appareil {
+  id                     String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  utilisateurId          String                  @map("utilisateur_id") @db.Uuid
+  plateforme             String                  @db.VarChar(10)
+  jetonFcm               String                  @unique @map("jeton_fcm")
+  dernierAcces           DateTime                @default(now()) @map("dernier_acces") @db.Timestamptz(6)
+  utilisateur            Utilisateur             @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  jetonRafraichissements JetonRafraichissement[]
+
+  @@index([utilisateurId], map: "ix_appareil_utilisateur")
+  @@map("appareil")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Avis {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  produitId   String      @map("produit_id") @db.Uuid
+  clientId    String      @map("client_id") @db.Uuid
+  note        Int         @db.SmallInt
+  commentaire String      @default("")
+  publie      Boolean     @default(false)
+  creeLe      DateTime    @default(now()) @map("cree_le") @db.Timestamptz(6)
+  client      Utilisateur @relation(fields: [clientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  produit     Produit     @relation(fields: [produitId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([produitId, clientId])
+  @@index([produitId, creeLe(sort: Desc)], map: "ix_avis_produit_publie", where: raw("publie"))
+  @@map("avis")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Categorie {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parentId   String?     @map("parent_id") @db.Uuid
+  slug       String      @unique @db.VarChar(80)
+  nom        String      @db.VarChar(80)
+  ordre      Int         @default(0)
+  imageUrl   String?     @map("image_url")
+  parent     Categorie?  @relation("categorieTocategorie", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  enfants    Categorie[] @relation("categorieTocategorie")
+  codePromos CodePromo[]
+  produits   Produit[]
+
+  @@index([parentId, ordre], map: "ix_categorie_parent")
+  @@map("categorie")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model CodePromo {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String     @unique(map: "ux_code_promo_code") @db.VarChar(30)
+  type            TypeRemise
+  valeur          Int        @default(0)
+  categorieId     String?    @map("categorie_id") @db.Uuid
+  montantMinimum  Int        @default(0) @map("montant_minimum")
+  debut           DateTime   @db.Timestamptz(6)
+  fin             DateTime   @db.Timestamptz(6)
+  utilisationsMax Int?       @map("utilisations_max")
+  utilisations    Int        @default(0)
+  actif           Boolean    @default(true)
+  categorie       Categorie? @relation(fields: [categorieId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  commandes       Commande[]
+
+  @@map("code_promo")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Commande {
+  id              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  numero          String                @unique @default(dbgenerated("((('LCE-'::text || to_char((now() AT TIME ZONE 'Africa/Bamako'::text), 'YYYY'::text)) || '-'::text) || lpad((nextval('seq_numero_commande'::regclass))::text, 6, '0'::text))")) @db.VarChar(20)
+  clientId        String                @map("client_id") @db.Uuid
+  zoneId          String                @map("zone_id") @db.Uuid
+  codePromoId     String?               @map("code_promo_id") @db.Uuid
+  statut          StatutCommande        @default(EN_ATTENTE_PAIEMENT)
+  moyen           MoyenPaiement
+  sousTotal       Int                   @map("sous_total")
+  fraisLivraison  Int                   @map("frais_livraison")
+  remise          Int                   @default(0)
+  total           Int
+  adresse         Json
+  noteClient      String?               @map("note_client") @db.VarChar(500)
+  creeLe          DateTime              @default(now()) @map("cree_le") @db.Timestamptz(6)
+  majLe           DateTime              @default(now()) @map("maj_le") @db.Timestamptz(6)
+  client          Utilisateur           @relation(fields: [clientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  codePromo       CodePromo?            @relation(fields: [codePromoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  zone            Zone                  @relation(fields: [zoneId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  historique      HistoriqueStatut[]
+  lignes          LigneCommande[]
+  missions        Mission[]
+  mouvementStocks MouvementStock[]
+  transactions    TransactionPaiement[]
+
+  @@index([clientId, creeLe(sort: Desc)], map: "ix_commande_client")
+  @@index([statut, creeLe], map: "ix_commande_statut")
+  @@index([zoneId, statut], map: "ix_commande_zone_statut")
+  @@map("commande")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Encaissement {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  missionId     String           @unique @map("mission_id") @db.Uuid
+  livreurId     String           @map("livreur_id") @db.Uuid
+  reversementId String?          @map("reversement_id") @db.Uuid
+  montant       Int
+  mode          ModeEncaissement
+  statut        StatutCaisse     @default(A_REVERSER)
+  refOperateur  String?          @map("ref_operateur") @db.VarChar(100)
+  encaisseLe    DateTime         @default(now()) @map("encaisse_le") @db.Timestamptz(6)
+  livreur       Livreur          @relation(fields: [livreurId], references: [utilisateurId], onDelete: NoAction, onUpdate: NoAction)
+  mission       Mission          @relation(fields: [missionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reversement   Reversement?     @relation(fields: [reversementId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([livreurId], map: "ix_encaissement_caisse", where: raw("(statut = 'A_REVERSER'::statut_caisse)"))
+  @@index([reversementId], map: "ix_encaissement_reversement")
+  @@map("encaissement")
+}
+
+model EvenementWebhook {
+  id                  BigInt               @id @default(autoincrement())
+  prestataire         MoyenPaiement
+  idEvenement         String               @map("id_evenement") @db.VarChar(100)
+  transactionId       String?              @map("transaction_id") @db.Uuid
+  charge              Json
+  signatureOk         Boolean              @map("signature_ok")
+  recuLe              DateTime             @default(now()) @map("recu_le") @db.Timestamptz(6)
+  traiteLe            DateTime?            @map("traite_le") @db.Timestamptz(6)
+  transactionPaiement TransactionPaiement? @relation(fields: [transactionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([prestataire, idEvenement])
+  @@map("evenement_webhook")
+}
+
+model Favori {
+  utilisateurId String      @map("utilisateur_id") @db.Uuid
+  produitId     String      @map("produit_id") @db.Uuid
+  ajouteLe      DateTime    @default(now()) @map("ajoute_le") @db.Timestamptz(6)
+  produit       Produit     @relation(fields: [produitId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([utilisateurId, produitId])
+  @@map("favori")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model HistoriqueStatut {
+  id         BigInt          @id @default(autoincrement())
+  commandeId String          @map("commande_id") @db.Uuid
+  de         StatutCommande?
+  a          StatutCommande
+  acteurId   String?         @map("acteur_id") @db.Uuid
+  motif      String?         @db.VarChar(500)
+  date       DateTime        @default(now()) @db.Timestamptz(6)
+  acteur     Utilisateur?    @relation(fields: [acteurId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  commande   Commande        @relation(fields: [commandeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([commandeId, date], map: "ix_historique_commande")
+  @@map("historique_statut")
+}
+
+model ImageProduit {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  produitId String  @map("produit_id") @db.Uuid
+  url200    String  @map("url_200")
+  url400    String  @map("url_400")
+  url800    String  @map("url_800")
+  ordre     Int     @default(0)
+  produit   Produit @relation(fields: [produitId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([produitId, ordre])
+  @@map("image_produit")
+}
+
+model JetonRafraichissement {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  utilisateurId String      @map("utilisateur_id") @db.Uuid
+  empreinte     String      @unique @db.Char(64)
+  appareilId    String?     @map("appareil_id") @db.Uuid
+  expireLe      DateTime    @map("expire_le") @db.Timestamptz(6)
+  revoqueLe     DateTime?   @map("revoque_le") @db.Timestamptz(6)
+  creeLe        DateTime    @default(now()) @map("cree_le") @db.Timestamptz(6)
+  appareil      Appareil?   @relation(fields: [appareilId], references: [id], onUpdate: NoAction, map: "fk_jeton_appareil")
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([utilisateurId], map: "ix_jeton_utilisateur", where: raw("(revoque_le IS NULL)"))
+  @@map("jeton_rafraichissement")
+}
+
+model JournalAudit {
+  id       BigInt       @id @default(autoincrement())
+  acteurId String?      @map("acteur_id") @db.Uuid
+  action   String       @db.VarChar(60)
+  entite   String       @db.VarChar(40)
+  entiteId String       @map("entite_id") @db.Uuid
+  avant    Json?
+  apres    Json?
+  ip       String?      @db.Inet
+  date     DateTime     @default(now()) @db.Timestamptz(6)
+  acteur   Utilisateur? @relation(fields: [acteurId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([acteurId, date(sort: Desc)], map: "ix_audit_acteur")
+  @@index([entite, entiteId, date(sort: Desc)], map: "ix_audit_entite")
+  @@map("journal_audit")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model LigneCommande {
+  commandeId   String   @map("commande_id") @db.Uuid
+  produitId    String   @map("produit_id") @db.Uuid
+  libelle      String   @db.VarChar(160)
+  quantite     Int
+  prixUnitaire Int      @map("prix_unitaire")
+  commande     Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  produit      Produit  @relation(fields: [produitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([commandeId, produitId])
+  @@index([produitId], map: "ix_ligne_commande_produit")
+  @@map("ligne_commande")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model LignePanier {
+  panierId  String   @map("panier_id") @db.Uuid
+  produitId String   @map("produit_id") @db.Uuid
+  quantite  Int
+  ajouteLe  DateTime @default(now()) @map("ajoute_le") @db.Timestamptz(6)
+  panier    Panier   @relation(fields: [panierId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  produit   Produit  @relation(fields: [produitId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([panierId, produitId])
+  @@map("ligne_panier")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Livreur {
+  utilisateurId String         @id @map("utilisateur_id") @db.Uuid
+  disponible    Boolean        @default(false)
+  latitude      Decimal?       @db.Decimal(9, 6)
+  longitude     Decimal?       @db.Decimal(9, 6)
+  majPosition   DateTime?      @map("maj_position") @db.Timestamptz(6)
+  encaissements Encaissement[]
+  utilisateur   Utilisateur    @relation(fields: [utilisateurId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  livreurZones  LivreurZone[]
+  missions      Mission[]
+  reversements  Reversement[]
+
+  @@index([utilisateurId], map: "ix_livreur_disponible", where: raw("disponible"))
+  @@map("livreur")
+}
+
+model LivreurZone {
+  livreurId String  @map("livreur_id") @db.Uuid
+  zoneId    String  @map("zone_id") @db.Uuid
+  livreur   Livreur @relation(fields: [livreurId], references: [utilisateurId], onDelete: Cascade, onUpdate: NoAction)
+  zone      Zone    @relation(fields: [zoneId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([livreurId, zoneId])
+  @@map("livreur_zone")
+}
+
+model Marque {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom      String    @unique @db.VarChar(80)
+  logoUrl  String?   @map("logo_url")
+  produits Produit[]
+
+  @@map("marque")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Mission {
+  id                     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Unique en base seulement si (statut = ANY (ARRAY['PROPOSEE'::statut_mission, 'ACCEPTEE'::statut_mission, 'EN_COURS'::statut_mission, 'LIVREE'::statut_mission])) (index ux_mission_active).
+  commandeId             String        @map("commande_id") @db.Uuid
+  livreurId              String        @map("livreur_id") @db.Uuid
+  affecteePar            String        @map("affectee_par") @db.Uuid
+  statut                 StatutMission @default(PROPOSEE)
+  codeHash               String        @map("code_hash")
+  essaisCode             Int           @default(0) @map("essais_code") @db.SmallInt
+  signatureUrl           String?       @map("signature_url")
+  photoUrl               String?       @map("photo_url")
+  motif                  String?       @db.VarChar(500)
+  affecteeLe             DateTime      @default(now()) @map("affectee_le") @db.Timestamptz(6)
+  accepteeLe             DateTime?     @map("acceptee_le") @db.Timestamptz(6)
+  livreeLe               DateTime?     @map("livree_le") @db.Timestamptz(6)
+  encaissement           Encaissement?
+  affecteeParUtilisateur Utilisateur   @relation(fields: [affecteePar], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  commande               Commande      @relation(fields: [commandeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  livreur                Livreur       @relation(fields: [livreurId], references: [utilisateurId], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([livreurId, statut, affecteeLe(sort: Desc)], map: "ix_mission_livreur")
+  @@map("mission")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model MouvementStock {
+  id         BigInt        @id @default(autoincrement())
+  produitId  String        @map("produit_id") @db.Uuid
+  commandeId String?       @map("commande_id") @db.Uuid
+  type       TypeMouvement
+  quantite   Int
+  motif      String?       @db.VarChar(255)
+  acteurId   String?       @map("acteur_id") @db.Uuid
+  date       DateTime      @default(now()) @db.Timestamptz(6)
+  acteur     Utilisateur?  @relation(fields: [acteurId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  commande   Commande?     @relation(fields: [commandeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  produit    Produit       @relation(fields: [produitId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([commandeId], map: "ix_mouvement_commande", where: raw("(commande_id IS NOT NULL)"))
+  @@index([produitId, date(sort: Desc)], map: "ix_mouvement_produit")
+  @@map("mouvement_stock")
+}
+
+model Panier {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  utilisateurId String        @unique @map("utilisateur_id") @db.Uuid
+  codePromo     String?       @map("code_promo") @db.VarChar(30)
+  majLe         DateTime      @default(now()) @map("maj_le") @db.Timestamptz(6)
+  lignePaniers  LignePanier[]
+  utilisateur   Utilisateur   @relation(fields: [utilisateurId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("panier")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Permission {
+  code            String           @id @db.VarChar(60)
+  libelle         String           @db.VarChar(120)
+  module          String           @db.VarChar(40)
+  rolePermissions RolePermission[]
+
+  @@map("permission")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Produit {
+  id              String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categorieId     String                   @map("categorie_id") @db.Uuid
+  marqueId        String?                  @map("marque_id") @db.Uuid
+  /// Unique en base seulement si (supprime_le IS NULL) (index ux_produit_slug).
+  slug            String                   @db.VarChar(120)
+  nom             String                   @db.VarChar(160)
+  description     String                   @default("")
+  prix            Int
+  prixBarre       Int?                     @map("prix_barre")
+  nouveau         Boolean                  @default(false)
+  noteMoyenne     Decimal                  @default(0) @map("note_moyenne") @db.Decimal(2, 1)
+  nbAvis          Int                      @default(0) @map("nb_avis")
+  recherche       Unsupported("tsvector")? @default(dbgenerated("(setweight(to_tsvector('french'::regconfig, (nom)::text), 'A'::\"char\") || setweight(to_tsvector('french'::regconfig, description), 'B'::\"char\"))"))
+  creeLe          DateTime                 @default(now()) @map("cree_le") @db.Timestamptz(6)
+  majLe           DateTime                 @default(now()) @map("maj_le") @db.Timestamptz(6)
+  supprimeLe      DateTime?                @map("supprime_le") @db.Timestamptz(6)
+  avis            Avis[]
+  favoris         Favori[]
+  imageProduits   ImageProduit[]
+  ligneCommandes  LigneCommande[]
+  lignePaniers    LignePanier[]
+  mouvementStocks MouvementStock[]
+  categorie       Categorie                @relation(fields: [categorieId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  marque          Marque?                  @relation(fields: [marqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  stock           Stock?
+
+  @@index([categorieId], map: "ix_produit_categorie", where: raw("(supprime_le IS NULL)"))
+  @@index([marqueId], map: "ix_produit_marque", where: raw("(supprime_le IS NULL)"))
+  @@index([recherche], map: "ix_produit_recherche", type: Gin)
+  @@map("produit")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Reversement {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  livreurId     String         @map("livreur_id") @db.Uuid
+  montant       Int
+  statut        StatutCaisse   @default(EN_ATTENTE_VALIDATION)
+  preuveUrl     String?        @map("preuve_url")
+  declareLe     DateTime       @default(now()) @map("declare_le") @db.Timestamptz(6)
+  valideePar    String?        @map("validee_par") @db.Uuid
+  valideeLe     DateTime?      @map("validee_le") @db.Timestamptz(6)
+  motifRejet    String?        @map("motif_rejet") @db.VarChar(500)
+  encaissements Encaissement[]
+  livreur       Livreur        @relation(fields: [livreurId], references: [utilisateurId], onDelete: NoAction, onUpdate: NoAction)
+  validateur    Utilisateur?   @relation(fields: [valideePar], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([declareLe], map: "ix_reversement_a_valider", where: raw("(statut = 'EN_ATTENTE_VALIDATION'::statut_caisse)"))
+  @@index([livreurId, declareLe(sort: Desc)], map: "ix_reversement_livreur")
+  @@map("reversement")
+}
+
+model Role {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom             String           @unique @db.VarChar(60)
+  systeme         Boolean          @default(false)
+  rolePermissions RolePermission[]
+  utilisateurs    Utilisateur[]
+
+  @@map("role")
+}
+
+model RolePermission {
+  roleId         String     @map("role_id") @db.Uuid
+  permissionCode String     @map("permission_code") @db.VarChar(60)
+  permission     Permission @relation(fields: [permissionCode], references: [code], onDelete: Cascade, onUpdate: NoAction)
+  role           Role       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([roleId, permissionCode])
+  @@map("role_permission")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Stock {
+  produitId   String  @id @map("produit_id") @db.Uuid
+  disponible  Int     @default(0)
+  reserve     Int     @default(0)
+  seuilAlerte Int     @default(5) @map("seuil_alerte")
+  version     Int     @default(0)
+  produit     Produit @relation(fields: [produitId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([produitId], map: "ix_stock_alerte", where: raw("(disponible <= seuil_alerte)"))
+  @@map("stock")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model TransactionPaiement {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Unique en base seulement si (statut = ANY (ARRAY['REUSSI'::statut_paiement, 'REMBOURSE'::statut_paiement, 'PARTIELLEMENT_REMBOURSE'::statut_paiement])) (index ux_transaction_reussie).
+  commandeId        String             @map("commande_id") @db.Uuid
+  moyen             MoyenPaiement
+  statut            StatutPaiement     @default(EN_ATTENTE)
+  montant           Int
+  montantRembourse  Int                @default(0) @map("montant_rembourse")
+  refPrestataire    String?            @map("ref_prestataire") @db.VarChar(100)
+  cleIdempotence    String             @unique @map("cle_idempotence") @db.Uuid
+  telephonePayeur   String?            @map("telephone_payeur") @db.VarChar(20)
+  codeErreur        String?            @map("code_erreur") @db.VarChar(60)
+  expireLe          DateTime?          @map("expire_le") @db.Timestamptz(6)
+  creeLe            DateTime           @default(now()) @map("cree_le") @db.Timestamptz(6)
+  majLe             DateTime           @default(now()) @map("maj_le") @db.Timestamptz(6)
+  evenementWebhooks EvenementWebhook[]
+  commande          Commande           @relation(fields: [commandeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([moyen, refPrestataire], map: "ux_transaction_ref", where: raw("(ref_prestataire IS NOT NULL)"))
+  @@index([commandeId], map: "ix_transaction_commande")
+  @@index([expireLe], map: "ix_transaction_expiration", where: raw("(statut = 'EN_ATTENTE'::statut_paiement)"))
+  @@map("transaction_paiement")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model Utilisateur {
+  id                     String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Unique en base seulement si (supprime_le IS NULL) (index ux_utilisateur_telephone).
+  telephone              String                  @db.VarChar(20)
+  email                  String?                 @db.VarChar(254)
+  nom                    String                  @db.VarChar(120)
+  motDePasseHash         String                  @map("mot_de_passe_hash")
+  roleId                 String                  @map("role_id") @db.Uuid
+  deuxFacteurs           Boolean                 @default(false) @map("deux_facteurs")
+  actif                  Boolean                 @default(true)
+  creeLe                 DateTime                @default(now()) @map("cree_le") @db.Timestamptz(6)
+  majLe                  DateTime                @default(now()) @map("maj_le") @db.Timestamptz(6)
+  supprimeLe             DateTime?               @map("supprime_le") @db.Timestamptz(6)
+  adresses               Adresse[]
+  appareils              Appareil[]
+  avis                   Avis[]
+  commandes              Commande[]
+  favoris                Favori[]
+  changementsStatut      HistoriqueStatut[]
+  jetonRafraichissements JetonRafraichissement[]
+  actionsAudit           JournalAudit[]
+  livreur                Livreur?
+  missionsAffectees      Mission[]
+  mouvementsStock        MouvementStock[]
+  panier                 Panier?
+  reversementsValides    Reversement[]
+  role                   Role                    @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([roleId], map: "ix_utilisateur_role")
+  @@map("utilisateur")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Zone {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nom          String        @unique @db.VarChar(80)
+  frais        Int
+  delaiHeures  Int           @map("delai_heures")
+  seuilGratuit Int?          @map("seuil_gratuit")
+  actif        Boolean       @default(true)
+  adresses     Adresse[]
+  commandes    Commande[]
+  livreurZones LivreurZone[]
+
+  @@map("zone")
+}
+
+enum ModeEncaissement {
+  ESPECES
+  ORANGE_MONEY
+  MOOV_MONEY
+
+  @@map("mode_encaissement")
+}
+
+enum MoyenPaiement {
+  ORANGE_MONEY
+  MOOV_MONEY
+  CARTE
+  A_LA_LIVRAISON
+
+  @@map("moyen_paiement")
+}
+
+enum StatutCaisse {
+  A_REVERSER
+  EN_ATTENTE_VALIDATION
+  REVERSE
+
+  @@map("statut_caisse")
+}
+
+enum StatutCommande {
+  EN_ATTENTE_PAIEMENT
+  CONFIRMEE
+  EN_PREPARATION
+  EN_ATTENTE_AFFECTATION
+  AFFECTEE
+  EN_COURS_LIVRAISON
+  LIVREE
+  ECHEC_LIVRAISON
+  RETOUR_ENTREPOT
+  ANNULEE
+
+  @@map("statut_commande")
+}
+
+enum StatutMission {
+  PROPOSEE
+  ACCEPTEE
+  REFUSEE
+  EN_COURS
+  LIVREE
+  ECHEC
+  RETOUR
+
+  @@map("statut_mission")
+}
+
+enum StatutPaiement {
+  EN_ATTENTE
+  REUSSI
+  ECHOUE
+  ANNULE
+  REMBOURSE
+  PARTIELLEMENT_REMBOURSE
+
+  @@map("statut_paiement")
+}
+
+enum TypeMouvement {
+  ENTREE
+  SORTIE
+  RESERVATION
+  LIBERATION
+  REINTEGRATION
+  INVENTAIRE
+
+  @@map("type_mouvement")
+}
+
+enum TypeRemise {
+  POURCENTAGE
+  MONTANT_FIXE
+  LIVRAISON_OFFERTE
+
+  @@map("type_remise")
+}

@@ -1,0 +1,52 @@
+// Fichier généré par tools/jetons/generer.mjs depuis libs/design-tokens/src : ne pas modifier.
+
+:root {
+  --lce-navy: #0B1C3F;
+  --lce-navy-700: #13285C;
+  --lce-navy-500: #1F3C82;
+  --lce-gold: #D4A62A;
+  --lce-gold-bright: #E9BE3F;
+  --lce-gold-deep: #B8871A;
+  --lce-gold-soft: #F8EFD4;
+  --lce-gold-text: #8A6410;
+  --lce-surface: #FFFFFF;
+  --lce-surface-ivoire: #FAF6EC;
+  --lce-ink: #0B1C3F;
+  --lce-ink-muted: #5A6378;
+  --lce-line: #E6E0D2;
+  --lce-success: #1E7A4C;
+  --lce-success-soft: #E3F2EA;
+  --lce-danger: #B3261E;
+  --lce-danger-soft: #FBE7E5;
+  --lce-info-soft: #E5EBF7;
+  --lce-neutre-soft: #ECEDF1;
+  --lce-promo: #E30613;
+  --lce-on-gold: #0B1C3F;
+  --lce-on-navy: #FFFFFF;
+  --lce-focus: #1F3C82;
+  --lce-adm-bg: #F4F5F9;
+
+  --lce-police-titre: 'Playfair Display', Georgia, serif;
+  --lce-police-texte: 'Montserrat', system-ui, sans-serif;
+
+  --lce-espace-1: 4px;
+  --lce-espace-2: 8px;
+  --lce-espace-3: 12px;
+  --lce-espace-4: 16px;
+  --lce-espace-5: 24px;
+  --lce-espace-6: 32px;
+  --lce-espace-7: 48px;
+  --lce-espace-8: 64px;
+  --lce-rayon-badge: 4px;
+  --lce-rayon-controle: 8px;
+  --lce-rayon-carte-mobile: 12px;
+  --lce-rayon-carte: 16px;
+  --lce-rayon-pastille: 999px;
+  --lce-ombre-card: 0 8px 24px rgba(11, 28, 63, 0.10);
+  --lce-ombre-gold: 0 6px 18px rgba(212, 166, 42, 0.35);
+  --lce-marge-ordinateur: 32px;
+  --lce-marge-mobile: 16px;
+  --lce-largeur-max: 1280px;
+  --lce-cible-tactile: 44px;
+  --lce-bouton-mobile: 52px;
+}

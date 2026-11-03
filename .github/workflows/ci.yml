@@ -1,0 +1,63 @@
+# Intégration continue : à chaque push et pull request.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-api:
+    name: Web et API
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: lce
+          POSTGRES_USER: lce
+          POSTGRES_PASSWORD: lce_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U lce -d lce" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://lce:lce_ci@localhost:5432/lce?schema=lce
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Jetons de design à jour
+        run: npx nx run design-tokens:verifier
+      - name: Migrations SQL applicables sur une base vide
+        run: npx nx run api:migrer
+      - run: npx nx run-many -t lint
+      - run: npx nx run-many -t test
+      - run: npx nx run-many -t build
+
+  flutter:
+    name: Applications Flutter
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        paquet: [lce_ui, client, livreur]
+    defaults:
+      run:
+        working-directory: mobile/${{ matrix.paquet }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.35.6
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test

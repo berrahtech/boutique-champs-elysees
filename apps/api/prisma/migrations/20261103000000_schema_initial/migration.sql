@@ -13,7 +13,7 @@
 --   * Les transitions de statut sont contrôlées par le serveur
 --     (changerStatut) ; la base garantit seulement les valeurs possibles.
 --
--- Exécution : psql -v ON_ERROR_STOP=1 -f schema.sql
+-- Appliqué par : npx nx run api:migrer (prisma migrate deploy)
 -- =============================================================================
 
 BEGIN;
@@ -573,30 +573,33 @@ WHERE p.supprime_le IS NULL AND s.disponible <= s.seuil_alerte;
 -- -----------------------------------------------------------------------------
 
 INSERT INTO permission (code, libelle, module) VALUES
+  ('tableau.voir',           'Voir le tableau de bord',          'pilotage'),
+  ('rapport.voir',           'Voir les finances et rapports',    'pilotage'),
   ('commande.voir',          'Voir les commandes',               'commande'),
   ('commande.changer_statut','Changer le statut d''une commande','commande'),
   ('commande.affecter',      'Affecter un livreur',              'commande'),
   ('commande.annuler',       'Annuler une commande',             'commande'),
   ('commande.rembourser',    'Rembourser un paiement',           'commande'),
-  ('produit.voir',           'Voir le catalogue',                'produit'),
-  ('produit.modifier',       'Créer et modifier les produits',   'produit'),
-  ('stock.ajuster',          'Ajuster le stock',                 'stock'),
-  ('promo.gerer',            'Gérer les codes promo',            'promo'),
-  ('avis.moderer',           'Modérer les avis',                 'avis'),
   ('client.voir',            'Voir les clients',                 'client'),
-  ('livreur.gerer',          'Gérer les livreurs et les zones',  'livraison'),
-  ('caisse.valider',         'Valider les reversements',         'caisse'),
-  ('rapport.voir',           'Voir les rapports',                'rapport'),
-  ('utilisateur.gerer',      'Gérer le personnel',               'utilisateur'),
-  ('role.gerer',             'Gérer les rôles et permissions',   'utilisateur'),
-  ('audit.voir',             'Consulter le journal d''audit',    'utilisateur');
+  ('promo.gerer',            'Gérer les codes promo',            'marketing'),
+  ('avis.moderer',           'Modérer les avis',                 'marketing'),
+  ('produit.voir',           'Voir le catalogue',                'catalogue'),
+  ('produit.modifier',       'Créer et modifier les produits',   'catalogue'),
+  ('stock.ajuster',          'Ajuster le stock',                 'catalogue'),
+  ('livreur.gerer',          'Gérer les livreurs',               'livraison'),
+  ('caisse.valider',         'Valider les reversements',         'livraison'),
+  ('zone.gerer',             'Gérer les zones et tarifs',        'livraison'),
+  ('utilisateur.gerer',      'Gérer le personnel',               'administration'),
+  ('role.gerer',             'Gérer les rôles et permissions',   'administration'),
+  ('audit.voir',             'Consulter le journal d''audit',    'administration');
 
+-- Rôles du dossier UX (§ Administration, colonne « Rôles qui y accèdent »).
 INSERT INTO role (nom, systeme) VALUES
   ('Client', true),
   ('Livreur', true),
   ('Administrateur', true),
-  ('Gestionnaire commandes', true),
-  ('Gestionnaire catalogue', true),
+  ('Gestionnaire commercial', true),
+  ('Gestionnaire de stock', true),
   ('Responsable financier', true);
 
 -- Administrateur : toutes les permissions.
@@ -607,21 +610,28 @@ INSERT INTO role_permission (role_id, permission_code)
 SELECT r.id, v.code
 FROM role r
 JOIN (VALUES
-  ('Gestionnaire commandes', 'commande.voir'),
-  ('Gestionnaire commandes', 'commande.changer_statut'),
-  ('Gestionnaire commandes', 'commande.affecter'),
-  ('Gestionnaire commandes', 'commande.annuler'),
-  ('Gestionnaire commandes', 'client.voir'),
-  ('Gestionnaire commandes', 'produit.voir'),
-  ('Gestionnaire catalogue', 'produit.voir'),
-  ('Gestionnaire catalogue', 'produit.modifier'),
-  ('Gestionnaire catalogue', 'stock.ajuster'),
-  ('Gestionnaire catalogue', 'promo.gerer'),
-  ('Gestionnaire catalogue', 'avis.moderer'),
-  ('Responsable financier',  'commande.voir'),
-  ('Responsable financier',  'commande.rembourser'),
-  ('Responsable financier',  'caisse.valider'),
-  ('Responsable financier',  'rapport.voir')
+  -- Commandes, clients, marketing, livreurs et encaissements.
+  ('Gestionnaire commercial', 'tableau.voir'),
+  ('Gestionnaire commercial', 'commande.voir'),
+  ('Gestionnaire commercial', 'commande.changer_statut'),
+  ('Gestionnaire commercial', 'commande.affecter'),
+  ('Gestionnaire commercial', 'commande.annuler'),
+  ('Gestionnaire commercial', 'client.voir'),
+  ('Gestionnaire commercial', 'promo.gerer'),
+  ('Gestionnaire commercial', 'avis.moderer'),
+  ('Gestionnaire commercial', 'livreur.gerer'),
+  ('Gestionnaire commercial', 'produit.voir'),
+  -- Produits et stocks.
+  ('Gestionnaire de stock',   'tableau.voir'),
+  ('Gestionnaire de stock',   'produit.voir'),
+  ('Gestionnaire de stock',   'produit.modifier'),
+  ('Gestionnaire de stock',   'stock.ajuster'),
+  -- Finances et transactions.
+  ('Responsable financier',   'tableau.voir'),
+  ('Responsable financier',   'rapport.voir'),
+  ('Responsable financier',   'commande.voir'),
+  ('Responsable financier',   'commande.rembourser'),
+  ('Responsable financier',   'caisse.valider')
 ) AS v(role, code) ON v.role = r.nom;
 
 COMMIT;

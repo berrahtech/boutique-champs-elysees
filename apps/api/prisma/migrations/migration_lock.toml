@@ -1,0 +1,2 @@
+# Verrou des migrations Prisma : ne pas modifier.
+provider = "postgresql"

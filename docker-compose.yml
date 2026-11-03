@@ -1,0 +1,37 @@
+# Services locaux de développement : PostgreSQL 16 et Redis 7.
+# Lancer : docker compose up -d
+# Ports décalés (5433, 6380) pour ne pas gêner un PostgreSQL ou un Redis déjà installé.
+name: lce
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: lce
+      POSTGRES_USER: lce
+      POSTGRES_PASSWORD: lce_dev
+      TZ: UTC
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lce -d lce']
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      retries: 10
+
+volumes:
+  postgres:
+  redis:

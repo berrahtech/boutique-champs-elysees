@@ -1,0 +1,9 @@
+# Fins de ligne LF dans le dépôt, quel que soit le système.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary
+*.ttf binary
+*.jar binary

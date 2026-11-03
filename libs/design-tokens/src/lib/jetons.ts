@@ -1,0 +1,134 @@
+// Fichier généré par tools/jetons/generer.mjs depuis libs/design-tokens/src : ne pas modifier.
+
+export const jetons = {
+  "couleurs": {
+    "navy": "#0B1C3F",
+    "navy-700": "#13285C",
+    "navy-500": "#1F3C82",
+    "gold": "#D4A62A",
+    "gold-bright": "#E9BE3F",
+    "gold-deep": "#B8871A",
+    "gold-soft": "#F8EFD4",
+    "gold-text": "#8A6410",
+    "surface": "#FFFFFF",
+    "surface-ivoire": "#FAF6EC",
+    "ink": "#0B1C3F",
+    "ink-muted": "#5A6378",
+    "line": "#E6E0D2",
+    "success": "#1E7A4C",
+    "success-soft": "#E3F2EA",
+    "danger": "#B3261E",
+    "danger-soft": "#FBE7E5",
+    "info-soft": "#E5EBF7",
+    "neutre-soft": "#ECEDF1",
+    "promo": "#E30613",
+    "on-gold": "#0B1C3F",
+    "on-navy": "#FFFFFF",
+    "focus": "#1F3C82",
+    "adm-bg": "#F4F5F9"
+  },
+  "polices": {
+    "titre": "Playfair Display",
+    "texte": "Montserrat"
+  },
+  "typographie": {
+    "display": {
+      "police": "titre",
+      "taille": 56,
+      "interligne": 60,
+      "graisse": 600,
+      "tailleMobile": 36,
+      "interligneMobile": 42
+    },
+    "h1": {
+      "police": "titre",
+      "taille": 40,
+      "interligne": 48,
+      "graisse": 600,
+      "tailleMobile": 30,
+      "interligneMobile": 36
+    },
+    "h2": {
+      "police": "titre",
+      "taille": 28,
+      "interligne": 36,
+      "graisse": 600
+    },
+    "h3": {
+      "police": "titre",
+      "taille": 20,
+      "interligne": 28,
+      "graisse": 600
+    },
+    "body-lg": {
+      "police": "texte",
+      "taille": 17,
+      "interligne": 26,
+      "graisse": 400
+    },
+    "body": {
+      "police": "texte",
+      "taille": 15,
+      "interligne": 24,
+      "graisse": 400
+    },
+    "label": {
+      "police": "texte",
+      "taille": 14,
+      "interligne": 20,
+      "graisse": 600
+    },
+    "small": {
+      "police": "texte",
+      "taille": 13,
+      "interligne": 20,
+      "graisse": 400
+    },
+    "surtitre": {
+      "police": "texte",
+      "taille": 12,
+      "interligne": 16,
+      "graisse": 600,
+      "espacement": 0.14,
+      "capitales": true
+    },
+    "prix": {
+      "police": "texte",
+      "taille": 18,
+      "interligne": 24,
+      "graisse": 700,
+      "chiffresTabulaires": true
+    }
+  },
+  "espacements": {
+    "1": 4,
+    "2": 8,
+    "3": 12,
+    "4": 16,
+    "5": 24,
+    "6": 32,
+    "7": 48,
+    "8": 64
+  },
+  "rayons": {
+    "badge": 4,
+    "controle": 8,
+    "carte-mobile": 12,
+    "carte": 16,
+    "pastille": 999
+  },
+  "ombres": {
+    "card": "0 8px 24px rgba(11, 28, 63, 0.10)",
+    "gold": "0 6px 18px rgba(212, 166, 42, 0.35)"
+  },
+  "mise-en-page": {
+    "marge-ordinateur": 32,
+    "marge-mobile": 16,
+    "largeur-max": 1280,
+    "cible-tactile": 44,
+    "bouton-mobile": 52
+  }
+} as const;
+
+export type CouleurLce = keyof typeof jetons.couleurs;
+export type StyleTexteLce = keyof typeof jetons.typographie;

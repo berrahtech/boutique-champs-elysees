@@ -1,0 +1,34 @@
+name: lce_ui
+description: "Jetons de design et composants partagés des applications Les Champs Élysées (client et livreur)."
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.2
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+# Polices : Playfair Display et Montserrat doivent être embarquées (connexions
+# instables). Déposer les fichiers .ttf dans fonts/ puis décommenter :
+# flutter:
+#   fonts:
+#     - family: Playfair Display
+#       fonts:
+#         - asset: packages/lce_ui/fonts/PlayfairDisplay-SemiBold.ttf
+#           weight: 600
+#     - family: Montserrat
+#       fonts:
+#         - asset: packages/lce_ui/fonts/Montserrat-Regular.ttf
+#         - asset: packages/lce_ui/fonts/Montserrat-SemiBold.ttf
+#           weight: 600
+#         - asset: packages/lce_ui/fonts/Montserrat-Bold.ttf
+#           weight: 700

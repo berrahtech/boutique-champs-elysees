@@ -1,0 +1,102 @@
+{
+  "name": "boutique",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "lce",
+  "sourceRoot": "apps/boutique/src",
+  "tags": [
+    "scope:web",
+    "type:app"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/boutique",
+        "browser": "apps/boutique/src/main.ts",
+        "tsConfig": "apps/boutique/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/boutique/public"
+          }
+        ],
+        "styles": [
+          "libs/ui/src/styles/lce.scss",
+          "apps/boutique/src/styles.scss"
+        ],
+        "server": "apps/boutique/src/main.server.ts",
+        "ssr": {
+          "entry": "apps/boutique/src/server.ts"
+        },
+        "outputMode": "server",
+        "security": {
+          "allowedHosts": []
+        },
+        "stylePreprocessorOptions": {
+          "includePaths": [
+            "libs/ui/src/styles"
+          ]
+        }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "10kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
+      "configurations": {
+        "production": {
+          "buildTarget": "boutique:build:production"
+        },
+        "development": {
+          "buildTarget": "boutique:build:development"
+        }
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": [
+        "build"
+      ],
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "boutique:build",
+        "staticFilePath": "dist/apps/boutique/browser",
+        "spa": true
+      }
+    }
+  }
+}

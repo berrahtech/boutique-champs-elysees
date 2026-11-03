@@ -43,3 +43,17 @@ desktop.ini
 # Journaux
 *.log
 npm-debug.log*
+
+.angular
+vitest.config.*.timestamp*
+.vitest
+
+# Nx et TypeScript
+out-tsc/
+.angular/
+
+# Client Prisma généré (npx nx run api:prisma-generer)
+apps/api/src/generated/
+
+# Configuration locale de l’aperçu (chemin de Node propre à cette machine)
+.claude/launch.json
