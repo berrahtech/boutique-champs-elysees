@@ -17,10 +17,10 @@ const PAR_PAGE = 12;
 
 const FILTRES: { valeur: Filtre; libelle: string }[] = [
   { valeur: 'tout', libelle: 'Tout' },
-  { valeur: 'promotions', libelle: 'En promotion' },
+  { valeur: 'promotions', libelle: 'Promos' },
   { valeur: 'nouveautes', libelle: 'Nouveautés' },
   { valeur: 'meilleures-ventes', libelle: 'Meilleures ventes' },
-  { valeur: 'petits-prix', libelle: 'Moins de 20 000 FCFA' },
+  { valeur: 'petits-prix', libelle: 'Petits prix' },
 ];
 
 const TRIS: { valeur: Tri; libelle: string }[] = [
@@ -101,10 +101,6 @@ export class Liste {
     }
   });
 
-  protected readonly bornes = computed(() => {
-    const r = this.resultats();
-    return r?.total ? `${(r.page - 1) * PAR_PAGE + 1}–${Math.min(r.page * PAR_PAGE, r.total)}` : '0';
-  });
 
   /** Pages affichées : la première, la dernière et les voisines de la page courante. */
   protected readonly numerosDePage = computed(() => {

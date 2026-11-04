@@ -12,8 +12,6 @@ import { Recents } from '../etat/recents';
 
 interface Banniere {
   titre: string;
-  texte: string;
-  action: string;
   lien: string;
   image: string;
   /** Photo détourée sur fond blanc : elle se fond dans la bannière au lieu d'être encadrée. */
@@ -24,26 +22,20 @@ interface Banniere {
 
 const BANNIERES: Banniere[] = [
   {
-    titre: 'Passez à une technologie plus performante.',
-    texte: 'Travail, jeux, création : smartphones et ordinateurs aux meilleurs prix',
-    action: 'Découvrir',
+    titre: 'Téléphones et ordinateurs',
     lien: '/categorie/telephones-informatique',
     image: '/bannieres/high-tech.webp',
     fondue: true,
     categorie: 'telephones-informatique',
   },
   {
-    titre: 'Votre maison mérite le meilleur.',
-    texte: 'Climatiseurs, réfrigérateurs et petit électroménager livrés chez vous',
-    action: 'Voir le rayon',
+    titre: 'Électroménager',
     lien: '/categorie/electromenager',
     image: '/bannieres/electromenager.webp',
     categorie: 'electromenager',
   },
   {
-    titre: 'Des parfums qui ne passent pas inaperçus.',
-    texte: 'Parfums orientaux, coffrets et soins sélectionnés par nos équipes',
-    action: 'Voir la sélection',
+    titre: 'Parfums',
     lien: '/categorie/parfums-cosmetiques',
     image: '/bannieres/parfums.webp',
     categorie: 'parfums-cosmetiques',
@@ -51,6 +43,9 @@ const BANNIERES: Banniere[] = [
 ];
 
 const DUREE_BANNIERE = 6000;
+
+/** Vignette photo de chaque rayon (repli sur l'icône pour un nouveau rayon). */
+const VIGNETTES = new Set(['mode', 'chaussures-accessoires', 'parfums-cosmetiques', 'electromenager', 'telephones-informatique', 'electronique', 'maison-decoration', 'divers']);
 
 @Component({
   selector: 'lce-accueil',
@@ -101,6 +96,10 @@ export class Accueil {
 
   protected suspendre(pause: boolean): void {
     this.enPause = pause;
+  }
+
+  protected vignette(slug: string): string | null {
+    return VIGNETTES.has(slug) ? `/bannieres/rayon-${slug}.webp` : null;
   }
 
   protected remise(categorie: string): number {

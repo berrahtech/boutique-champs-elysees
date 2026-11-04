@@ -9,14 +9,7 @@
     <span aria-current="page">{{ intitule() }}</span>
   </nav>
 
-  <header class="empile">
-    <h1 class="titre-1">{{ intitule() }}</h1>
-    <span class="attenue">
-      @if (resultats(); as r) {
-        {{ r.total }} article{{ r.total > 1 ? 's' : '' }} · livrés par nos équipes
-      }
-    </span>
-  </header>
+  <h1 class="titre-1">{{ intitule() }}</h1>
 
   @if (mode() !== 'promotions') {
     <nav class="puces" aria-label="Raccourcis">
@@ -59,7 +52,7 @@
           @for (c of categories(); track c.slug) {
             <li>
               <a [routerLink]="['/categorie', c.slug]" [queryParams]="{ page: null }" queryParamsHandling="merge" [class.on]="slug() === c.slug" [attr.aria-current]="slug() === c.slug ? 'page' : null">
-                <span>{{ c.nom }}</span>
+                <span>{{ c.court }}</span>
                 <span class="attenue">{{ resultats()?.parCategorie?.[c.slug] ?? 0 }}</span>
               </a>
             </li>
@@ -70,27 +63,26 @@
       <hr class="filet" />
 
       <form (ngSubmit)="appliquerPrix()">
-        <h2>Prix (FCFA)</h2>
+        <h2>Prix</h2>
         <div class="prix">
           <div class="champ"><label for="pmin">Min.</label><input id="pmin" name="min" class="saisie" type="number" min="0" step="500" inputmode="numeric" [(ngModel)]="prixMin" /></div>
           <div class="champ"><label for="pmax">Max.</label><input id="pmax" name="max" class="saisie" type="number" min="0" step="500" inputmode="numeric" [(ngModel)]="prixMax" /></div>
         </div>
-        <button lceBouton variante="primaire" [pleineLargeur]="true" [petit]="true" type="submit">Appliquer le prix</button>
+        <button lceBouton variante="primaire" [pleineLargeur]="true" [petit]="true" type="submit">Appliquer</button>
       </form>
 
       <hr class="filet" />
 
       <div>
-        <h2>Disponibilité</h2>
-        <label class="case"><input type="checkbox" [checked]="stock()" (change)="basculerStock()" />En stock uniquement</label>
+        <label class="case"><input type="checkbox" [checked]="stock()" (change)="basculerStock()" />En stock</label>
       </div>
     </aside>
 
     <section class="resultats" aria-label="Produits">
       <div class="barre-tri panneau-ivoire">
-        <span class="petit" aria-live="polite"><b>{{ bornes() }}</b> sur {{ resultats()?.total ?? 0 }} articles</span>
+        <span class="petit" aria-live="polite">{{ resultats()?.total ?? 0 }} articles</span>
         <span class="tri">
-          <label for="tri" class="petit">Trier par</label>
+          <label for="tri" class="lce-visuellement-masque">Trier par</label>
           <select id="tri" class="liste-deroulante" [ngModel]="tri() ?? 'popularite'" (ngModelChange)="changerTri($event)">
             @for (t of tris; track t.valeur) {
               <option [value]="t.valeur">{{ t.libelle }}</option>
@@ -132,15 +124,8 @@
       } @else {
         <div class="vide panneau-ivoire">
           <lce-icone nom="recherche" [taille]="44" />
-          <h2 class="titre-3">Aucun article ne correspond</h2>
-          <p class="attenue">
-            @if (q()) {
-              Vérifiez l'orthographe de « {{ q() }} » ou essayez un mot plus général.
-            } @else {
-              Élargissez la fourchette de prix ou retirez un filtre.
-            }
-          </p>
-          <button lceBouton variante="primaire" type="button" (click)="toutEffacer()">Effacer les filtres</button>
+          <h2 class="titre-3">Aucun résultat</h2>
+          <button lceBouton variante="primaire" type="button" (click)="toutEffacer()">Tout effacer</button>
         </div>
       }
     </section>

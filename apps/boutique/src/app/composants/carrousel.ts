@@ -13,9 +13,6 @@ import { Icone } from '@lce/ui';
     <div class="tete">
       <div class="titres">
         <h2>{{ titre() }}</h2>
-        @if (sousTitre()) {
-          <p>{{ sousTitre() }}</p>
-        }
       </div>
       <ng-content select="[action]" />
       @if (debordement()) {
@@ -42,7 +39,7 @@ import { Icone } from '@lce/ui';
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
     .titres {
       flex: 1;
@@ -50,12 +47,8 @@ import { Icone } from '@lce/ui';
     }
     h2 {
       margin: 0;
-      font: 600 26px/34px var(--lce-police-titre);
+      font: 600 22px/28px var(--lce-police-titre);
       letter-spacing: -0.01em;
-    }
-    p {
-      margin: 2px 0 0;
-      color: var(--lce-ink-muted);
     }
     .fleches {
       flex: none;
@@ -65,8 +58,8 @@ import { Icone } from '@lce/ui';
     button {
       display: grid;
       place-items: center;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border: 0;
       border-radius: 50%;
       background: var(--lce-surface);
@@ -111,7 +104,6 @@ import { Icone } from '@lce/ui';
 })
 export class Carrousel {
   readonly titre = input.required<string>();
-  readonly sousTitre = input<string>();
 
   private readonly piste = viewChild.required<ElementRef<HTMLElement>>('piste');
 

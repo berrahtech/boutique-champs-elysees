@@ -50,7 +50,7 @@ export interface CategorieMenu {
         <form class="recherche" role="search" (ngSubmit)="rechercher.emit(requete.trim())">
           <button type="submit" aria-label="Lancer la recherche"><lce-icone nom="recherche" [taille]="18" /></button>
           <label for="lce-recherche" class="lce-visuellement-masque">Rechercher un produit</label>
-          <input id="lce-recherche" name="q" type="search" autocomplete="off" placeholder="Rechercher un produit, une marque…" [(ngModel)]="requete" />
+          <input id="lce-recherche" name="q" type="search" autocomplete="off" placeholder="Rechercher" [(ngModel)]="requete" />
         </form>
 
         <nav class="actions" aria-label="Mon espace">
@@ -79,12 +79,11 @@ export interface CategorieMenu {
             <lce-icone nom="categories" [taille]="16" />Catégories
           </button>
           <nav aria-label="Raccourcis" class="raccourcis">
-            <a routerLink="/promotions" routerLinkActive="on">Meilleures offres</a>
+            <a routerLink="/promotions" routerLinkActive="on">Promotions</a>
             <a routerLink="/boutique" [queryParams]="{ filtre: 'nouveautes' }">Nouveautés</a>
             <a routerLink="/boutique" [queryParams]="{ filtre: 'meilleures-ventes' }">Meilleures ventes</a>
-            <a routerLink="/boutique" [queryParams]="{ filtre: 'petits-prix' }">Petits prix</a>
           </nav>
-          <a routerLink="/aide" class="aide">Centre d'aide</a>
+          <a routerLink="/aide" class="aide">Aide</a>
         </div>
       </div>
 

@@ -42,8 +42,8 @@ export const jetons = {
   "typographie": {
     "display": {
       "police": "titre",
-      "taille": 46,
-      "interligne": 52,
+      "taille": 38,
+      "interligne": 44,
       "graisse": 700,
       "espacement": -0.025,
       "tailleMobile": 30,
@@ -51,8 +51,8 @@ export const jetons = {
     },
     "h1": {
       "police": "titre",
-      "taille": 32,
-      "interligne": 40,
+      "taille": 26,
+      "interligne": 32,
       "graisse": 700,
       "espacement": -0.015,
       "tailleMobile": 26,
@@ -60,8 +60,8 @@ export const jetons = {
     },
     "h2": {
       "police": "titre",
-      "taille": 26,
-      "interligne": 34,
+      "taille": 22,
+      "interligne": 28,
       "graisse": 600,
       "espacement": -0.01,
       "tailleMobile": 22,
@@ -123,9 +123,9 @@ export const jetons = {
   },
   "rayons": {
     "badge": 6,
-    "controle": 10,
-    "carte-mobile": 12,
-    "carte": 14,
+    "controle": 8,
+    "carte-mobile": 8,
+    "carte": 10,
     "pastille": 999
   },
   "ombres": {

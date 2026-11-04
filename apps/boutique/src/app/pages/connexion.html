@@ -3,30 +3,21 @@
     <ol class="etapes" aria-label="Étapes de la commande">
       <li class="fait"><i><lce-icone nom="valider" [taille]="14" /></i>Panier</li>
       <li aria-current="step"><i>2</i>Compte</li>
-      <li><i>3</i>Livraison et paiement</li>
+      <li><i>3</i>Paiement</li>
       <li><i>4</i>Confirmation</li>
     </ol>
   }
 
   <div class="colonnes">
-    <lce-avantages-compte
-      [surtitre]="retour() === '/panier' ? 'Encore une étape' : 'Mon compte'"
-      [titre]="retour() === '/panier' ? 'Connectez-vous pour finaliser votre commande' : 'Heureux de vous revoir'"
-      texte="Un compte permet de suivre votre livraison et de retrouver vos factures."
-    />
-
     <section class="panneau formulaire">
       @switch (etape()) {
         @case ('connexion') {
           <form (ngSubmit)="seConnecter()" novalidate>
-            <div class="empile">
-              <h2 class="titre-2">Connexion</h2>
-              <span class="attenue">Pas encore de compte ? <a routerLink="/inscription" [queryParams]="{ retour: retour() }">Créer un compte</a></span>
-            </div>
+            <h1 class="titre-2">Connexion</h1>
             <lce-bouton-google (jeton)="connexionGoogle($event)" />
             <div class="champ">
               <label for="identifiant">Téléphone ou e-mail</label>
-              <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" placeholder="76 12 34 56 ou vous@exemple.ml" required [(ngModel)]="identifiant" />
+              <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" required [(ngModel)]="identifiant" />
             </div>
             <div class="champ">
               <div class="ligne-etiquette">
@@ -44,11 +35,10 @@
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
             <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">
-              {{ envoi() ? 'Connexion…' : retour() === '/panier' ? 'Se connecter et continuer' : 'Se connecter' }}
+              {{ envoi() ? 'Connexion…' : 'Se connecter' }}
             </button>
             <div class="separateur petit attenue"><span></span>ou<span></span></div>
-            <a lceBouton variante="contour" [pleineLargeur]="true" routerLink="/inscription" [queryParams]="{ retour: retour() }">Créer un compte en 1 minute</a>
-            <p class="petit attenue securite"><lce-icone nom="cadenas" [taille]="16" />Connexion sécurisée. Après 5 essais incorrects, le compte est bloqué 15 minutes.</p>
+            <a lceBouton variante="contour" [pleineLargeur]="true" routerLink="/inscription" [queryParams]="{ retour: retour() }">Créer un compte</a>
           </form>
         }
 
@@ -56,11 +46,11 @@
           <form (ngSubmit)="seConnecter()" novalidate>
             <button type="button" class="bouton-texte retour" (click)="allerA('connexion')">← Retour</button>
             <div class="empile">
-              <h2 class="titre-2">Vérification en 2 étapes</h2>
-              <span class="attenue">Nous avons envoyé un code sur votre téléphone et votre e-mail vérifié.</span>
+              <h1 class="titre-2">Vérification en 2 étapes</h1>
+              <span class="attenue">Code envoyé par SMS et e-mail.</span>
             </div>
             <div class="champ">
-              <label for="code2fa">Code reçu (6 chiffres)</label>
+              <label for="code2fa">Code</label>
               <input id="code2fa" name="code" class="saisie code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required [(ngModel)]="code" />
             </div>
             @if (erreur()) {
@@ -72,14 +62,14 @@
 
         @case ('oubli-numero') {
           <form (ngSubmit)="demanderCodeOubli()" novalidate>
-            <button type="button" class="bouton-texte retour" (click)="allerA('connexion')">← Retour à la connexion</button>
+            <button type="button" class="bouton-texte retour" (click)="allerA('connexion')">← Retour</button>
             <div class="empile">
-              <h2 class="titre-2">Mot de passe oublié</h2>
-              <span class="attenue">Saisissez votre numéro ou votre e-mail : nous y envoyons un code pour choisir un nouveau mot de passe.</span>
+              <h1 class="titre-2">Mot de passe oublié</h1>
+              <span class="attenue">Vous recevrez un code.</span>
             </div>
             <div class="champ">
               <label for="identifiant-oubli">Téléphone ou e-mail</label>
-              <input id="identifiant-oubli" name="identifiant" class="saisie" autocomplete="username" placeholder="76 12 34 56 ou vous@exemple.ml" required [(ngModel)]="identifiant" />
+              <input id="identifiant-oubli" name="identifiant" class="saisie" autocomplete="username" required [(ngModel)]="identifiant" />
             </div>
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
@@ -92,22 +82,22 @@
           <form (ngSubmit)="reinitialiser()" novalidate>
             <button type="button" class="bouton-texte retour" (click)="allerA('oubli-numero')">← Changer d'identifiant</button>
             <div class="empile">
-              <h2 class="titre-2">Nouveau mot de passe</h2>
-              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Si ce compte existe, un code a été envoyé à {{ masque() }}.</span>
+              <h1 class="titre-2">Nouveau mot de passe</h1>
+              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Code envoyé à {{ masque() }}.</span>
             </div>
             <div class="champ">
-              <label for="code-oubli">Code reçu (6 chiffres)</label>
+              <label for="code-oubli">Code</label>
               <input id="code-oubli" name="code" class="saisie code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required [(ngModel)]="code" />
             </div>
             <div class="champ">
               <label for="nmdp">Nouveau mot de passe</label>
               <input id="nmdp" name="nmdp" class="saisie" type="password" autocomplete="new-password" required [(ngModel)]="nouveauMotDePasse" aria-describedby="nmdp-aide" />
-              <span id="nmdp-aide" class="aide">8 caractères minimum, avec au moins une lettre et un chiffre.</span>
+              <span id="nmdp-aide" class="aide">8 caractères, une lettre et un chiffre.</span>
             </div>
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Enregistrer et me connecter</button>
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Enregistrer</button>
           </form>
         }
       }

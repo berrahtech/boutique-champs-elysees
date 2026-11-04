@@ -12,8 +12,7 @@
       <div class="lce-conteneur diapo-ligne">
         <div class="diapo-texte">
           <h1 [attr.aria-level]="i === 0 ? null : 2">{{ b.titre }}</h1>
-          <p>{{ b.texte }}</p>
-          <a lceBouton variante="clair" [petit]="true" [routerLink]="b.lien">{{ b.action }}</a>
+          <a lceBouton [routerLink]="b.lien">Voir</a>
         </div>
         <div class="diapo-visuel" [class.fondue]="b.fondue">
           <img [src]="b.image" alt="" width="720" height="540" [attr.loading]="i === 0 ? 'eager' : 'lazy'" />
@@ -34,14 +33,19 @@
 </section>
 
 <div class="lce-conteneur sections">
-  <lce-carrousel titre="Parcourir les catégories">
+  <lce-carrousel titre="Catégories">
+    <a action class="lien" routerLink="/boutique">Tout voir</a>
     <ul class="rayons">
-      <li>
-        <a routerLink="/boutique"><lce-icone nom="categories" [taille]="56" /><span>Toutes les catégories</span></a>
-      </li>
       @for (c of catalogue.categories(); track c.slug) {
         <li>
-          <a [routerLink]="['/categorie', c.slug]"><lce-icone [nom]="ico(c.icone)" [taille]="56" /><span>{{ c.nom }}</span></a>
+          <a [routerLink]="['/categorie', c.slug]">
+            @if (vignette(c.slug); as image) {
+              <img [src]="image" alt="" width="96" height="96" loading="lazy" />
+            } @else {
+              <lce-icone [nom]="ico(c.icone)" [taille]="56" />
+            }
+            <span>{{ c.court }}</span>
+          </a>
         </li>
       }
     </ul>
@@ -53,7 +57,7 @@
     <section aria-labelledby="titre-recommandes">
       <div class="tete-section">
         <h2 id="titre-recommandes">Recommandé pour vous</h2>
-        <a lceBouton [petit]="true" routerLink="/promotions">Voir plus</a>
+        <a class="lien" routerLink="/promotions">Tout voir</a>
       </div>
       <lce-cartes [produits]="recommandes()" colonnes="grille-2" format="horizontale" />
     </section>
@@ -74,17 +78,13 @@
 
     <section aria-labelledby="titre-tech" class="rayon-vedette">
       <div class="tete-section">
-        <div>
-          <h2 id="titre-tech">Téléphones et informatique</h2>
-          <p class="attenue">Des smartphones aux accessoires du quotidien</p>
-        </div>
-        <a lceBouton routerLink="/categorie/telephones-informatique">Tout explorer</a>
+        <h2 id="titre-tech">Téléphones et informatique</h2>
+        <a class="lien" routerLink="/categorie/telephones-informatique">Tout voir</a>
       </div>
       <div class="tuiles">
         <a class="tuile peche" routerLink="/categorie/electromenager">
           <span class="tuile-texte">
-            <b>Offres électroménager</b>
-            <span>Équipez votre maison pour moins cher</span>
+            <b>Électroménager</b>
           </span>
           <img src="/bannieres/tuile-electromenager.webp" alt="" width="360" height="300" loading="lazy" />
           @if (remise('electromenager'); as r) {
@@ -104,13 +104,13 @@
       <lce-cartes [produits]="a.selectionTech" colonnes="grille-4" />
     </section>
 
-    <lce-carrousel titre="Beauté et parfums" sousTitre="Parfums, soins et coffrets à offrir">
-      <a action lceBouton routerLink="/categorie/parfums-cosmetiques">Tout explorer</a>
+    <lce-carrousel titre="Beauté et parfums">
+      <a action class="lien" routerLink="/categorie/parfums-cosmetiques">Tout voir</a>
       <lce-cartes [produits]="a.selectionBeaute" colonnes="ligne-5" />
     </lce-carrousel>
 
-    <lce-carrousel titre="Maison et électroménager" sousTitre="L'essentiel pour votre intérieur">
-      <a action lceBouton routerLink="/categorie/maison-decoration">Tout explorer</a>
+    <lce-carrousel titre="Maison et électroménager">
+      <a action class="lien" routerLink="/categorie/maison-decoration">Tout voir</a>
       <lce-cartes [produits]="a.selectionMaison" colonnes="ligne-5" />
     </lce-carrousel>
   } @else {
@@ -120,9 +120,9 @@
 
 <section class="engagements" aria-label="Nos engagements">
   <ul class="lce-conteneur">
-    <li><lce-icone nom="livraison" [taille]="28" /><span><b>Livraison par nos équipes</b>24 à 48 h à Bamako</span></li>
-    <li><lce-icone nom="mobile" [taille]="28" /><span><b>Orange Money et Moov Money</b>Ou carte Visa et Mastercard</span></li>
-    <li><lce-icone nom="especes" [taille]="28" /><span><b>Paiement à la livraison</b>Réglez à la réception</span></li>
-    <li><lce-icone nom="support" [taille]="28" /><span><b>Service client</b>Téléphone, WhatsApp et e-mail</span></li>
+    <li><lce-icone nom="livraison" [taille]="24" />Livraison 24–48 h</li>
+    <li><lce-icone nom="mobile" [taille]="24" />Orange et Moov Money</li>
+    <li><lce-icone nom="especes" [taille]="24" />Paiement à la livraison</li>
+    <li><lce-icone nom="support" [taille]="24" />Service client</li>
   </ul>
 </section>

@@ -25,22 +25,12 @@ export interface ProduitCarte {
 /** standard : carte verticale complète ; compacte : sans note ni étiquette ; horizontale : photo à gauche. */
 export type FormatCarte = 'standard' | 'compacte' | 'horizontale';
 
-/** Le sceau « Choix des clients » récompense des avis réels, pas une décision marketing. */
-const NOTE_CHOIX = 4.5;
-const AVIS_CHOIX = 20;
 const SEUIL_STOCK_FAIBLE = 5;
 
-/** Contour festonné du sceau, tracé une fois pour toutes. */
-const SCEAU = Array.from({ length: 28 }, (_, i) => {
-  const rayon = i % 2 ? 46 : 50;
-  const angle = (i / 28) * 2 * Math.PI;
-  return `${(50 + rayon * Math.cos(angle)).toFixed(1)},${(50 + rayon * Math.sin(angle)).toFixed(1)}`;
-}).join(' ');
-
 /**
- * Carte produit : photo sur fond blanc, favori, sceau, nom sur deux lignes,
- * note et nombre d'avis, étiquette (nouveauté, stock, livraison), prix, ancien
- * prix barré, pastille de réduction et bouton panier.
+ * Carte produit : photo, favori, nom sur deux lignes, note et nombre d'avis,
+ * étiquette seulement si elle apporte quelque chose (nouveauté, stock faible,
+ * rupture), prix, ancien prix barré, pastille de réduction et bouton panier.
  */
 @Component({
   selector: 'lce-carte-produit',
@@ -54,12 +44,6 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
           <img [src]="produit().imageUrl" alt="" loading="lazy" width="400" height="400" />
         } @else {
           <lce-icone [nom]="produit().icone ?? 'sac'" [taille]="56" />
-        }
-        @if (choixClients()) {
-          <span class="sceau">
-            <svg viewBox="0 0 100 100" aria-hidden="true"><polygon [attr.points]="sceau" /></svg>
-            <span>choix des clients</span>
-          </span>
         }
       </a>
       <button
@@ -83,27 +67,22 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
             <span class="note">
               <span class="lce-visuellement-masque">Note {{ produit().noteMoyenne }} sur 5, {{ produit().nbAvis }} avis</span>
               <span aria-hidden="true" class="note-valeur etoile"><lce-icone nom="etoile" [taille]="16" [plein]="true" />{{ produit().noteMoyenne.toLocaleString('fr-FR') }}</span>
-              <span aria-hidden="true" class="note-valeur"><lce-icone nom="message" [taille]="16" />{{ produit().nbAvis }}</span>
+              <span aria-hidden="true" class="attenue">({{ produit().nbAvis }})</span>
             </span>
           }
         }
         @if (format() === 'standard') {
-          <div class="etiquette-zone">
-            @switch (etiquette()) {
-              @case ('rupture') {
-                <span class="etiquette rupture">Rupture de stock</span>
-              }
-              @case ('nouveaute') {
-                <lce-badge type="nouveau" class="grand">Nouveauté</lce-badge>
-              }
-              @case ('stock') {
-                <span class="etiquette info">Plus que {{ produit().stock }} en stock</span>
-              }
-              @case ('livraison') {
-                <span class="etiquette livraison"><lce-icone nom="livraison" [taille]="16" />Livré en 24–48 h</span>
-              }
+          @switch (etiquette()) {
+            @case ('rupture') {
+              <span class="etiquette rupture">Rupture</span>
             }
-          </div>
+            @case ('nouveaute') {
+              <lce-badge type="nouveau" class="etiquette">Nouveauté</lce-badge>
+            }
+            @case ('stock') {
+              <span class="etiquette info">Plus que {{ produit().stock }}</span>
+            }
+          }
         }
 
         <div class="achat">
@@ -139,7 +118,14 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      overflow: hidden;
+      border: 1px solid var(--lce-line);
+      border-radius: var(--lce-rayon-carte);
+      background: var(--lce-surface);
+      transition: box-shadow 180ms;
+    }
+    .carte:hover {
+      box-shadow: var(--lce-ombre-card);
     }
     .visuel {
       position: relative;
@@ -147,52 +133,25 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
       place-items: center;
       aspect-ratio: 1;
       overflow: hidden;
-      border-radius: var(--lce-rayon-carte);
-      background: var(--lce-surface);
-      box-shadow: 0 1px 3px rgb(22 24 70 / 6%);
+      background: var(--lce-surface-douce);
       color: var(--lce-line-fort);
-      transition: box-shadow 180ms;
-    }
-    .carte:hover .visuel {
-      box-shadow: var(--lce-ombre-card);
     }
     .visuel img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    .sceau {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      display: grid;
-      place-items: center;
-      width: 46px;
-      height: 46px;
-      color: var(--lce-on-gold);
-      font: 600 8px/9px var(--lce-police-texte);
-      text-align: center;
-    }
-    .sceau svg {
-      position: absolute;
-      inset: 0;
-      fill: var(--lce-gold-bright);
-    }
-    .sceau span {
-      position: relative;
-      padding-inline: 4px;
-    }
     .favori {
       position: absolute;
-      top: 6px;
-      right: 6px;
+      top: 8px;
+      right: 8px;
       display: grid;
       place-items: center;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border: 0;
       border-radius: 50%;
-      background: none;
+      background: var(--lce-surface);
       color: var(--lce-ink-muted);
       cursor: pointer;
     }
@@ -204,17 +163,18 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
       min-width: 0;
+      padding: 12px;
     }
     .nom {
       display: -webkit-box;
       margin: 0;
       overflow: hidden;
-      font: 500 15px/20px var(--lce-police-texte);
+      font: 400 14px/19px var(--lce-police-texte);
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
-      min-height: 40px;
+      min-height: 38px;
     }
     .nom a {
       color: var(--lce-ink);
@@ -226,7 +186,7 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
     }
     .note {
       display: flex;
-      gap: 14px;
+      gap: 4px;
       color: var(--lce-ink-muted);
       font-size: 13px;
       line-height: 18px;
@@ -239,21 +199,11 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
     .etoile lce-icone {
       color: var(--lce-etoile);
     }
-    .etiquette-zone {
-      min-height: 26px;
-    }
-    .etiquette,
-    .grand {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 8px;
+    .etiquette {
+      align-self: flex-start;
+      padding: 2px 8px;
       border-radius: var(--lce-rayon-badge);
       font: 500 12px/18px var(--lce-police-texte);
-    }
-    .livraison {
-      background: var(--lce-success-soft);
-      color: var(--lce-success);
     }
     .info {
       background: var(--lce-info-soft);
@@ -301,10 +251,10 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
       flex: none;
       display: grid;
       place-items: center;
-      width: 46px;
-      height: 42px;
+      width: 40px;
+      height: 36px;
       border: 0;
-      border-radius: 14px;
+      border-radius: var(--lce-rayon-controle);
       background: var(--lce-primaire-soft);
       color: var(--lce-navy);
       cursor: pointer;
@@ -322,9 +272,6 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
       cursor: not-allowed;
     }
 
-    :host(.format-compacte) .carte {
-      gap: 10px;
-    }
     :host(.format-compacte) .nom {
       font-size: 13px;
       line-height: 18px;
@@ -337,53 +284,30 @@ const SCEAU = Array.from({ length: 28 }, (_, i) => {
     :host(.format-compacte) .ajouter {
       width: 40px;
       height: 34px;
-      border-radius: 12px;
-    }
-    :host(.format-compacte) .sceau {
-      display: none;
+      border-radius: var(--lce-rayon-controle);
     }
 
     :host(.format-horizontale) .carte {
       flex-direction: row;
-      gap: 20px;
-      padding: 16px;
-      border-radius: var(--lce-rayon-carte);
-      background: var(--lce-surface);
-      box-shadow: 0 1px 3px rgb(22 24 70 / 6%);
-      transition: box-shadow 180ms;
-    }
-    :host(.format-horizontale) .carte:hover {
-      box-shadow: var(--lce-ombre-card);
     }
     :host(.format-horizontale) .visuel {
-      flex: 0 0 44%;
-      box-shadow: none;
-      align-self: center;
+      flex: 0 0 40%;
     }
     :host(.format-horizontale) .nom {
-      font-size: 16px;
-      line-height: 22px;
-      -webkit-line-clamp: 3;
+      font-size: 15px;
+      line-height: 20px;
+      -webkit-line-clamp: 2;
       min-height: 0;
     }
     :host(.format-horizontale) .favori {
       top: auto;
-      right: 66px;
-      bottom: 19px;
+      right: 60px;
+      bottom: 14px;
     }
 
     @media (max-width: 520px) {
       .prix b {
         font-size: 15px;
-      }
-      .ajouter {
-        width: 40px;
-        height: 36px;
-        border-radius: 12px;
-      }
-      :host(.format-horizontale) .carte {
-        gap: 12px;
-        padding: 12px;
       }
       :host(.format-horizontale) .favori {
         top: 6px;
@@ -403,17 +327,10 @@ export class CarteProduit {
   readonly ajouterAuPanier = output<string>();
   readonly basculerFavori = output<string>();
 
-  protected readonly sceau = SCEAU;
-
   /** Pourcentage de réduction arrondi, ou 0 sans prix barré. */
   protected readonly remise = computed(() => {
     const { prix, prixBarre } = this.produit();
     return prixBarre && prixBarre > prix ? Math.round((1 - prix / prixBarre) * 100) : 0;
-  });
-
-  protected readonly choixClients = computed(() => {
-    const { noteMoyenne, nbAvis } = this.produit();
-    return noteMoyenne >= NOTE_CHOIX && nbAvis >= AVIS_CHOIX;
   });
 
   protected readonly etiquette = computed(() => {
@@ -421,6 +338,6 @@ export class CarteProduit {
     if (enRupture) return 'rupture';
     if (nouveau) return 'nouveaute';
     if (stock !== undefined && stock <= SEUIL_STOCK_FAIBLE) return 'stock';
-    return 'livraison';
+    return null;
   });
 }

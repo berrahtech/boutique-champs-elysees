@@ -18,50 +18,41 @@ export interface Coordonnees {
     <footer>
       <div class="lce-conteneur interieur">
         <div class="colonnes">
-          <div class="presentation">
-            <a routerLink="/" class="marque" aria-label="Les Champs Élysées, accueil">
-              <img src="/logo-lce.png" alt="" width="48" height="48" />
-              <span>Les Champs Élysées</span>
-            </a>
-            <p>Mode, beauté, maison, électroménager et high-tech : tout votre shopping au même endroit, livré chez vous par nos équipes.</p>
-          </div>
+          <a routerLink="/" class="marque" aria-label="Les Champs Élysées, accueil">
+            <img src="/logo-lce.png" alt="" width="48" height="48" />
+            <span>Les Champs Élysées</span>
+          </a>
           <nav aria-labelledby="pied-boutique">
             <h2 id="pied-boutique">Boutique</h2>
-            <a routerLink="/boutique">Toute la boutique</a>
             <a routerLink="/promotions">Promotions</a>
             <a routerLink="/boutique" [queryParams]="{ filtre: 'nouveautes' }">Nouveautés</a>
-            <a routerLink="/favoris">Mes favoris</a>
           </nav>
           <nav aria-labelledby="pied-aide">
             <h2 id="pied-aide">Aide</h2>
-            <a routerLink="/compte/commandes">Suivre ma commande</a>
-            <a routerLink="/aide">Questions fréquentes</a>
-            <a routerLink="/contact">Nous contacter</a>
-            <a routerLink="/compte">Mon compte</a>
+            <a routerLink="/compte/commandes">Suivi de commande</a>
+            <a routerLink="/aide">FAQ</a>
+            <a routerLink="/contact">Contact</a>
           </nav>
           <div>
-            <h2>Nous joindre</h2>
+            <h2>Contact</h2>
             <address>
               <span><lce-icone nom="telephone" [taille]="18" /><a [href]="'tel:' + coordonnees().telephone.replace(/\\s/g, '')">{{ coordonnees().telephone }}</a></span>
               <span><lce-icone nom="email" [taille]="18" /><a [href]="'mailto:' + coordonnees().email">{{ coordonnees().email }}</a></span>
-              <span><lce-icone nom="localisation" [taille]="18" />{{ coordonnees().adresse }}</span>
-              <span><lce-icone nom="horloge" [taille]="18" />{{ coordonnees().horaires }}</span>
             </address>
           </div>
         </div>
 
         <div class="paiements">
-          <span class="titre">Paiements acceptés</span>
           @for (moyen of moyens; track moyen) {
             <span class="moyen">{{ moyen }}</span>
           }
         </div>
 
         <div class="legal">
-          <span>© {{ annee }} Les Champs Élysées · Bamako, Mali</span>
+          <span>© {{ annee }} Les Champs Élysées</span>
           <nav aria-label="Informations légales">
             <a routerLink="/mentions-legales">Mentions légales</a>
-            <a routerLink="/confidentialite">Politique de confidentialité</a>
+            <a routerLink="/confidentialite">Confidentialité</a>
           </nav>
         </div>
       </div>
@@ -83,11 +74,6 @@ export interface Coordonnees {
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 32px;
     }
-    .presentation {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
     .marque {
       display: flex;
       align-items: center;
@@ -100,11 +86,6 @@ export interface Coordonnees {
       width: 48px;
       height: 48px;
       object-fit: contain;
-    }
-    p {
-      margin: 0;
-      font-size: 14px;
-      line-height: 22px;
     }
     nav[aria-labelledby] {
       display: flex;
@@ -181,6 +162,6 @@ export interface Coordonnees {
 })
 export class PiedDePage {
   readonly coordonnees = input.required<Coordonnees>();
-  protected readonly moyens = ['Orange Money', 'Moov Money', 'Visa', 'Mastercard', 'Paiement à la livraison'];
+  protected readonly moyens = ['Orange Money', 'Moov Money', 'Visa', 'Mastercard', 'Espèces'];
   protected readonly annee = new Date().getFullYear();
 }

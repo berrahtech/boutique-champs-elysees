@@ -57,9 +57,9 @@ abstract final class EspacesLce {
 
 abstract final class RayonsLce {
   static const double badge = 6;
-  static const double controle = 10;
-  static const double carteMobile = 12;
-  static const double carte = 14;
+  static const double controle = 8;
+  static const double carteMobile = 8;
+  static const double carte = 10;
   static const double pastille = 999;
 }
 

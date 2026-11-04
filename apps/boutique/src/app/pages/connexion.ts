@@ -2,7 +2,6 @@ import { Component, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Bouton, Icone } from '@lce/ui';
-import { AvantagesCompte } from '../composants/avantages-compte';
 import { BoutonGoogle } from '../composants/bouton-google';
 import { Notifications } from '../etat/notifications';
 import { ErreurApi, masquerIdentifiant, normaliserIdentifiant, Session, versErreurApi } from '@lce/session';
@@ -12,7 +11,7 @@ type Etape = 'connexion' | 'double-authentification' | 'oubli-numero' | 'oubli-c
 /** Connexion (maquette « Connexion ») avec double authentification et mot de passe oublié. */
 @Component({
   selector: 'lce-connexion',
-  imports: [FormsModule, RouterLink, AvantagesCompte, BoutonGoogle, Bouton, Icone],
+  imports: [FormsModule, RouterLink, BoutonGoogle, Bouton, Icone],
   templateUrl: './connexion.html',
   styleUrl: './compte-formulaires.scss',
 })

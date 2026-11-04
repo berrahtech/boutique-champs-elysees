@@ -40,13 +40,12 @@
 
       <section class="infos" aria-label="Informations produit">
         <div class="empile">
-          <span class="surtitre">{{ p.rayon || p.categorie.nom }}{{ p.reference ? ' · Réf. ' + p.reference : '' }}</span>
           <h1 class="titre-1">{{ p.nom }}</h1>
           @if (p.nbAvis) {
             <button type="button" class="note" (click)="onglet.set('avis')">
               <lce-etoiles [note]="p.noteMoyenne" [taille]="18" />
               <b>{{ p.noteMoyenne.toLocaleString('fr-FR') }}</b>
-              <span class="attenue petit">· {{ p.nbAvis }} avis clients</span>
+              <span class="attenue petit">({{ p.nbAvis }})</span>
             </button>
           }
         </div>
@@ -55,16 +54,14 @@
           <b [class.promo]="remise()" class="chiffres">{{ p.prix | fcfa }}</b>
           @if (remise()) {
             <s class="chiffres"><span class="lce-visuellement-masque">au lieu de </span>{{ p.prixBarre | fcfa }}</s>
-            <span class="economie">Vous économisez {{ p.prixBarre! - p.prix | fcfa }}</span>
           }
         </div>
-        <p class="attenue description-courte">{{ p.description }}</p>
         <hr class="filet" />
 
         @if (p.stock > 0) {
           <span class="stock" [class.faible]="p.stock <= 5">
             <lce-icone nom="valide-rond" [taille]="18" />
-            {{ p.stock <= 5 ? 'Plus que ' + p.stock + ' en stock' : 'En stock · ' + p.stock + ' disponibles' }}
+            {{ p.stock <= 5 ? 'Plus que ' + p.stock : 'En stock' }}
           </span>
           @if (maximum() > 0) {
             <div class="achat">
@@ -86,31 +83,21 @@
             <button lceBouton variante="doux" type="button" [pleineLargeur]="true" (click)="acheterMaintenant()">Acheter maintenant</button>
           } @else {
             <p class="info-panier">
-              <lce-icone nom="information" [taille]="18" />Tout le stock disponible est déjà dans votre panier.
+              <lce-icone nom="information" [taille]="18" />Stock déjà dans le panier.
               <a routerLink="/panier">Voir le panier</a>
             </p>
           }
         } @else {
-          <span class="stock rupture"><lce-icone nom="alerte" [taille]="18" />Rupture de stock</span>
+          <span class="stock rupture"><lce-icone nom="alerte" [taille]="18" />Rupture</span>
           <button lceBouton variante="contour" type="button" (click)="actions.basculerFavori(p)">
             <lce-icone nom="favoris" [taille]="20" [plein]="favoris.ensemble().has(p.id)" />
-            {{ favoris.ensemble().has(p.id) ? 'Dans vos favoris' : 'Ajouter aux favoris' }}
+            Favoris
           </button>
         }
 
-        <ul class="rassurance panneau-ivoire">
-          <li>
-            <lce-icone nom="livraison" [taille]="24" />
-            <span class="petit"><b>Livraison à Bamako : 24 à 48 h</b><br />Frais calculés selon votre zone avant validation. Livraison par nos propres livreurs.</span>
-          </li>
-          <li>
-            <lce-icone nom="mobile" [taille]="24" />
-            <span class="petit"><b>Payez comme vous voulez</b><br />Orange Money, Moov Money, carte Visa ou Mastercard, ou en espèces à la livraison.</span>
-          </li>
-          <li>
-            <lce-icone nom="securite" [taille]="24" />
-            <span class="petit"><b>Produit neuf</b><br />Facture fournie avec chaque commande.</span>
-          </li>
+        <ul class="rassurance">
+          <li><lce-icone nom="livraison" [taille]="20" />Livraison 24–48 h à Bamako</li>
+          <li><lce-icone nom="mobile" [taille]="20" />Orange Money, Moov Money, carte, espèces</li>
         </ul>
       </section>
     </div>
@@ -119,23 +106,13 @@
       <div role="tablist" class="onglets" aria-label="Détails du produit">
         <button type="button" role="tab" id="t-desc" aria-controls="p-desc" [attr.aria-selected]="onglet() === 'description'" [class.on]="onglet() === 'description'" (click)="onglet.set('description')">Description</button>
         <button type="button" role="tab" id="t-car" aria-controls="p-car" [attr.aria-selected]="onglet() === 'caracteristiques'" [class.on]="onglet() === 'caracteristiques'" (click)="onglet.set('caracteristiques')">Caractéristiques</button>
-        <button type="button" role="tab" id="t-avis" aria-controls="p-avis" [attr.aria-selected]="onglet() === 'avis'" [class.on]="onglet() === 'avis'" (click)="onglet.set('avis')">Avis clients ({{ p.nbAvis }})</button>
+        <button type="button" role="tab" id="t-avis" aria-controls="p-avis" [attr.aria-selected]="onglet() === 'avis'" [class.on]="onglet() === 'avis'" (click)="onglet.set('avis')">Avis ({{ p.nbAvis }})</button>
       </div>
 
       @switch (onglet()) {
         @case ('description') {
-          <div id="p-desc" role="tabpanel" aria-labelledby="t-desc" class="grille-2 panneau-onglet">
-            <div class="empile">
-              <h2 class="titre-3">{{ p.nom }}</h2>
-              <p>{{ p.description }}</p>
-            </div>
-            <table class="specs">
-              <tbody>
-                @for (c of p.caracteristiques; track c[0]) {
-                  <tr><th scope="row">{{ c[0] }}</th><td>{{ c[1] }}</td></tr>
-                }
-              </tbody>
-            </table>
+          <div id="p-desc" role="tabpanel" aria-labelledby="t-desc" class="panneau-onglet">
+            <p>{{ p.description }}</p>
           </div>
         }
         @case ('caracteristiques') {
@@ -156,13 +133,9 @@
             <div class="avis-synthese">
               <b class="avis-note">{{ p.noteMoyenne.toLocaleString('fr-FR') }}<span class="attenue"> / 5</span></b>
               <lce-etoiles [note]="p.noteMoyenne" [taille]="20" />
-              <span class="attenue petit">{{ p.nbAvis }} avis vérifiés</span>
+              <span class="attenue petit">{{ p.nbAvis }} avis</span>
             </div>
-            <div class="avis-liste panneau-ivoire">
-              <lce-icone nom="message" [taille]="28" />
-              <p>Les avis publiés ici sont ceux de clients ayant acheté le produit, après modération.</p>
-              <a lceBouton variante="contour" routerLink="/connexion">Donner mon avis</a>
-            </div>
+            <a lceBouton variante="contour" routerLink="/connexion">Donner mon avis</a>
           </div>
         }
       }
@@ -172,19 +145,18 @@
       <section aria-labelledby="similaires">
         <div class="sec-tete">
           <h2 id="similaires" class="titre-2">Produits similaires</h2>
-          <a class="lien" [routerLink]="['/categorie', p.categorie.slug]">Voir le rayon<lce-icone nom="chevron-droite" [taille]="16" /></a>
+          <a class="lien" [routerLink]="['/categorie', p.categorie.slug]">Tout voir<lce-icone nom="chevron-droite" [taille]="16" /></a>
         </div>
         <lce-cartes [produits]="similaires()" />
       </section>
     }
   </div>
 } @else if (erreur()) {
-  <div class="lce-conteneur page"><lce-erreur-chargement titre="Impossible de charger ce produit" (reessayer)="ressource.reload()" /></div>
+  <div class="lce-conteneur page"><lce-erreur-chargement (reessayer)="ressource.reload()" /></div>
 } @else if (introuvable()) {
   <div class="a-venir">
     <lce-icone nom="recherche" [taille]="48" />
-    <h1 class="titre-2">Ce produit n'existe pas ou plus</h1>
-    <p class="attenue">Il a peut-être été retiré du catalogue. Découvrez les articles similaires dans la boutique.</p>
+    <h1 class="titre-2">Produit introuvable</h1>
     <a lceBouton variante="primaire" routerLink="/boutique">Voir la boutique</a>
   </div>
 } @else {

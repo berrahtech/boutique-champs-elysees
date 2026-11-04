@@ -2,7 +2,6 @@ import { afterNextRender, Component, DestroyRef, inject, input, signal } from '@
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Bouton, Icone } from '@lce/ui';
-import { AvantagesCompte } from '../composants/avantages-compte';
 import { BoutonGoogle } from '../composants/bouton-google';
 import { Notifications } from '../etat/notifications';
 import { estEmail, masquerIdentifiant, normaliserIdentifiant, Session, versErreurApi } from '@lce/session';
@@ -14,7 +13,7 @@ const DELAI_RENVOI = 60;
 /** Inscription en 3 étapes (maquette « Inscription ») : téléphone ou e-mail, code, profil. Ou Google, en une étape. */
 @Component({
   selector: 'lce-inscription',
-  imports: [FormsModule, RouterLink, AvantagesCompte, BoutonGoogle, Bouton, Icone],
+  imports: [FormsModule, RouterLink, BoutonGoogle, Bouton, Icone],
   templateUrl: './inscription.html',
   styleUrl: './compte-formulaires.scss',
 })

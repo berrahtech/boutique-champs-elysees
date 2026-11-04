@@ -51,7 +51,7 @@ export function versCarte(p: ProduitPublic): ProduitCarte {
     .ligne-5,
     .ligne-6 {
       display: flex;
-      gap: 20px;
+      gap: 14px;
     }
     .ligne-5 > li,
     .ligne-6 > li {
@@ -59,10 +59,10 @@ export function versCarte(p: ProduitPublic): ProduitCarte {
       scroll-snap-align: start;
     }
     .ligne-5 > li {
-      width: calc((100% - 4 * 20px) / 5);
+      width: calc((100% - 4 * 14px) / 5);
     }
     .ligne-6 > li {
-      width: calc((100% - 5 * 20px) / 6);
+      width: calc((100% - 5 * 14px) / 6);
     }
     @media (max-width: 1100px) {
       .ligne-5 > li,

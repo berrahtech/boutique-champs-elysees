@@ -15,16 +15,12 @@ import { Favoris } from '../etat/favoris';
   template: `
     <div class="lce-conteneur page">
       <nav class="fil" aria-label="Fil d'Ariane"><a routerLink="/">Accueil</a><lce-icone nom="chevron-droite" [taille]="14" /><span aria-current="page">Mes favoris</span></nav>
-      <div class="empile">
-        <h1 class="titre-1">Mes favoris</h1>
-        <span class="attenue">{{ favoris.nombre() }} produit{{ favoris.nombre() > 1 ? 's' : '' }} mis de côté</span>
-      </div>
+      <h1 class="titre-1">Mes favoris ({{ favoris.nombre() }})</h1>
       @if (favoris.nombre() === 0) {
         <div class="a-venir panneau-ivoire">
           <lce-icone nom="favoris" [taille]="48" />
-          <h2 class="titre-3">Aucun favori pour l'instant</h2>
-          <p class="attenue">Touchez le cœur d'un produit pour le retrouver ici.</p>
-          <a lceBouton variante="primaire" routerLink="/boutique">Découvrir la boutique</a>
+          <h2 class="titre-3">Aucun favori</h2>
+          <a lceBouton variante="primaire" routerLink="/boutique">Voir la boutique</a>
         </div>
       } @else if (produits(); as liste) {
         <lce-cartes [produits]="liste" />

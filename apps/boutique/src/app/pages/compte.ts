@@ -17,17 +17,14 @@ import { Session } from '@lce/session';
         <div class="disposition">
           <lce-menu-client (deconnecter)="deconnecter()" />
           <div class="contenu">
-            <div class="empile">
-              <span class="surtitre">Mon compte</span>
-              <h1 class="titre-1">Bonjour {{ session.prenom() }}</h1>
-            </div>
+            <h1 class="titre-1">Bonjour {{ session.prenom() }}</h1>
             <div class="grille-3 tuiles">
-              <a class="tuile panneau" routerLink="/compte/commandes"><lce-icone nom="colis" [taille]="28" /><b>Mes commandes</b><span class="petit attenue">Suivi et factures</span></a>
-              <a class="tuile panneau" routerLink="/panier"><lce-icone nom="panier" [taille]="28" /><b>Mon panier</b><span class="petit attenue">{{ panier.nbArticles() }} article(s)</span></a>
-              <a class="tuile panneau" routerLink="/favoris"><lce-icone nom="favoris" [taille]="28" /><b>Mes favoris</b><span class="petit attenue">{{ favoris.nombre() }} produit(s)</span></a>
+              <a class="tuile panneau" routerLink="/compte/commandes"><lce-icone nom="colis" [taille]="28" /><b>Commandes</b></a>
+              <a class="tuile panneau" routerLink="/panier"><lce-icone nom="panier" [taille]="28" /><b>Panier ({{ panier.nbArticles() }})</b></a>
+              <a class="tuile panneau" routerLink="/favoris"><lce-icone nom="favoris" [taille]="28" /><b>Favoris ({{ favoris.nombre() }})</b></a>
             </div>
             <section class="panneau infos" aria-labelledby="infos-titre">
-              <h2 id="infos-titre" class="titre-3">Informations personnelles</h2>
+              <h2 id="infos-titre" class="titre-3">Mes informations</h2>
               <dl>
                 <dt>Nom</dt><dd>{{ profil.nom }}</dd>
                 <dt>Téléphone</dt><dd>{{ profil.telephone ?? 'Non renseigné' }}</dd>
@@ -41,8 +38,7 @@ import { Session } from '@lce/session';
       } @else {
         <div class="a-venir">
           <lce-icone nom="compte" [taille]="48" />
-          <h1 class="titre-2">Connectez-vous pour accéder à votre compte</h1>
-          <p class="attenue">Suivez vos commandes, retrouvez vos factures et vos favoris sur tous vos appareils.</p>
+          <h1 class="titre-2">Mon compte</h1>
           <a lceBouton variante="primaire" routerLink="/connexion" [queryParams]="{ retour: '/compte' }">Se connecter</a>
           <a class="lien" routerLink="/inscription">Créer un compte</a>
         </div>

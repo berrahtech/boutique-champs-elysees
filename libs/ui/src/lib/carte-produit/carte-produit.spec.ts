@@ -32,20 +32,12 @@ describe('CarteProduit', () => {
     expect(badges).toEqual(['Nouveauté', '−20 %']);
   });
 
-  it('prévient quand le stock est faible, sinon annonce la livraison', async () => {
+  it('prévient quand le stock est faible, et n’affiche rien sinon', async () => {
     const faible = await rendre({ ...base, nouveau: false, stock: 3 });
-    expect((faible.nativeElement as HTMLElement).textContent).toContain('Plus que 3 en stock');
+    expect((faible.nativeElement as HTMLElement).textContent).toContain('Plus que 3');
     faible.componentRef.setInput('produit', { ...base, nouveau: false, stock: 40 });
     await faible.whenStable();
-    expect((faible.nativeElement as HTMLElement).textContent).toContain('Livré en 24–48 h');
-  });
-
-  it('réserve le sceau « choix des clients » aux produits bien notés et assez évalués', async () => {
-    const peuAvis = await rendre({ ...base, noteMoyenne: 5, nbAvis: 3 });
-    expect((peuAvis.nativeElement as HTMLElement).querySelector('.sceau')).toBeNull();
-    peuAvis.componentRef.setInput('produit', { ...base, noteMoyenne: 4.6, nbAvis: 30 });
-    await peuAvis.whenStable();
-    expect((peuAvis.nativeElement as HTMLElement).querySelector('.sceau')).not.toBeNull();
+    expect((faible.nativeElement as HTMLElement).querySelector('.etiquette')).toBeNull();
   });
 
   it('affiche « Nouveauté » sans réduction', async () => {
@@ -57,7 +49,7 @@ describe('CarteProduit', () => {
     const fixture = await rendre({ ...base, enRupture: true });
     const page = fixture.nativeElement as HTMLElement;
     expect((page.querySelector('.ajouter') as HTMLButtonElement).disabled).toBe(true);
-    expect(page.textContent).toContain('Rupture de stock');
+    expect(page.querySelector('.etiquette')?.textContent).toContain('Rupture');
   });
 
   it("émet l'identifiant au clic sur « Ajouter au panier »", async () => {

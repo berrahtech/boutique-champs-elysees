@@ -13,9 +13,10 @@ import { Bouton, Icone, NomIcone } from '@lce/ui';
     <div class="a-venir">
       <lce-icone [nom]="icone()" [taille]="48" />
       <h1 class="titre-2">{{ titre() }}</h1>
-      <p class="attenue">{{ texte() }}</p>
-      <a lceBouton variante="primaire" routerLink="/">Retour à l'accueil</a>
-      <a class="lien" routerLink="/boutique">Parcourir la boutique</a>
+      @if (texte()) {
+        <p class="attenue">{{ texte() }}</p>
+      }
+      <a lceBouton variante="primaire" routerLink="/">Accueil</a>
     </div>
   `,
   styles: `
@@ -25,7 +26,7 @@ import { Bouton, Icone, NomIcone } from '@lce/ui';
   `,
 })
 export class AVenir {
-  readonly titre = input('Page en préparation');
-  readonly texte = input('Cette page arrive prochainement.');
+  readonly titre = input('Bientôt disponible');
+  readonly texte = input('Bientôt disponible.');
   readonly icone = input<NomIcone>('information');
 }

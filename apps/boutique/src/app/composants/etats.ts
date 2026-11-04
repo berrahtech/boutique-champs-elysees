@@ -68,7 +68,6 @@ export class Squelettes {
     <div class="panneau-ivoire boite" role="alert">
       <lce-icone nom="wifi-off" [taille]="44" />
       <h2 class="titre-3">{{ titre() }}</h2>
-      <p class="attenue">Vérifiez votre connexion internet puis réessayez.</p>
       <button lceBouton variante="primaire" type="button" (click)="reessayer.emit()">Réessayer</button>
     </div>
   `,
@@ -84,12 +83,9 @@ export class Squelettes {
     lce-icone {
       color: var(--lce-navy);
     }
-    p {
-      margin: 0;
-    }
   `,
 })
 export class ErreurChargement {
-  readonly titre = input('Impossible de charger les produits');
+  readonly titre = input('Connexion impossible');
   readonly reessayer = output<void>();
 }

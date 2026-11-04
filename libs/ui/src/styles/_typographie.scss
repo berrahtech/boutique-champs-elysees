@@ -2,8 +2,8 @@
 
 @mixin texte-display {
   font-family: var(--lce-police-titre);
-  font-size: 46px;
-  line-height: 52px;
+  font-size: 38px;
+  line-height: 44px;
   font-weight: 700;
   letter-spacing: -0.025em;
   @media (max-width: 767px) {
@@ -14,8 +14,8 @@
 
 @mixin texte-h1 {
   font-family: var(--lce-police-titre);
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 26px;
+  line-height: 32px;
   font-weight: 700;
   letter-spacing: -0.015em;
   @media (max-width: 767px) {
@@ -26,8 +26,8 @@
 
 @mixin texte-h2 {
   font-family: var(--lce-police-titre);
-  font-size: 26px;
-  line-height: 34px;
+  font-size: 22px;
+  line-height: 28px;
   font-weight: 600;
   letter-spacing: -0.01em;
   @media (max-width: 767px) {
