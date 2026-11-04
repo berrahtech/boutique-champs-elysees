@@ -34,8 +34,8 @@ ul {
   aspect-ratio: 1;
   border: 1px solid var(--lce-line);
   border-radius: var(--lce-rayon-controle);
-  background: var(--lce-surface-ivoire);
-  color: var(--lce-gold-deep);
+  background: var(--lce-surface-douce);
+  color: var(--lce-navy);
   cursor: pointer;
 
   &.on {
@@ -48,8 +48,8 @@ ul {
   place-items: center;
   aspect-ratio: 1;
   border-radius: var(--lce-rayon-carte);
-  background: var(--lce-surface-ivoire);
-  color: var(--lce-gold-deep);
+  background: var(--lce-surface-douce);
+  color: var(--lce-navy);
 }
 .visuel img,
 .vignette img {
@@ -123,7 +123,7 @@ ul {
   color: var(--lce-success);
 
   &.faible {
-    color: var(--lce-gold-text);
+    color: var(--lce-navy-500);
   }
   &.rupture {
     color: var(--lce-danger);
@@ -175,7 +175,7 @@ ul {
   }
   lce-icone {
     flex: none;
-    color: var(--lce-gold-deep);
+    color: var(--lce-navy);
   }
 }
 
@@ -201,7 +201,7 @@ ul {
 
     &.on {
       color: var(--lce-navy);
-      border-bottom-color: var(--lce-gold);
+      border-bottom-color: var(--lce-navy);
     }
   }
 }
@@ -256,7 +256,7 @@ ul {
   gap: 12px;
 
   lce-icone {
-    color: var(--lce-gold-deep);
+    color: var(--lce-navy);
   }
 }
 

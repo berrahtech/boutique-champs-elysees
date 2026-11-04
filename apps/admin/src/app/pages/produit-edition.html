@@ -19,7 +19,7 @@
         <div class="outils">
           <a lceBouton variante="contour" [petit]="true" routerLink="/admin/produits">Retour</a>
           @if (peutModifier()) {
-            <button lceBouton variante="or" type="submit" [disabled]="envoi()">{{ envoi() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+            <button lceBouton variante="primaire" type="submit" [disabled]="envoi()">{{ envoi() ? 'Enregistrement…' : 'Enregistrer' }}</button>
           }
         </div>
       </div>

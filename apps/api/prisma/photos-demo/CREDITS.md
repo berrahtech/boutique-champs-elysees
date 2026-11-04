@@ -1,0 +1,41 @@
+# Photos de démonstration
+
+Photos sous licence Unsplash (https://unsplash.com/license), à remplacer par les vraies photos du catalogue avant la mise en ligne.
+
+- Robe longue en wax : https://images.unsplash.com/photo-1572804013309-59a88b7e92f1
+- Chemise en lin homme : https://images.unsplash.com/photo-1603252109303-2751441dd157
+- Pagne tissé Faso Dan Fani : https://images.unsplash.com/photo-1591176134674-87e8f7c73ce9
+- Tee-shirt coton bio : https://images.unsplash.com/photo-1581655353564-df123a1eb820
+- Baskets cuir blanches : https://images.unsplash.com/photo-1560769629-975ec94e6a86
+- Sac cabas en cuir : https://images.unsplash.com/photo-1590874103328-eac38a683ce7
+- Montre homme acier : https://images.unsplash.com/photo-1547996160-81dfa63595aa
+- Sandales cuir femme : https://images.unsplash.com/photo-1562273138-f46be4ebdf33
+- Ceinture cuir tressé : https://images.unsplash.com/photo-1624222247344-550fb60583dc
+- Parfum oriental 100 ml : https://images.unsplash.com/photo-1615634260167-c8cdede054de
+- Coffret soin visage : https://images.unsplash.com/photo-1631729371254-42c2892f0e6e
+- Eau de parfum florale 50 ml : https://images.unsplash.com/photo-1590736704728-f4730bb30770
+- Huile de karité pure 250 ml : https://images.unsplash.com/photo-1608571423902-eed4a5ad8108
+- Palette maquillage 12 teintes : https://images.unsplash.com/photo-1512496015851-a90fb38ba796
+- Coffret cadeau parfum : https://images.unsplash.com/photo-1513885535751-8b9238bd345a
+- Réfrigérateur 2 portes 260 L : https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5
+- Mixeur blender 1,5 L : https://images.unsplash.com/photo-1585515320310-259814833e62
+- Ventilateur sur pied : https://images.unsplash.com/photo-1565151443833-29bf2ba5dd8d
+- Fer à repasser vapeur : https://images.unsplash.com/photo-1489274495757-95c7c837b101
+- Smartphone 6,7" 128 Go : https://images.unsplash.com/photo-1511707171634-5f897ff02aa9
+- Smartphone 6,5" 128 Go : https://images.unsplash.com/photo-1580910051074-3eb694886505
+- Ordinateur portable 15" : https://images.unsplash.com/photo-1588872657578-7efd1f1555ed
+- Écouteurs sans fil : https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb
+- Coque et verre trempé 6,7" : https://images.unsplash.com/photo-1601593346740-925612772716
+- Téléviseur LED 43" : https://images.unsplash.com/photo-1461151304267-38535e780c79
+- Enceinte Bluetooth : https://images.unsplash.com/photo-1589003077984-894e133dabab
+- Lampe de table laiton : https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9
+- Parure de lit 2 places : https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af
+- Service à thé 6 verres : https://images.unsplash.com/photo-1558160074-4d7d8bdf4256
+- Tapis berbère 160 × 230 : https://images.unsplash.com/photo-1600166898405-da9535204843
+- Coffret cadeau : https://images.unsplash.com/photo-1549465220-1a8b9238cd48
+- Sac de voyage 60 L : https://images.unsplash.com/photo-1622560480605-d83c853bc5c3
+- high-tech : https://images.unsplash.com/photo-1588872657578-7efd1f1555ed
+- electromenager : https://images.unsplash.com/photo-1556911220-bff31c812dba
+- parfums : https://images.unsplash.com/photo-1615634260167-c8cdede054de
+- tuile-electromenager : https://images.unsplash.com/photo-1626806787461-102c1bfaaea1
+- tuile-smartphones : https://images.unsplash.com/photo-1580910051074-3eb694886505

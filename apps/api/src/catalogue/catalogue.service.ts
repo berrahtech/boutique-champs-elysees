@@ -165,27 +165,30 @@ export class CatalogueService {
         .then((r) => r.map(versProduitPublic));
 
     const parVentes = { nbVentes: 'desc' } as const;
-    const [nouveautes, tousEnPromo, ventes, selectionBeaute, electromenager, maison, smartphones] = await Promise.all([
+    const [nouveautes, tousEnPromo, ventes, selectionTech, selectionBeaute, electromenager, maison, smartphones] = await Promise.all([
       liste({ nouveau: true }, { creeLe: 'desc' }, 4),
       liste({ prixBarre: { not: null } }, parVentes, 48),
-      liste({}, parVentes, 10),
-      liste({ categorie: { slug: 'parfums-cosmetiques' } }, parVentes, 3),
-      liste({ categorie: { slug: 'electromenager' } }, parVentes, 2),
-      liste({ categorie: { slug: 'maison-decoration' } }, parVentes, 1),
+      liste({}, parVentes, 16),
+      liste({ categorie: { slug: 'telephones-informatique' } }, parVentes, 4),
+      liste({ categorie: { slug: 'parfums-cosmetiques' } }, parVentes, 6),
+      liste({ categorie: { slug: 'electromenager' } }, parVentes, 4),
+      liste({ categorie: { slug: 'maison-decoration' } }, parVentes, 2),
       this.prisma.produit.aggregate({ where: { ...this.visible, rayon: 'Smartphones' }, _min: { prix: true } }),
     ]);
     const enPromo = tousEnPromo.filter((p) => remisePourcentage(p) > 0).sort((a, b) => remisePourcentage(b) - remisePourcentage(a));
-    const remisesElectromenager = enPromo.filter((p) => p.categorie.slug === 'electromenager').map(remisePourcentage);
+    const remisesParCategorie: Record<string, number> = {};
+    for (const p of enPromo) remisesParCategorie[p.categorie.slug] = Math.max(remisesParCategorie[p.categorie.slug] ?? 0, remisePourcentage(p));
 
     return {
       nouveautes,
-      promotions: enPromo.slice(0, 4),
-      meilleuresVentes: ventes.slice(0, 4),
-      populaires: ventes.slice(4, 10),
+      promotions: enPromo.slice(0, 6),
+      meilleuresVentes: ventes.slice(0, 10),
+      populaires: ventes.slice(10, 16),
+      selectionTech,
       selectionBeaute,
       selectionMaison: [...electromenager, ...maison],
       prixMinSmartphones: smartphones._min.prix,
-      remiseMaxElectromenager: Math.max(0, ...remisesElectromenager),
+      remisesParCategorie,
       remiseMax: Math.max(0, ...enPromo.map(remisePourcentage)),
     };
   }

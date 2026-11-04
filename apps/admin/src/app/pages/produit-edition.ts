@@ -42,8 +42,8 @@ const TAILLE_MAX_IMAGE = 5 * 1024 * 1024;
       overflow: hidden;
       border: 1px solid var(--adm-ligne);
       border-radius: 10px;
-      background: var(--lce-surface-ivoire);
-      color: var(--lce-gold-deep);
+      background: var(--lce-surface-douce);
+      color: var(--lce-navy);
     }
     .image img {
       width: 100%;

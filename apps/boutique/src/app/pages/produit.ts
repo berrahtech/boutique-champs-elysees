@@ -11,6 +11,7 @@ import { ErreurChargement } from '../composants/etats';
 import { remiseDe } from '../donnees/catalogue';
 import { Favoris } from '../etat/favoris';
 import { Panier } from '../etat/panier';
+import { Recents } from '../etat/recents';
 import { titreDePage } from '../titres';
 
 type Onglet = 'description' | 'caracteristiques' | 'avis';
@@ -24,6 +25,7 @@ type Onglet = 'description' | 'caracteristiques' | 'avis';
 })
 export class FicheProduit {
   private readonly panier = inject(Panier);
+  private readonly recents = inject(Recents);
   private readonly router = inject(Router);
   private readonly titre = inject(Title);
   private readonly meta = inject(Meta);
@@ -69,6 +71,7 @@ export class FicheProduit {
       this.vue.set(0);
       this.onglet.set('description');
       if (p) {
+        this.recents.noter(p.id);
         this.titre.setTitle(titreDePage(p.nom));
         this.meta.updateTag({ name: 'description', content: p.description.slice(0, 160) });
       } else if (this.introuvable()) {

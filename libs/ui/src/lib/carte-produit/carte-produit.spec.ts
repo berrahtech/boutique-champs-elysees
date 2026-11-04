@@ -26,30 +26,45 @@ async function rendre(produit: ProduitCarte) {
 }
 
 describe('CarteProduit', () => {
-  it('affiche le badge promo à la place de « Nouveau » quand le produit est réduit', async () => {
+  it('affiche la pastille de réduction à côté de l’étiquette « Nouveauté »', async () => {
     const fixture = await rendre({ ...base, prixBarre: 50000 });
-    const badges = (fixture.nativeElement as HTMLElement).querySelectorAll('lce-badge');
-    expect(badges.length).toBe(1);
-    expect(badges[0].textContent?.trim()).toBe('−20 %');
+    const badges = [...(fixture.nativeElement as HTMLElement).querySelectorAll('lce-badge')].map((b) => b.textContent?.trim());
+    expect(badges).toEqual(['Nouveauté', '−20 %']);
   });
 
-  it('affiche « Nouveau » sans réduction', async () => {
+  it('prévient quand le stock est faible, sinon annonce la livraison', async () => {
+    const faible = await rendre({ ...base, nouveau: false, stock: 3 });
+    expect((faible.nativeElement as HTMLElement).textContent).toContain('Plus que 3 en stock');
+    faible.componentRef.setInput('produit', { ...base, nouveau: false, stock: 40 });
+    await faible.whenStable();
+    expect((faible.nativeElement as HTMLElement).textContent).toContain('Livré en 24–48 h');
+  });
+
+  it('réserve le sceau « choix des clients » aux produits bien notés et assez évalués', async () => {
+    const peuAvis = await rendre({ ...base, noteMoyenne: 5, nbAvis: 3 });
+    expect((peuAvis.nativeElement as HTMLElement).querySelector('.sceau')).toBeNull();
+    peuAvis.componentRef.setInput('produit', { ...base, noteMoyenne: 4.6, nbAvis: 30 });
+    await peuAvis.whenStable();
+    expect((peuAvis.nativeElement as HTMLElement).querySelector('.sceau')).not.toBeNull();
+  });
+
+  it('affiche « Nouveauté » sans réduction', async () => {
     const fixture = await rendre(base);
-    expect((fixture.nativeElement as HTMLElement).querySelector('lce-badge')?.textContent?.trim()).toBe('Nouveau');
+    expect((fixture.nativeElement as HTMLElement).querySelector('lce-badge')?.textContent?.trim()).toBe('Nouveauté');
   });
 
   it('désactive le bouton en cas de rupture', async () => {
     const fixture = await rendre({ ...base, enRupture: true });
-    const bouton = (fixture.nativeElement as HTMLElement).querySelector('button[lcebouton]') as HTMLButtonElement;
-    expect(bouton.disabled).toBe(true);
-    expect(bouton.textContent).toContain('Rupture de stock');
+    const page = fixture.nativeElement as HTMLElement;
+    expect((page.querySelector('.ajouter') as HTMLButtonElement).disabled).toBe(true);
+    expect(page.textContent).toContain('Rupture de stock');
   });
 
   it("émet l'identifiant au clic sur « Ajouter au panier »", async () => {
     const fixture = await rendre(base);
     let recu = '';
     fixture.componentInstance.ajouterAuPanier.subscribe((id) => (recu = id));
-    ((fixture.nativeElement as HTMLElement).querySelector('button[lcebouton]') as HTMLButtonElement).click();
+    ((fixture.nativeElement as HTMLElement).querySelector('.ajouter') as HTMLButtonElement).click();
     expect(recu).toBe('p1');
   });
 });

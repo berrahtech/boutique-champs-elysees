@@ -68,7 +68,7 @@ class LceCarteProduit extends StatelessWidget {
                     Positioned.fill(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: CouleursLce.surfaceIvoire,
+                          color: CouleursLce.surfaceDouce,
                           borderRadius: BorderRadius.circular(RayonsLce.controle),
                         ),
                         child: Image.network(

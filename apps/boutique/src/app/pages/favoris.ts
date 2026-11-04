@@ -24,7 +24,7 @@ import { Favoris } from '../etat/favoris';
           <lce-icone nom="favoris" [taille]="48" />
           <h2 class="titre-3">Aucun favori pour l'instant</h2>
           <p class="attenue">Touchez le cœur d'un produit pour le retrouver ici.</p>
-          <a lceBouton variante="nuit" routerLink="/boutique">Découvrir la boutique</a>
+          <a lceBouton variante="primaire" routerLink="/boutique">Découvrir la boutique</a>
         </div>
       } @else if (produits(); as liste) {
         <lce-cartes [produits]="liste" />
@@ -43,7 +43,7 @@ import { Favoris } from '../etat/favoris';
       padding-block: 24px 64px;
     }
     .a-venir lce-icone {
-      color: var(--lce-gold-deep);
+      color: var(--lce-navy);
     }
   `,
 })

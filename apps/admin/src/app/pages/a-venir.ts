@@ -11,7 +11,7 @@ import { Bouton, Icone } from '@lce/ui';
       <lce-icone nom="information" [taille]="48" />
       <h1>Rubrique en préparation</h1>
       <p class="attenue">Elle arrive avec le module correspondant. Le catalogue et les stocks sont déjà disponibles.</p>
-      <a lceBouton variante="nuit" routerLink="/admin/produits">Voir les produits</a>
+      <a lceBouton variante="primaire" routerLink="/admin/produits">Voir les produits</a>
     </div>
   `,
   styles: `
@@ -21,7 +21,7 @@ import { Bouton, Icone } from '@lce/ui';
       text-align: center;
     }
     lce-icone {
-      color: var(--lce-gold-deep);
+      color: var(--lce-navy);
     }
     h1 {
       margin: 0;

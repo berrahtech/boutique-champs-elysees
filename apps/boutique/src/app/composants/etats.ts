@@ -28,7 +28,7 @@ import { Bouton, Icone } from '@lce/ui';
     }
     .visuel {
       aspect-ratio: 1;
-      background: var(--lce-surface-ivoire);
+      background: var(--lce-surface-douce);
       animation: pulse 1.2s ease-in-out infinite;
     }
     .ligne {
@@ -69,7 +69,7 @@ export class Squelettes {
       <lce-icone nom="wifi-off" [taille]="44" />
       <h2 class="titre-3">{{ titre() }}</h2>
       <p class="attenue">Vérifiez votre connexion internet puis réessayez.</p>
-      <button lceBouton variante="nuit" type="button" (click)="reessayer.emit()">Réessayer</button>
+      <button lceBouton variante="primaire" type="button" (click)="reessayer.emit()">Réessayer</button>
     </div>
   `,
   styles: `
@@ -82,7 +82,7 @@ export class Squelettes {
       text-align: center;
     }
     lce-icone {
-      color: var(--lce-gold-deep);
+      color: var(--lce-navy);
     }
     p {
       margin: 0;

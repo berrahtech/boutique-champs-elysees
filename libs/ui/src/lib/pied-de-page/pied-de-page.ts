@@ -20,7 +20,7 @@ export interface Coordonnees {
         <div class="colonnes">
           <div class="presentation">
             <a routerLink="/" class="marque" aria-label="Les Champs Élysées, accueil">
-              <img src="/logo-lce.png" alt="" width="64" height="64" />
+              <img src="/logo-lce.png" alt="" width="48" height="48" />
               <span>Les Champs Élysées</span>
             </a>
             <p>Mode, beauté, maison, électroménager et high-tech : tout votre shopping au même endroit, livré chez vous par nos équipes.</p>
@@ -69,8 +69,8 @@ export interface Coordonnees {
   `,
   styles: `
     footer {
-      background: var(--lce-navy);
-      color: #c9d0e0;
+      background: var(--lce-navy-700);
+      color: #d7d8ee;
     }
     .interieur {
       display: flex;
@@ -94,11 +94,11 @@ export interface Coordonnees {
       gap: 12px;
       color: var(--lce-on-navy);
       text-decoration: none;
-      font: 600 20px/26px var(--lce-police-titre);
+      font: 700 18px/24px var(--lce-police-titre);
     }
     .marque img {
-      width: 64px;
-      height: 64px;
+      width: 48px;
+      height: 48px;
       object-fit: contain;
     }
     p {
@@ -113,19 +113,17 @@ export interface Coordonnees {
     h2,
     .titre {
       margin: 0 0 12px;
-      font: 600 12px/16px var(--lce-police-texte);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--lce-gold-bright);
+      font: 600 15px/20px var(--lce-police-texte);
+      color: var(--lce-on-navy);
     }
     a {
-      color: #c9d0e0;
+      color: #d7d8ee;
       text-decoration: none;
       font-size: 14px;
       line-height: 30px;
     }
     a:hover {
-      color: var(--lce-gold-bright);
+      color: var(--lce-on-navy);
     }
     address {
       display: flex;
@@ -157,10 +155,10 @@ export interface Coordonnees {
       align-items: center;
       height: 32px;
       padding: 0 12px;
-      border: 1px solid #2a3b66;
-      border-radius: 6px;
-      font: 600 12px/16px var(--lce-police-texte);
-      color: #e8ebf3;
+      border: 1px solid rgb(255 255 255 / 25%);
+      border-radius: var(--lce-rayon-pastille);
+      font: 500 12px/16px var(--lce-police-texte);
+      color: #ffffff;
     }
     .legal {
       display: flex;
@@ -168,7 +166,7 @@ export interface Coordonnees {
       justify-content: space-between;
       gap: 12px 24px;
       padding-top: 24px;
-      border-top: 1px solid #24345c;
+      border-top: 1px solid rgb(255 255 255 / 15%);
       font-size: 13px;
     }
     .legal nav {

@@ -104,7 +104,7 @@ body {
     color: var(--lce-danger);
   }
   .or {
-    color: var(--lce-gold-text);
+    color: var(--lce-navy-500);
   }
 }
 
@@ -157,7 +157,7 @@ body {
 .zone-texte {
   width: 100%;
   padding: 0 14px;
-  border: 1px solid #c9c2b2;
+  border: 1px solid var(--lce-line-fort);
   border-radius: var(--lce-rayon-controle);
   background: var(--lce-surface);
   color: var(--lce-ink);
@@ -260,8 +260,8 @@ body {
   height: 40px;
   overflow: hidden;
   border-radius: var(--lce-rayon-controle);
-  background: var(--lce-surface-ivoire);
-  color: var(--lce-gold-deep);
+  background: var(--lce-surface-douce);
+  color: var(--lce-navy);
 
   img {
     width: 100%;
@@ -280,7 +280,7 @@ body {
     text-decoration: none;
 
     &:hover {
-      color: var(--lce-gold-text);
+      color: var(--lce-navy-500);
     }
   }
 }
@@ -303,7 +303,7 @@ body {
   cursor: pointer;
 
   &.on {
-    border-bottom-color: var(--lce-gold);
+    border-bottom-color: var(--lce-navy);
     color: var(--lce-navy);
   }
   span {

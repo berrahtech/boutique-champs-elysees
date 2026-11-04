@@ -34,7 +34,7 @@ import { Panier } from '../etat/panier';
       color: var(--lce-on-navy);
     }
     .surtitre {
-      color: var(--lce-gold-bright);
+      color: var(--lce-on-navy);
     }
     .titre-1 {
       color: var(--lce-on-navy);
@@ -54,7 +54,7 @@ import { Panier } from '../etat/panier';
 
       b {
         font-size: 20px;
-        color: var(--lce-gold-bright);
+        color: var(--lce-on-navy);
       }
     }
     ul {
@@ -72,7 +72,7 @@ import { Panier } from '../etat/panier';
     }
     lce-icone {
       flex: none;
-      color: var(--lce-gold-bright);
+      color: var(--lce-on-navy);
     }
     @media (max-width: 520px) {
       :host {

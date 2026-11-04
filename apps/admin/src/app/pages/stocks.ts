@@ -49,7 +49,7 @@ const LIBELLES_MOUVEMENT: Record<string, string> = {
       color: var(--lce-danger);
     }
     .sous-seuil {
-      color: var(--lce-gold-text);
+      color: var(--lce-navy-500);
     }
     .plus {
       color: var(--lce-success);

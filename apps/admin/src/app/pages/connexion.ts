@@ -41,7 +41,7 @@ import { Bouton, Icone } from '@lce/ui';
         @if (erreur()) {
           <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
         }
-        <button lceBouton [variante]="etape() === 'identifiants' ? 'nuit' : 'or'" type="submit" [pleineLargeur]="true" [disabled]="envoi()">
+        <button lceBouton type="submit" [pleineLargeur]="true" [disabled]="envoi()">
           {{ envoi() ? 'Vérification…' : etape() === 'identifiants' ? 'Continuer' : 'Se connecter' }}
         </button>
         <span class="petit attenue">Après 5 tentatives incorrectes, le compte est bloqué 15 minutes.</span>
@@ -113,8 +113,8 @@ import { Bouton, Icone } from '@lce/ui';
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: var(--lce-gold-soft);
-      color: var(--lce-gold-deep);
+      background: var(--lce-primaire-soft);
+      color: var(--lce-navy);
     }
     .code {
       font-size: 20px;

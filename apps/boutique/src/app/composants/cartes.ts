@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import type { ProduitPublic } from '@lce/contrats';
-import { CarteProduit, NomIcone, ProduitCarte } from '@lce/ui';
+import { CarteProduit, FormatCarte, NomIcone, ProduitCarte } from '@lce/ui';
 import { Favoris } from '../etat/favoris';
 import { ActionsProduit } from './actions-produit';
 
@@ -17,6 +17,7 @@ export function versCarte(p: ProduitPublic): ProduitCarte {
     nbAvis: p.nbAvis,
     imageUrl: p.images[0]?.url400 ?? null,
     icone: (p.icone ?? 'sac') as NomIcone,
+    stock: p.stock,
     enRupture: p.stock === 0,
   };
 }
@@ -32,6 +33,7 @@ export function versCarte(p: ProduitPublic): ProduitCarte {
         <li>
           <lce-carte-produit
             [produit]="cartes()[i]"
+            [format]="format()"
             [favori]="favoris.ensemble().has(p.id)"
             (ajouterAuPanier)="actions.ajouterAuPanier(p)"
             (basculerFavori)="actions.basculerFavori(p)"
@@ -46,11 +48,47 @@ export function versCarte(p: ProduitPublic): ProduitCarte {
       padding: 0;
       list-style: none;
     }
+    .ligne-5,
+    .ligne-6 {
+      display: flex;
+      gap: 20px;
+    }
+    .ligne-5 > li,
+    .ligne-6 > li {
+      flex: none;
+      scroll-snap-align: start;
+    }
+    .ligne-5 > li {
+      width: calc((100% - 4 * 20px) / 5);
+    }
+    .ligne-6 > li {
+      width: calc((100% - 5 * 20px) / 6);
+    }
+    @media (max-width: 1100px) {
+      .ligne-5 > li,
+      .ligne-6 > li {
+        width: 200px;
+      }
+    }
+    @media (max-width: 767px) {
+      .ligne-5,
+      .ligne-6 {
+        gap: 12px;
+      }
+      .ligne-5 > li {
+        width: 172px;
+      }
+      .ligne-6 > li {
+        width: 148px;
+      }
+    }
   `,
 })
 export class Cartes {
   readonly produits = input.required<ProduitPublic[]>();
-  readonly colonnes = input<'grille-4' | 'grille-3'>('grille-4');
+  readonly colonnes = input<'grille-4' | 'grille-3' | 'grille-2' | 'ligne-5' | 'ligne-6'>('grille-4');
+
+  readonly format = input<FormatCarte>('standard');
 
   protected readonly favoris = inject(Favoris);
   protected readonly actions = inject(ActionsProduit);

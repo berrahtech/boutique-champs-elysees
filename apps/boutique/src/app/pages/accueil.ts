@@ -1,63 +1,113 @@
 import { httpResource } from '@angular/common/http';
 import { afterNextRender, Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import type { Accueil as DonneesAccueil } from '@lce/contrats';
+import type { Accueil as DonneesAccueil, ProduitPublic, ResultatsCatalogue } from '@lce/contrats';
 import { API } from '@lce/session';
-import { Badge, Bouton, FcfaPipe, Icone, NomIcone } from '@lce/ui';
+import { Bouton, FcfaPipe, Icone, NomIcone } from '@lce/ui';
+import { Carrousel } from '../composants/carrousel';
 import { Cartes } from '../composants/cartes';
 import { ErreurChargement, Squelettes } from '../composants/etats';
 import { Catalogue } from '../donnees/catalogue';
+import { Recents } from '../etat/recents';
 
-/** Fin des promotions de la semaine : dimanche 23 h 59, heure de Bamako (UTC). */
-function finDeSemaine(maintenant: Date): Date {
-  const fin = new Date(maintenant);
-  fin.setUTCDate(fin.getUTCDate() + ((7 - fin.getUTCDay()) % 7));
-  fin.setUTCHours(23, 59, 59, 0);
-  return fin;
+interface Banniere {
+  titre: string;
+  texte: string;
+  action: string;
+  lien: string;
+  image: string;
+  /** Photo détourée sur fond blanc : elle se fond dans la bannière au lieu d'être encadrée. */
+  fondue?: boolean;
+  /** Catégorie dont la meilleure réduction s'affiche sur la bannière. */
+  categorie: string;
 }
+
+const BANNIERES: Banniere[] = [
+  {
+    titre: 'Passez à une technologie plus performante.',
+    texte: 'Travail, jeux, création : smartphones et ordinateurs aux meilleurs prix',
+    action: 'Découvrir',
+    lien: '/categorie/telephones-informatique',
+    image: '/bannieres/high-tech.webp',
+    fondue: true,
+    categorie: 'telephones-informatique',
+  },
+  {
+    titre: 'Votre maison mérite le meilleur.',
+    texte: 'Climatiseurs, réfrigérateurs et petit électroménager livrés chez vous',
+    action: 'Voir le rayon',
+    lien: '/categorie/electromenager',
+    image: '/bannieres/electromenager.webp',
+    categorie: 'electromenager',
+  },
+  {
+    titre: 'Des parfums qui ne passent pas inaperçus.',
+    texte: 'Parfums orientaux, coffrets et soins sélectionnés par nos équipes',
+    action: 'Voir la sélection',
+    lien: '/categorie/parfums-cosmetiques',
+    image: '/bannieres/parfums.webp',
+    categorie: 'parfums-cosmetiques',
+  },
+];
+
+const DUREE_BANNIERE = 6000;
 
 @Component({
   selector: 'lce-accueil',
-  imports: [FormsModule, RouterLink, Badge, Bouton, Cartes, ErreurChargement, FcfaPipe, Icone, Squelettes],
+  imports: [RouterLink, Bouton, Carrousel, Cartes, ErreurChargement, FcfaPipe, Icone, Squelettes],
   templateUrl: './accueil.html',
   styleUrl: './accueil.scss',
 })
 export class Accueil {
   protected readonly catalogue = inject(Catalogue);
+  private readonly recents = inject(Recents);
 
   protected readonly donnees = httpResource<DonneesAccueil>(() => `${API}/accueil`);
   protected readonly a = computed(() => (this.donnees.hasValue() ? this.donnees.value() : undefined));
   protected readonly erreur = computed(() => this.donnees.status() === 'error');
+  protected readonly recommandes = computed(() => this.a()?.promotions.slice(0, 2) ?? []);
 
-  private readonly maintenant = signal(new Date());
-  protected readonly decompte = computed(() => {
-    const reste = Math.max(0, finDeSemaine(this.maintenant()).getTime() - this.maintenant().getTime());
-    const minutes = Math.floor(reste / 60_000);
-    return { jours: Math.floor(minutes / 1440), heures: Math.floor((minutes % 1440) / 60), minutes: minutes % 60 };
+  protected readonly bannieres = BANNIERES;
+  protected readonly courante = signal(0);
+  private enPause = false;
+
+  /** Lu après le premier rendu : le serveur ne connaît pas l'historique de l'appareil. */
+  private readonly idsRecents = signal<string[]>([]);
+  private readonly ressourceRecents = httpResource<ResultatsCatalogue>(() => {
+    const ids = this.idsRecents();
+    return ids.length ? `${API}/produits?parPage=12&ids=${ids.join(',')}` : undefined;
   });
-
-  protected email = '';
-  protected readonly newsletter = signal<'saisie' | 'annonce'>('saisie');
+  protected readonly consultes = computed<ProduitPublic[]>(() => {
+    if (!this.ressourceRecents.hasValue()) return [];
+    const parId = new Map((this.ressourceRecents.value()?.produits ?? []).map((p) => [p.id, p]));
+    return this.idsRecents().flatMap((id) => parId.get(id) ?? []);
+  });
 
   constructor() {
     const destroy = inject(DestroyRef);
     afterNextRender(() => {
-      const minuteur = setInterval(() => this.maintenant.set(new Date()), 30_000);
+      this.idsRecents.set(this.recents.ids());
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const minuteur = setInterval(() => {
+        if (!this.enPause && !document.hidden) this.avancer(1);
+      }, DUREE_BANNIERE);
       destroy.onDestroy(() => clearInterval(minuteur));
     });
   }
 
+  protected avancer(sens: 1 | -1): void {
+    this.courante.update((i) => (i + sens + BANNIERES.length) % BANNIERES.length);
+  }
+
+  protected suspendre(pause: boolean): void {
+    this.enPause = pause;
+  }
+
+  protected remise(categorie: string): number {
+    return this.a()?.remisesParCategorie[categorie] ?? 0;
+  }
+
   protected ico(nom: string | null): NomIcone {
     return (nom ?? 'sac') as NomIcone;
-  }
-
-  protected deuxChiffres(n: number): string {
-    return String(n).padStart(2, '0');
-  }
-
-  protected inscrireNewsletter(): void {
-    // Aucun service d'envoi pour l'instant : on le dit au lieu de faire croire à une inscription.
-    this.newsletter.set('annonce');
   }
 }

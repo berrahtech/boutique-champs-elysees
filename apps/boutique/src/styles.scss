@@ -3,14 +3,14 @@
 @use 'typographie' as t;
 
 .sec {
-  padding-block: 56px;
+  padding-block: 40px;
 
   @media (max-width: 520px) {
     padding-block: 40px;
   }
 }
 .sec-ivoire {
-  background: var(--lce-surface-ivoire);
+  background: var(--lce-surface-douce);
 }
 .sec-tete {
   display: flex;
@@ -27,7 +27,7 @@
 }
 .surtitre {
   @include t.texte-surtitre;
-  color: var(--lce-gold-text);
+  color: var(--lce-navy-500);
 }
 .titre-1 {
   @include t.texte-h1;
@@ -63,7 +63,7 @@
   text-decoration: none;
 
   &:hover {
-    color: var(--lce-gold-text);
+    color: var(--lce-navy-500);
   }
 }
 
@@ -129,7 +129,7 @@
   padding: 24px;
 }
 .panneau-ivoire {
-  background: var(--lce-surface-ivoire);
+  background: var(--lce-surface-douce);
   border-radius: var(--lce-rayon-carte);
   padding: 24px;
 }
@@ -187,7 +187,7 @@
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  border: 1px solid #c9c2b2;
+  border: 1px solid var(--lce-line-fort);
   border-radius: var(--lce-rayon-controle);
   background: var(--lce-surface);
   color: var(--lce-ink);
@@ -231,10 +231,10 @@
     display: grid;
     place-items: center;
     padding: 0 14px;
-    border: 1px solid #c9c2b2;
+    border: 1px solid var(--lce-line-fort);
     border-right: 0;
     border-radius: var(--lce-rayon-controle) 0 0 var(--lce-rayon-controle);
-    background: var(--lce-surface-ivoire);
+    background: var(--lce-surface-douce);
     font-weight: 600;
   }
   .saisie {
@@ -260,7 +260,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--lce-gold-text);
+  color: var(--lce-navy-500);
   font: 600 13px/20px var(--lce-police-texte);
   text-decoration: underline;
   cursor: pointer;

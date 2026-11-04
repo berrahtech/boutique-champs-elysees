@@ -17,18 +17,14 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
 
-# Polices : Playfair Display et Montserrat doivent être embarquées (connexions
-# instables). Déposer les fichiers .ttf dans fonts/ puis décommenter :
+# Police : Figtree doit être embarquée (connexions instables).
+# Déposer les fichiers .ttf dans fonts/ puis décommenter :
 # flutter:
 #   fonts:
-#     - family: Playfair Display
+#     - family: Figtree
 #       fonts:
-#         - asset: packages/lce_ui/fonts/PlayfairDisplay-SemiBold.ttf
+#         - asset: packages/lce_ui/fonts/Figtree-Regular.ttf
+#         - asset: packages/lce_ui/fonts/Figtree-SemiBold.ttf
 #           weight: 600
-#     - family: Montserrat
-#       fonts:
-#         - asset: packages/lce_ui/fonts/Montserrat-Regular.ttf
-#         - asset: packages/lce_ui/fonts/Montserrat-SemiBold.ttf
-#           weight: 600
-#         - asset: packages/lce_ui/fonts/Montserrat-Bold.ttf
+#         - asset: packages/lce_ui/fonts/Figtree-Bold.ttf
 #           weight: 700

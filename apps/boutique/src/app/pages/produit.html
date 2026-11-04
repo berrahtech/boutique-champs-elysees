@@ -69,7 +69,7 @@
           @if (maximum() > 0) {
             <div class="achat">
               <lce-quantite [(valeur)]="quantite" [max]="maximum()" />
-              <button lceBouton variante="or" type="button" class="ajouter" (click)="ajouter()">
+              <button lceBouton variante="primaire" type="button" class="ajouter" (click)="ajouter()">
                 <lce-icone nom="panier-ajouter" [taille]="20" />Ajouter au panier
               </button>
               <button
@@ -83,7 +83,7 @@
                 <lce-icone nom="favoris" [taille]="22" [plein]="favoris.ensemble().has(p.id)" />
               </button>
             </div>
-            <button lceBouton variante="nuit" type="button" [pleineLargeur]="true" (click)="acheterMaintenant()">Acheter maintenant</button>
+            <button lceBouton variante="doux" type="button" [pleineLargeur]="true" (click)="acheterMaintenant()">Acheter maintenant</button>
           } @else {
             <p class="info-panier">
               <lce-icone nom="information" [taille]="18" />Tout le stock disponible est déjà dans votre panier.
@@ -185,7 +185,7 @@
     <lce-icone nom="recherche" [taille]="48" />
     <h1 class="titre-2">Ce produit n'existe pas ou plus</h1>
     <p class="attenue">Il a peut-être été retiré du catalogue. Découvrez les articles similaires dans la boutique.</p>
-    <a lceBouton variante="nuit" routerLink="/boutique">Voir la boutique</a>
+    <a lceBouton variante="primaire" routerLink="/boutique">Voir la boutique</a>
   </div>
 } @else {
   <p class="attente" role="status">Chargement du produit…</p>

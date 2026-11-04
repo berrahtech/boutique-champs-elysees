@@ -14,13 +14,13 @@ import { Bouton, Icone, NomIcone } from '@lce/ui';
       <lce-icone [nom]="icone()" [taille]="48" />
       <h1 class="titre-2">{{ titre() }}</h1>
       <p class="attenue">{{ texte() }}</p>
-      <a lceBouton variante="nuit" routerLink="/">Retour à l'accueil</a>
+      <a lceBouton variante="primaire" routerLink="/">Retour à l'accueil</a>
       <a class="lien" routerLink="/boutique">Parcourir la boutique</a>
     </div>
   `,
   styles: `
     lce-icone {
-      color: var(--lce-gold-deep);
+      color: var(--lce-navy);
     }
   `,
 })

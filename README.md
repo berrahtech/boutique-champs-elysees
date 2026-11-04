@@ -37,7 +37,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 
 ```bash
 npm run migrer            # applique les migrations SQL
-npx nx run api:seed       # zones, catégories, produits de démonstration, compte admin de test
+npx nx run api:seed       # zones, catégories, produits et photos de démonstration, compte admin de test
 npm run api               # http://localhost:3000/api/v1
 npm run boutique          # http://localhost:4200
 npm run admin             # http://localhost:4300/admin
@@ -114,7 +114,8 @@ Règle de sécurité : un compte existant n'est rattaché à Google que si son a
 
 ## À fournir ou à décider
 
-- **Polices :** les fichiers `.ttf` de Playfair Display et Montserrat sont à placer dans `mobile/lce_ui/fonts`. Voir `pubspec.yaml`.
+- **Photos :** celles de `apps/api/prisma/photos-demo` et `apps/boutique/public/bannieres` sont des photos Unsplash de démonstration (`CREDITS.md`). Elles sont à remplacer par les vraies photos avant la mise en ligne.
+- **Polices :** les fichiers `.ttf` de Figtree sont à placer dans `mobile/lce_ui/fonts`. Voir `pubspec.yaml`.
 - **E-mails :** le service d'envoi (`SMTP_URL`) reste à choisir pour la production.
 - **SMS :** le prestataire (Orange, Moov ou un agrégateur) reste à choisir. Il faudra une implémentation de `PasserelleSms`.
 - **Rubriques :** les 10 rubriques de l'espace client et les 8 catégories sont à confronter aux maquettes.

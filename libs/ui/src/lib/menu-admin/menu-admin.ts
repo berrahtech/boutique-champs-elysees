@@ -167,8 +167,8 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
       min-width: 22px;
       padding: 0 6px;
       border-radius: var(--lce-rayon-pastille);
-      background: var(--lce-gold);
-      color: var(--lce-on-gold);
+      background: var(--lce-navy);
+      color: var(--lce-on-navy);
       font-size: 12px;
       font-weight: 700;
       text-align: center;

@@ -33,7 +33,7 @@ function genererScss() {
   const l = [`// ${entete}`, '', ':root {'];
   for (const [nom, valeur] of Object.entries(jetons.couleurs)) l.push(`  --lce-${nom}: ${valeur};`);
   l.push('');
-  l.push(`  --lce-police-titre: '${jetons.polices.titre}', Georgia, serif;`);
+  l.push(`  --lce-police-titre: '${jetons.polices.titre}', system-ui, sans-serif;`);
   l.push(`  --lce-police-texte: '${jetons.polices.texte}', system-ui, sans-serif;`);
   l.push('');
   for (const [nom, valeur] of Object.entries(jetons.espacements)) l.push(`  --lce-espace-${nom}: ${valeur}px;`);

@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/** or = action principale ; nuit ; contour ; clair = fond blanc ; fantome = contour blanc sur fond bleu nuit. */
-export type VarianteBouton = 'or' | 'nuit' | 'contour' | 'clair' | 'fantome';
+/** primaire = bleu plein ; doux = fond bleu pâle ; contour ; clair = fond blanc ; fantome = contour blanc sur fond bleu. */
+export type VarianteBouton = 'primaire' | 'doux' | 'contour' | 'clair' | 'fantome';
 
 /**
  * Bouton LCE, posé sur un vrai <button> ou <a> :
- *   <button lceBouton variante="or">Commander</button>
- * Un seul bouton « or » par écran visible : c'est l'action principale.
+ *   <button lceBouton>Commander</button>
  */
 @Component({
   // Sélecteur d'attribut voulu : le bouton reste un vrai <button> ou <a> (accessibilité).
@@ -15,8 +14,8 @@ export type VarianteBouton = 'or' | 'nuit' | 'contour' | 'clair' | 'fantome';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'lce-bouton',
-    '[class.lce-bouton--or]': 'variante() === "or"',
-    '[class.lce-bouton--nuit]': 'variante() === "nuit"',
+    '[class.lce-bouton--primaire]': 'variante() === "primaire"',
+    '[class.lce-bouton--doux]': 'variante() === "doux"',
     '[class.lce-bouton--contour]': 'variante() === "contour"',
     '[class.lce-bouton--clair]': 'variante() === "clair"',
     '[class.lce-bouton--fantome]': 'variante() === "fantome"',
@@ -33,9 +32,9 @@ export type VarianteBouton = 'or' | 'nuit' | 'contour' | 'clair' | 'fantome';
       align-items: center;
       justify-content: center;
       gap: var(--lce-espace-2);
-      height: 48px;
+      height: 44px;
       padding-inline: var(--lce-espace-5);
-      border-radius: var(--lce-rayon-controle);
+      border-radius: var(--lce-rayon-pastille);
       border: 1px solid transparent;
       text-decoration: none;
       cursor: pointer;
@@ -54,21 +53,20 @@ export type VarianteBouton = 'or' | 'nuit' | 'contour' | 'clair' | 'fantome';
     :host(.lce-bouton--plein) {
       width: 100%;
     }
-    :host(.lce-bouton--or) {
-      background: var(--lce-gold);
-      color: var(--lce-on-gold);
-      border-color: var(--lce-gold-deep);
-    }
-    :host(.lce-bouton--or:hover) {
-      background: var(--lce-gold-bright);
-      box-shadow: var(--lce-ombre-gold);
-    }
-    :host(.lce-bouton--nuit) {
+    :host(.lce-bouton--primaire) {
       background: var(--lce-navy);
       color: var(--lce-on-navy);
     }
-    :host(.lce-bouton--nuit:hover) {
-      background: var(--lce-navy-700);
+    :host(.lce-bouton--primaire:hover) {
+      background: var(--lce-navy-500);
+    }
+    :host(.lce-bouton--doux) {
+      background: var(--lce-primaire-soft);
+      color: var(--lce-navy);
+    }
+    :host(.lce-bouton--doux:hover) {
+      background: var(--lce-navy);
+      color: var(--lce-on-navy);
     }
     :host(.lce-bouton--contour) {
       background: transparent;
@@ -76,7 +74,7 @@ export type VarianteBouton = 'or' | 'nuit' | 'contour' | 'clair' | 'fantome';
       border-color: var(--lce-navy);
     }
     :host(.lce-bouton--contour:hover) {
-      background: var(--lce-surface-ivoire);
+      background: var(--lce-surface-douce);
     }
     :host(.lce-bouton--clair) {
       background: var(--lce-surface);
@@ -91,9 +89,6 @@ export type VarianteBouton = 'or' | 'nuit' | 'contour' | 'clair' | 'fantome';
     :host(.lce-bouton--fantome:hover) {
       background: rgb(255 255 255 / 8%);
     }
-    :host(.lce-bouton--contour) {
-      border-color: var(--lce-ink);
-    }
     :host([disabled]),
     :host([aria-disabled='true']) {
       opacity: 0.5;
@@ -103,7 +98,7 @@ export type VarianteBouton = 'or' | 'nuit' | 'contour' | 'clair' | 'fantome';
   `,
 })
 export class Bouton {
-  readonly variante = input<VarianteBouton>('nuit');
+  readonly variante = input<VarianteBouton>('primaire');
   readonly petit = input(false);
   readonly pleineLargeur = input(false);
 }

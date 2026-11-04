@@ -88,10 +88,10 @@ export const RUBRIQUES_CLIENT: RubriqueClient[] = [
       cursor: pointer;
     }
     a:hover {
-      background: var(--lce-surface-ivoire);
+      background: var(--lce-surface-douce);
     }
     a.actif {
-      background: var(--lce-gold-soft);
+      background: var(--lce-primaire-soft);
       color: var(--lce-navy);
     }
     .libelle {

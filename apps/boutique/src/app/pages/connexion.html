@@ -43,7 +43,7 @@
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">
               {{ envoi() ? 'Connexion…' : retour() === '/panier' ? 'Se connecter et continuer' : 'Se connecter' }}
             </button>
             <div class="separateur petit attenue"><span></span>ou<span></span></div>
@@ -66,7 +66,7 @@
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Valider</button>
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Valider</button>
           </form>
         }
 
@@ -84,7 +84,7 @@
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="nuit" type="submit" [pleineLargeur]="true" [disabled]="envoi()">{{ envoi() ? 'Envoi…' : 'Recevoir un code' }}</button>
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" [disabled]="envoi()">{{ envoi() ? 'Envoi…' : 'Recevoir un code' }}</button>
           </form>
         }
 
@@ -107,7 +107,7 @@
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Enregistrer et me connecter</button>
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Enregistrer et me connecter</button>
           </form>
         }
       }

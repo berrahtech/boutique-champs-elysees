@@ -2,51 +2,58 @@
 
 @mixin texte-display {
   font-family: var(--lce-police-titre);
-  font-size: 56px;
-  line-height: 60px;
-  font-weight: 600;
-  @media (max-width: 767px) {
-    font-size: 36px;
-    line-height: 42px;
-  }
-}
-
-@mixin texte-h1 {
-  font-family: var(--lce-police-titre);
-  font-size: 40px;
-  line-height: 48px;
-  font-weight: 600;
+  font-size: 46px;
+  line-height: 52px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   @media (max-width: 767px) {
     font-size: 30px;
     line-height: 36px;
   }
 }
 
+@mixin texte-h1 {
+  font-family: var(--lce-police-titre);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  @media (max-width: 767px) {
+    font-size: 26px;
+    line-height: 32px;
+  }
+}
+
 @mixin texte-h2 {
   font-family: var(--lce-police-titre);
-  font-size: 28px;
-  line-height: 36px;
+  font-size: 26px;
+  line-height: 34px;
   font-weight: 600;
+  letter-spacing: -0.01em;
+  @media (max-width: 767px) {
+    font-size: 22px;
+    line-height: 28px;
+  }
 }
 
 @mixin texte-h3 {
   font-family: var(--lce-police-titre);
-  font-size: 20px;
-  line-height: 28px;
+  font-size: 18px;
+  line-height: 26px;
   font-weight: 600;
 }
 
 @mixin texte-body-lg {
   font-family: var(--lce-police-texte);
-  font-size: 17px;
-  line-height: 26px;
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 400;
 }
 
 @mixin texte-body {
   font-family: var(--lce-police-texte);
   font-size: 15px;
-  line-height: 24px;
+  line-height: 22px;
   font-weight: 400;
 }
 
@@ -60,23 +67,21 @@
 @mixin texte-small {
   font-family: var(--lce-police-texte);
   font-size: 13px;
-  line-height: 20px;
+  line-height: 18px;
   font-weight: 400;
 }
 
 @mixin texte-surtitre {
   font-family: var(--lce-police-texte);
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 @mixin texte-prix {
   font-family: var(--lce-police-texte);
   font-size: 18px;
   line-height: 24px;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

@@ -53,10 +53,10 @@ import { EtatStocks } from '../etat-stocks';
       text-decoration: none;
     }
     .raccourci:hover {
-      border-color: var(--lce-gold);
+      border-color: var(--lce-navy);
     }
     .raccourci lce-icone {
-      color: var(--lce-gold-deep);
+      color: var(--lce-navy);
     }
     p {
       margin: 0;

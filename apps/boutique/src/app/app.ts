@@ -1,6 +1,6 @@
 import { afterNextRender, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
-import { CategorieMenu, Coordonnees, Entete, Icone, PiedDePage } from '@lce/ui';
+import { CategorieMenu, Coordonnees, Entete, Icone, NomIcone, PiedDePage } from '@lce/ui';
 import { Catalogue } from './donnees/catalogue';
 import { Favoris } from './etat/favoris';
 import { Notifications } from './etat/notifications';
@@ -72,14 +72,14 @@ import { Session } from '@lce/session';
       animation: apparition 180ms ease-out;
     }
     .notification lce-icone {
-      color: var(--lce-gold-bright);
+      color: var(--lce-on-navy);
     }
     .notification span {
       flex: 1;
       font-weight: 600;
     }
     .notification a {
-      color: var(--lce-gold-bright);
+      color: var(--lce-on-navy);
       font-weight: 700;
       white-space: nowrap;
     }
@@ -116,7 +116,7 @@ export class App {
   protected readonly notifications = inject(Notifications);
 
   private readonly catalogue = inject(Catalogue);
-  protected readonly categories = computed<CategorieMenu[]>(() => this.catalogue.categories().map((c) => ({ slug: c.slug, nom: c.court })));
+  protected readonly categories = computed<CategorieMenu[]>(() => this.catalogue.categories().map((c) => ({ slug: c.slug, nom: c.nom, icone: c.icone as NomIcone })));
 
   // Provisoire : coordonnées à fournir par Les Champs Élysées.
   protected readonly coordonnees: Coordonnees = {

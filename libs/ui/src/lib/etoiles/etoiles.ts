@@ -16,7 +16,7 @@ import { Icone } from '../icone/icone';
     :host {
       display: inline-flex;
       gap: 2px;
-      color: var(--lce-gold-deep);
+      color: var(--lce-etoile);
     }
   `,
 })

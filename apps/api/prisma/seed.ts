@@ -3,7 +3,12 @@
 // Usage : npx nx run api:seed
 
 import 'dotenv/config';
+import { randomUUID } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { mkdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { PrismaPg } from '@prisma/adapter-pg';
+import sharp from 'sharp';
 import { PrismaClient } from '../src/generated/prisma/client';
 import { hacherMotDePasse } from '../src/identite/mot-de-passe';
 import { CATEGORIES, PRODUITS } from './donnees-demo';
@@ -106,6 +111,32 @@ async function principal() {
   }
 
   console.log(`${crees} produit(s) créé(s), ${PRODUITS.length - crees} déjà présent(s).`);
+  console.log(`${await ajouterPhotosDemo()} photo(s) de démonstration ajoutée(s).`);
+}
+
+/** Photos de prisma/photos-demo/<slug>.jpg, recadrées en carré, pour les produits qui n'en ont aucune. */
+async function ajouterPhotosDemo(): Promise<number> {
+  // Le seed tourne depuis apps/api, l'API depuis la racine du dépôt : c'est là qu'elle sert /medias.
+  const source = join('prisma', 'photos-demo');
+  const cible = join('..', '..', process.env['MEDIAS_DOSSIER'] ?? 'medias', 'produits');
+  await mkdir(cible, { recursive: true });
+  let ajoutees = 0;
+  for (const p of PRODUITS) {
+    const fichier = join(source, `${p.slug}.jpg`);
+    if (!existsSync(fichier)) continue;
+    const produit = await prisma.produit.findFirst({ where: { slug: p.slug, supprimeLe: null, imageProduits: { none: {} } } });
+    if (!produit) continue;
+    const contenu = await readFile(fichier);
+    const nom = randomUUID();
+    const urls: Record<number, string> = {};
+    for (const taille of [200, 400, 800]) {
+      await sharp(contenu).resize(taille, taille, { fit: 'cover' }).webp({ quality: 82 }).toFile(join(cible, `${nom}-${taille}.webp`));
+      urls[taille] = `/medias/produits/${nom}-${taille}.webp`;
+    }
+    await prisma.imageProduit.create({ data: { produitId: produit.id, url200: urls[200], url400: urls[400], url800: urls[800], ordre: 0 } });
+    ajoutees++;
+  }
+  return ajoutees;
 }
 
 principal()

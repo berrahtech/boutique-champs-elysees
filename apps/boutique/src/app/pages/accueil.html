@@ -1,235 +1,128 @@
-<section class="hero">
-  <div class="lce-conteneur hero-ligne">
-    <div class="hero-texte">
-      <span class="surtitre sur-nuit">Nouvelle saison</span>
-      <h1>Shoppez mieux,<br />vivez mieux !</h1>
-      <p>
-        Mode, beauté, maison, électroménager et high-tech réunis dans une seule boutique. Commandez en ligne, nos livreurs
-        vous livrent à domicile.
-      </p>
-      <div class="hero-actions">
-        <a lceBouton variante="or" routerLink="/boutique">Découvrir la boutique<lce-icone nom="fleche-droite" [taille]="18" /></a>
-        <a lceBouton variante="fantome" routerLink="/promotions">Voir les promotions</a>
+<section
+  class="banniere"
+  aria-roledescription="carrousel"
+  aria-label="Offres du moment"
+  (mouseenter)="suspendre(true)"
+  (mouseleave)="suspendre(false)"
+  (focusin)="suspendre(true)"
+  (focusout)="suspendre(false)"
+>
+  @for (b of bannieres; track b.lien; let i = $index) {
+    <div class="diapo" [class.active]="courante() === i" [attr.aria-hidden]="courante() !== i" [inert]="courante() !== i">
+      <div class="lce-conteneur diapo-ligne">
+        <div class="diapo-texte">
+          <h1 [attr.aria-level]="i === 0 ? null : 2">{{ b.titre }}</h1>
+          <p>{{ b.texte }}</p>
+          <a lceBouton variante="clair" [petit]="true" [routerLink]="b.lien">{{ b.action }}</a>
+        </div>
+        <div class="diapo-visuel" [class.fondue]="b.fondue">
+          <img [src]="b.image" alt="" width="720" height="540" [attr.loading]="i === 0 ? 'eager' : 'lazy'" />
+          @if (remise(b.categorie); as r) {
+            <span class="bulle"><span class="lce-visuellement-masque">Jusqu'à </span>−{{ r }} %</span>
+          }
+        </div>
       </div>
-      <ul class="hero-garanties">
-        <li><lce-icone nom="securite" [taille]="18" />Paiement sécurisé</li>
-        <li><lce-icone nom="especes" [taille]="18" />Paiement à la livraison</li>
-      </ul>
     </div>
-
-    <div class="mosaique">
-      <a class="tuile tuile-grande" routerLink="/categorie/parfums-cosmetiques">
-        <lce-badge type="nouveau">Nouvelle collection</lce-badge>
-        <lce-icone nom="parfum" [taille]="120" class="tuile-icone" />
-        <span class="tuile-pied">
-          <span class="titre-3">Parfums &amp; cosmétiques</span>
-          <span class="lien">Découvrir<lce-icone nom="chevron-droite" [taille]="16" /></span>
-        </span>
-      </a>
-      <a class="tuile tuile-or" routerLink="/categorie/telephones-informatique">
-        <span class="tuile-col">
-          <span class="titre-3">Smartphones</span>
-          @if (a()?.prixMinSmartphones; as prix) {
-            <span class="a-partir">À partir de<br /><b>{{ prix | fcfa }}</b></span>
-          }
-        </span>
-        <lce-icone nom="mobile" [taille]="72" />
-      </a>
-      <a class="tuile tuile-nuit" routerLink="/categorie/electromenager">
-        <span class="tuile-col">
-          @if (a()?.remiseMaxElectromenager; as remise) {
-            <lce-badge type="promo">Jusqu'à −{{ remise }} %</lce-badge>
-          }
-          <span class="titre-3">Électroménager</span>
-        </span>
-        <lce-icone nom="electromenager" [taille]="72" class="dore" />
-      </a>
-    </div>
+  }
+  <button type="button" class="fleche precedent" aria-label="Offre précédente" (click)="avancer(-1)"><lce-icone nom="chevron-gauche" [taille]="16" /></button>
+  <button type="button" class="fleche suivant" aria-label="Offre suivante" (click)="avancer(1)"><lce-icone nom="chevron-droite" [taille]="16" /></button>
+  <div class="points">
+    @for (b of bannieres; track b.lien; let i = $index) {
+      <button type="button" [class.on]="courante() === i" [attr.aria-label]="'Afficher l\'offre ' + (i + 1)" [attr.aria-current]="courante() === i" (click)="courante.set(i)"></button>
+    }
   </div>
 </section>
 
-<section class="sec-ivoire" aria-label="Nos engagements">
-  <ul class="lce-conteneur engagements">
-    <li>
-      <lce-icone nom="livraison" [taille]="32" />
-      <span><b>Livrée par nos équipes</b><br /><span class="petit attenue">Nos propres livreurs, suivi en temps réel</span></span>
-    </li>
-    <li>
-      <lce-icone nom="mobile" [taille]="32" />
-      <span><b>Orange Money &amp; Moov Money</b><br /><span class="petit attenue">Ou carte Visa et Mastercard</span></span>
-    </li>
-    <li>
-      <lce-icone nom="especes" [taille]="32" />
-      <span><b>Paiement à la livraison</b><br /><span class="petit attenue">Réglez au livreur à la réception</span></span>
-    </li>
-    <li>
-      <lce-icone nom="support" [taille]="32" />
-      <span><b>Service client</b><br /><span class="petit attenue">Par téléphone, WhatsApp et e-mail</span></span>
-    </li>
-  </ul>
-</section>
-
-<section class="sec">
-  <div class="lce-conteneur">
-    <div class="sec-tete">
-      <div class="empile"><span class="surtitre">Nos rayons</span><h2 class="titre-2">Parcourir par catégorie</h2></div>
-      <a class="lien" routerLink="/boutique">Toute la boutique<lce-icone nom="chevron-droite" [taille]="16" /></a>
-    </div>
-    <ul class="grille-4 rayons">
+<div class="lce-conteneur sections">
+  <lce-carrousel titre="Parcourir les catégories">
+    <ul class="rayons">
+      <li>
+        <a routerLink="/boutique"><lce-icone nom="categories" [taille]="56" /><span>Toutes les catégories</span></a>
+      </li>
       @for (c of catalogue.categories(); track c.slug) {
         <li>
-          <a class="rayon" [routerLink]="['/categorie', c.slug]">
-            <span class="rayon-icone"><lce-icone [nom]="ico(c.icone)" [taille]="30" /></span>
-            <span class="rayon-nom">{{ c.nom }}</span>
-            <span class="petit attenue">{{ c.nbProduits }} articles</span>
-          </a>
+          <a [routerLink]="['/categorie', c.slug]"><lce-icone [nom]="ico(c.icone)" [taille]="56" /><span>{{ c.nom }}</span></a>
         </li>
       }
     </ul>
-  </div>
-</section>
+  </lce-carrousel>
 
-<section class="sec sans-haut">
-  <div class="lce-conteneur">
-    <div class="sec-tete">
-      <div class="empile"><span class="surtitre">Fraîchement arrivés</span><h2 class="titre-2">Nouveautés</h2></div>
-      <a class="lien" routerLink="/boutique" [queryParams]="{ filtre: 'nouveautes' }">Voir toutes les nouveautés<lce-icone nom="chevron-droite" [taille]="16" /></a>
-    </div>
-    @if (a(); as a) {
-      <lce-cartes [produits]="a.nouveautes" />
-    } @else if (erreur()) {
-      <lce-erreur-chargement (reessayer)="donnees.reload()" />
+  @if (erreur()) {
+    <lce-erreur-chargement (reessayer)="donnees.reload()" />
+  } @else if (a(); as a) {
+    <section aria-labelledby="titre-recommandes">
+      <div class="tete-section">
+        <h2 id="titre-recommandes">Recommandé pour vous</h2>
+        <a lceBouton [petit]="true" routerLink="/promotions">Voir plus</a>
+      </div>
+      <lce-cartes [produits]="recommandes()" colonnes="grille-2" format="horizontale" />
+    </section>
+
+    @if (consultes().length) {
+      <lce-carrousel titre="Récemment consultés">
+        <lce-cartes [produits]="consultes()" colonnes="ligne-6" format="compacte" />
+      </lce-carrousel>
     } @else {
-      <lce-squelettes />
+      <lce-carrousel titre="Produits populaires">
+        <lce-cartes [produits]="a.populaires" colonnes="ligne-6" format="compacte" />
+      </lce-carrousel>
     }
-  </div>
-</section>
 
-<section class="sec sec-ivoire">
-  <div class="lce-conteneur">
-    <div class="sec-tete">
-      <div class="empile">
-        @if (a()?.remiseMax; as remise) {
-          <lce-badge type="promo" class="debut">Jusqu'à −{{ remise }} %</lce-badge>
-        }
-        <h2 class="titre-2">Les promotions de la semaine</h2>
-      </div>
-      <div class="promo-droite">
-        <span class="decompte-libelle"><lce-icone nom="horloge" [taille]="18" />Se termine dans</span>
-        <span class="decompte" role="timer" aria-live="off">
-          <b class="chiffres">{{ decompte().jours }} j</b>
-          <b class="chiffres">{{ deuxChiffres(decompte().heures) }} h</b>
-          <b class="chiffres">{{ deuxChiffres(decompte().minutes) }} min</b>
-        </span>
-        <a class="lien" routerLink="/promotions">Toutes les promos<lce-icone nom="chevron-droite" [taille]="16" /></a>
-      </div>
-    </div>
-    @if (a(); as a) {
-      <lce-cartes [produits]="a.promotions" />
-    } @else if (erreur()) {
-      <lce-erreur-chargement (reessayer)="donnees.reload()" />
-    } @else {
-      <lce-squelettes />
-    }
-  </div>
-</section>
+    <lce-carrousel titre="Meilleures ventes">
+      <lce-cartes [produits]="a.meilleuresVentes" colonnes="ligne-5" />
+    </lce-carrousel>
 
-<section class="sec">
-  <div class="lce-conteneur">
-    <div class="sec-tete">
-      <div class="empile"><span class="surtitre">Les plus commandés</span><h2 class="titre-2">Meilleures ventes</h2></div>
-      <a class="lien" routerLink="/boutique" [queryParams]="{ filtre: 'meilleures-ventes' }">Voir le classement<lce-icone nom="chevron-droite" [taille]="16" /></a>
-    </div>
-    @if (a(); as a) {
-      <lce-cartes [produits]="a.meilleuresVentes" />
-    } @else if (erreur()) {
-      <lce-erreur-chargement (reessayer)="donnees.reload()" />
-    } @else {
-      <lce-squelettes />
-    }
-  </div>
-</section>
-
-<section class="sec sans-haut">
-  <div class="lce-conteneur grille-2">
-    <div class="selection selection-nuit">
-      <div class="sec-tete serre">
-        <div class="empile"><span class="surtitre sur-nuit">Sélection</span><h2 class="titre-2">Beauté &amp; parfums</h2></div>
-        <a lceBouton variante="fantome" [petit]="true" routerLink="/categorie/parfums-cosmetiques">Voir le rayon</a>
+    <section aria-labelledby="titre-tech" class="rayon-vedette">
+      <div class="tete-section">
+        <div>
+          <h2 id="titre-tech">Téléphones et informatique</h2>
+          <p class="attenue">Des smartphones aux accessoires du quotidien</p>
+        </div>
+        <a lceBouton routerLink="/categorie/telephones-informatique">Tout explorer</a>
       </div>
-      <ul class="minis">
-        @for (p of a()?.selectionBeaute ?? []; track p.id) {
-          <li>
-            <a class="mini" [routerLink]="['/produit', p.slug]">
-              <span class="mini-visuel"><lce-icone [nom]="ico(p.icone)" [taille]="30" /></span>
-              <span class="mini-texte"><b>{{ p.nom }}</b><span class="petit attenue">{{ p.rayon }}</span></span>
-              <b class="chiffres">{{ p.prix | fcfa }}</b>
-            </a>
-          </li>
-        }
-      </ul>
-    </div>
-    <div class="selection selection-ivoire">
-      <div class="sec-tete serre">
-        <div class="empile"><span class="surtitre">Sélection</span><h2 class="titre-2">Maison &amp; électroménager</h2></div>
-        <a lceBouton variante="contour" [petit]="true" routerLink="/categorie/maison-decoration">Voir le rayon</a>
+      <div class="tuiles">
+        <a class="tuile peche" routerLink="/categorie/electromenager">
+          <span class="tuile-texte">
+            <b>Offres électroménager</b>
+            <span>Équipez votre maison pour moins cher</span>
+          </span>
+          <img src="/bannieres/tuile-electromenager.webp" alt="" width="360" height="300" loading="lazy" />
+          @if (remise('electromenager'); as r) {
+            <span class="bulle petite"><span class="lce-visuellement-masque">Jusqu'à </span>−{{ r }} %</span>
+          }
+        </a>
+        <a class="tuile lilas" routerLink="/categorie/telephones-informatique">
+          <span class="tuile-texte">
+            <b>Smartphones</b>
+            @if (a.prixMinSmartphones; as prix) {
+              <span>À partir de {{ prix | fcfa }}</span>
+            }
+          </span>
+          <img src="/bannieres/tuile-smartphones.webp" alt="" width="360" height="300" loading="lazy" />
+        </a>
       </div>
-      <ul class="minis">
-        @for (p of a()?.selectionMaison ?? []; track p.id) {
-          <li>
-            <a class="mini" [routerLink]="['/produit', p.slug]">
-              <span class="mini-visuel"><lce-icone [nom]="ico(p.icone)" [taille]="30" /></span>
-              <span class="mini-texte"><b>{{ p.nom }}</b><span class="petit attenue">{{ p.rayon }}</span></span>
-              <b class="chiffres">{{ p.prix | fcfa }}</b>
-            </a>
-          </li>
-        }
-      </ul>
-    </div>
-  </div>
-</section>
+      <lce-cartes [produits]="a.selectionTech" colonnes="grille-4" />
+    </section>
 
-<section class="sec sec-ivoire">
-  <div class="lce-conteneur">
-    <div class="sec-tete">
-      <div class="empile"><span class="surtitre">Ce que nos clients regardent</span><h2 class="titre-2">Produits populaires</h2></div>
-    </div>
-    <ul class="grille-3 minis">
-      @for (p of a()?.populaires ?? []; track p.id) {
-        <li>
-          <a class="mini" [routerLink]="['/produit', p.slug]">
-            <span class="mini-visuel grand"><lce-icone [nom]="ico(p.icone)" [taille]="34" /></span>
-            <span class="mini-texte">
-              <span class="petit attenue">{{ p.rayon }}</span>
-              <b>{{ p.nom }}</b>
-              <b class="chiffres prix-mini">{{ p.prix | fcfa }}</b>
-            </span>
-          </a>
-        </li>
-      }
-    </ul>
-  </div>
-</section>
+    <lce-carrousel titre="Beauté et parfums" sousTitre="Parfums, soins et coffrets à offrir">
+      <a action lceBouton routerLink="/categorie/parfums-cosmetiques">Tout explorer</a>
+      <lce-cartes [produits]="a.selectionBeaute" colonnes="ligne-5" />
+    </lce-carrousel>
 
-<section class="sec">
-  <div class="lce-conteneur">
-    <div class="newsletter">
-      <div class="newsletter-texte">
-        <lce-icone nom="eclat" [taille]="28" class="dore" />
-        <h2 class="titre-2">Les nouveautés et offres exclusives, en premier</h2>
-        <p>Inscrivez-vous à la newsletter. Désinscription en un clic.</p>
-      </div>
-      @if (newsletter() === 'saisie') {
-        <form class="newsletter-form" (ngSubmit)="inscrireNewsletter()">
-          <label for="nl-email" class="lce-visuellement-masque">Adresse e-mail</label>
-          <input id="nl-email" name="email" class="saisie" type="email" required autocomplete="email" placeholder="Votre adresse e-mail" [(ngModel)]="email" />
-          <button lceBouton variante="or" type="submit">S'inscrire</button>
-        </form>
-      } @else {
-        <p class="newsletter-merci" role="status">
-          <lce-icone nom="information" [taille]="22" />La newsletter ouvre bientôt : votre adresse n'a pas été enregistrée.
-        </p>
-      }
-    </div>
-  </div>
+    <lce-carrousel titre="Maison et électroménager" sousTitre="L'essentiel pour votre intérieur">
+      <a action lceBouton routerLink="/categorie/maison-decoration">Tout explorer</a>
+      <lce-cartes [produits]="a.selectionMaison" colonnes="ligne-5" />
+    </lce-carrousel>
+  } @else {
+    <lce-squelettes />
+  }
+</div>
+
+<section class="engagements" aria-label="Nos engagements">
+  <ul class="lce-conteneur">
+    <li><lce-icone nom="livraison" [taille]="28" /><span><b>Livraison par nos équipes</b>24 à 48 h à Bamako</span></li>
+    <li><lce-icone nom="mobile" [taille]="28" /><span><b>Orange Money et Moov Money</b>Ou carte Visa et Mastercard</span></li>
+    <li><lce-icone nom="especes" [taille]="28" /><span><b>Paiement à la livraison</b>Réglez à la réception</span></li>
+    <li><lce-icone nom="support" [taille]="28" /><span><b>Service client</b>Téléphone, WhatsApp et e-mail</span></li>
+  </ul>
 </section>

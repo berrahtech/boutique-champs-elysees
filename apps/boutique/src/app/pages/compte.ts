@@ -43,7 +43,7 @@ import { Session } from '@lce/session';
           <lce-icone nom="compte" [taille]="48" />
           <h1 class="titre-2">Connectez-vous pour accéder à votre compte</h1>
           <p class="attenue">Suivez vos commandes, retrouvez vos factures et vos favoris sur tous vos appareils.</p>
-          <a lceBouton variante="or" routerLink="/connexion" [queryParams]="{ retour: '/compte' }">Se connecter</a>
+          <a lceBouton variante="primaire" routerLink="/connexion" [queryParams]="{ retour: '/compte' }">Se connecter</a>
           <a class="lien" routerLink="/inscription">Créer un compte</a>
         </div>
       }
@@ -81,10 +81,10 @@ import { Session } from '@lce/session';
       text-decoration: none;
     }
     .tuile:hover {
-      border-color: var(--lce-gold);
+      border-color: var(--lce-navy);
     }
     .tuile lce-icone {
-      color: var(--lce-gold-deep);
+      color: var(--lce-navy);
     }
     dl {
       display: grid;

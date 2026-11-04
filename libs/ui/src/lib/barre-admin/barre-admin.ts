@@ -83,8 +83,8 @@ import { Icone } from '../icone/icone';
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: var(--lce-gold-soft);
-      color: var(--lce-gold-text);
+      background: var(--lce-primaire-soft);
+      color: var(--lce-navy-500);
       font-weight: 700;
     }
     small {

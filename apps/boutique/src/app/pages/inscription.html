@@ -29,7 +29,7 @@
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Envoi…' : 'Recevoir le code' }}</button>
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Envoi…' : 'Recevoir le code' }}</button>
           </form>
         }
 
@@ -48,7 +48,7 @@
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Vérifier</button>
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Vérifier</button>
             <button type="button" class="bouton-texte" [disabled]="attenteRenvoi() > 0 || envoi()" (click)="envoyerCode()">
               {{ attenteRenvoi() > 0 ? 'Renvoyer le code dans ' + attenteRenvoi() + ' s' : 'Renvoyer le code' }}
             </button>
@@ -81,7 +81,7 @@
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
             }
-            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Création…' : 'Créer mon compte' }}</button>
+            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Création…' : 'Créer mon compte' }}</button>
           </form>
         }
       }

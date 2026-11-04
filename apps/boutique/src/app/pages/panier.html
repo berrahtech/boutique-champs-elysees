@@ -23,7 +23,7 @@
       <lce-icone nom="panier" [taille]="48" />
       <h2 class="titre-3">Votre panier est vide</h2>
       <p class="attenue">Parcourez nos rayons : vos articles restent enregistrés sur cet appareil.</p>
-      <a lceBouton variante="nuit" routerLink="/boutique">Découvrir la boutique</a>
+      <a lceBouton variante="primaire" routerLink="/boutique">Découvrir la boutique</a>
     </div>
   } @else if (panier.erreur() && !apercu()) {
     <lce-erreur-chargement titre="Impossible de calculer votre panier" (reessayer)="panier.recharger()" />
@@ -110,7 +110,7 @@
         <hr class="filet" />
         <div class="ligne-montant"><span class="total-libelle">Total TTC</span><b class="total chiffres">{{ a.total | fcfa }}</b></div>
 
-        <button lceBouton variante="or" type="button" [pleineLargeur]="true" class="commander" (click)="commander()">
+        <button lceBouton variante="primaire" type="button" [pleineLargeur]="true" class="commander" (click)="commander()">
           Commander<lce-icone nom="fleche-droite" [taille]="18" />
         </button>
         @if (commandeAnnoncee()) {

@@ -48,7 +48,7 @@ import { firstValueFrom } from 'rxjs';
       color: var(--lce-danger);
     }
     .sous-seuil {
-      color: var(--lce-gold-text);
+      color: var(--lce-navy-500);
     }
     .promo {
       color: var(--lce-promo);

@@ -75,7 +75,7 @@
           <div class="champ"><label for="pmin">Min.</label><input id="pmin" name="min" class="saisie" type="number" min="0" step="500" inputmode="numeric" [(ngModel)]="prixMin" /></div>
           <div class="champ"><label for="pmax">Max.</label><input id="pmax" name="max" class="saisie" type="number" min="0" step="500" inputmode="numeric" [(ngModel)]="prixMax" /></div>
         </div>
-        <button lceBouton variante="nuit" [pleineLargeur]="true" [petit]="true" type="submit">Appliquer le prix</button>
+        <button lceBouton variante="primaire" [pleineLargeur]="true" [petit]="true" type="submit">Appliquer le prix</button>
       </form>
 
       <hr class="filet" />
@@ -140,7 +140,7 @@
               Élargissez la fourchette de prix ou retirez un filtre.
             }
           </p>
-          <button lceBouton variante="nuit" type="button" (click)="toutEffacer()">Effacer les filtres</button>
+          <button lceBouton variante="primaire" type="button" (click)="toutEffacer()">Effacer les filtres</button>
         </div>
       }
     </section>

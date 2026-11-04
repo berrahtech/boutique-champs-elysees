@@ -60,10 +60,12 @@ export interface Accueil {
   promotions: ProduitPublic[];
   meilleuresVentes: ProduitPublic[];
   populaires: ProduitPublic[];
+  selectionTech: ProduitPublic[];
   selectionBeaute: ProduitPublic[];
   selectionMaison: ProduitPublic[];
   prixMinSmartphones: number | null;
-  remiseMaxElectromenager: number;
+  /** Meilleure réduction par slug de catégorie (absente sans promotion). */
+  remisesParCategorie: Record<string, number>;
   remiseMax: number;
 }
 
