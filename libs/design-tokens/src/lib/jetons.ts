@@ -33,7 +33,10 @@ export const jetons = {
     "on-gold": "#0B1C3F",
     "on-navy": "#FFFFFF",
     "focus": "#1C1CB0",
-    "adm-bg": "#F4F5F9"
+    "adm-bg": "#F4F5F9",
+    "noir": "#000000",
+    "saisie-fond": "#F1F1F1",
+    "facebook": "#166FE5"
   },
   "polices": {
     "titre": "Figtree",

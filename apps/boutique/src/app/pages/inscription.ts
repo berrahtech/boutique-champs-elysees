@@ -1,19 +1,21 @@
 import { afterNextRender, Component, DestroyRef, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Bouton, Icone } from '@lce/ui';
-import { BoutonGoogle } from '../composants/bouton-google';
+import { Icone } from '@lce/ui';
+import { CadreCompte } from '../composants/cadre-compte';
+import { ConnexionSociale } from '../composants/connexion-sociale';
 import { Notifications } from '../etat/notifications';
 import { estEmail, masquerIdentifiant, normaliserIdentifiant, Session, versErreurApi } from '@lce/session';
 
-type Etape = 'numero' | 'code' | 'profil';
+type Etape = 'formulaire' | 'code';
 
 const DELAI_RENVOI = 60;
+const MOT_DE_PASSE_VALIDE = /^(?=.*[A-Za-zÀ-ÿ])(?=.*\d).{8,128}$/;
 
-/** Inscription en 3 étapes (maquette « Inscription ») : téléphone ou e-mail, code, profil. Ou Google, en une étape. */
+/** Inscription : nom, téléphone ou e-mail et mot de passe sur un écran, puis code de vérification. Ou Google. */
 @Component({
   selector: 'lce-inscription',
-  imports: [FormsModule, RouterLink, BoutonGoogle, Bouton, Icone],
+  imports: [FormsModule, RouterLink, CadreCompte, ConnexionSociale, Icone],
   templateUrl: './inscription.html',
   styleUrl: './compte-formulaires.scss',
 })
@@ -24,18 +26,16 @@ export class Inscription {
 
   readonly retour = input<string>();
 
-  protected readonly etape = signal<Etape>('numero');
+  protected readonly etape = signal<Etape>('formulaire');
   protected readonly envoi = signal(false);
   protected readonly erreur = signal<string | null>(null);
   protected readonly attenteRenvoi = signal(0);
+  protected readonly motDePasseVisible = signal(false);
 
   protected identifiant = '';
   protected code = '';
   protected nom = '';
-  protected email = '';
   protected motDePasse = '';
-  protected conditions = false;
-  private preuve = '';
   private minuteur?: ReturnType<typeof setInterval>;
 
   constructor() {
@@ -43,42 +43,43 @@ export class Inscription {
     afterNextRender(() => destroy.onDestroy(() => clearInterval(this.minuteur)));
   }
 
+  /** Tout est saisi sur le même écran : on vérifie avant d'envoyer un code. */
   protected async envoyerCode(): Promise<void> {
     const identifiant = normaliserIdentifiant(this.identifiant);
-    if (!identifiant) {
+    if (!this.nom.trim()) {
+      this.erreur.set('Saisissez votre nom complet.');
+    } else if (!identifiant) {
       this.erreur.set('Saisissez un numéro malien à 8 chiffres (76 12 34 56) ou une adresse e-mail.');
-      return;
+    } else if (!MOT_DE_PASSE_VALIDE.test(this.motDePasse)) {
+      this.erreur.set('Le mot de passe doit contenir 8 caractères, une lettre et un chiffre.');
+    } else {
+      await this.executer(async () => {
+        await this.session.demanderCode(identifiant, 'INSCRIPTION');
+        this.code = '';
+        this.etape.set('code');
+        this.demarrerAttente();
+      });
     }
-    await this.executer(async () => {
-      await this.session.demanderCode(identifiant, 'INSCRIPTION');
-      this.etape.set('code');
-      this.demarrerAttente();
-    });
   }
 
   protected async verifierCode(): Promise<void> {
     const identifiant = normaliserIdentifiant(this.identifiant)!;
     await this.executer(async () => {
-      this.preuve = await this.session.verifierCode(identifiant, 'INSCRIPTION', this.code.replace(/\s/g, ''));
-      this.etape.set('profil');
-    });
-  }
-
-  protected async creerCompte(): Promise<void> {
-    if (!this.conditions) {
-      this.erreur.set('Acceptez les conditions générales pour créer votre compte.');
-      return;
-    }
-    await this.executer(async () => {
-      await this.session.inscrire(this.preuve, this.nom.trim(), this.motDePasse, this.email.trim() || undefined);
+      const preuve = await this.session.verifierCode(identifiant, 'INSCRIPTION', this.code.replace(/\s/g, ''));
+      try {
+        await this.session.inscrire(preuve, this.nom.trim(), this.motDePasse);
+      } catch (e) {
+        // La preuve est à usage unique : pour corriger, il faudra un nouveau code.
+        this.etape.set('formulaire');
+        throw e;
+      }
       await this.terminer();
     });
   }
 
-  protected changerNumero(): void {
+  protected modifier(): void {
     this.erreur.set(null);
-    this.code = '';
-    this.etape.set('numero');
+    this.etape.set('formulaire');
   }
 
   protected async inscriptionGoogle(jeton: string): Promise<void> {
@@ -92,7 +93,6 @@ export class Inscription {
     return masquerIdentifiant(this.identifiant);
   }
 
-  /** Inscrit avec son e-mail : l'adresse est déjà connue et vérifiée, inutile de la redemander. */
   protected parEmail(): boolean {
     return estEmail(this.identifiant);
   }
@@ -118,10 +118,7 @@ export class Inscription {
     try {
       await action();
     } catch (e) {
-      const erreur = versErreurApi(e);
-      // Un code épuisé ou expiré oblige à en redemander un.
-      if (erreur.code === 'otp-expire' && this.etape() === 'profil') this.etape.set('numero');
-      this.erreur.set(erreur.messageUtilisateur);
+      this.erreur.set(versErreurApi(e).messageUtilisateur);
     } finally {
       this.envoi.set(false);
     }

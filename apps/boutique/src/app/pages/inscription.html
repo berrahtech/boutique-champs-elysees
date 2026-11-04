@@ -1,81 +1,52 @@
-<div class="lce-conteneur page">
-  <div class="colonnes">
-    <section class="panneau formulaire">
-      <ol class="progression" aria-label="Étape {{ etape() === 'numero' ? 1 : etape() === 'code' ? 2 : 3 }} sur 3">
-        <li class="fait"></li>
-        <li [class.fait]="etape() !== 'numero'"></li>
-        <li [class.fait]="etape() === 'profil'"></li>
-      </ol>
-
-      @switch (etape()) {
-        @case ('numero') {
-          <form (ngSubmit)="envoyerCode()" novalidate>
-            <div class="empile">
-              <h1 class="titre-2">Créer un compte</h1>
-              <span class="attenue">Déjà client ? <a routerLink="/connexion" [queryParams]="{ retour: retour() }">Se connecter</a></span>
-            </div>
-            <lce-bouton-google (jeton)="inscriptionGoogle($event)" />
-            <div class="champ">
-              <label for="identifiant">Téléphone ou e-mail</label>
-              <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" required [(ngModel)]="identifiant" />
-            </div>
-            @if (erreur()) {
-              <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
-            }
-            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Envoi…' : 'Recevoir le code' }}</button>
-          </form>
-        }
-
-        @case ('code') {
-          <form (ngSubmit)="verifierCode()" novalidate>
-            <button type="button" class="bouton-texte retour" (click)="changerNumero()">← Changer d'identifiant</button>
-            <div class="empile">
-              <h1 class="titre-2">Code de vérification</h1>
-              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Code envoyé {{ parEmail() ? 'par e-mail à' : 'par SMS au' }} {{ masque() }}</span>
-            </div>
-            <div class="champ">
-              <label for="code">Code</label>
-              <input id="code" name="code" class="saisie code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required [(ngModel)]="code" />
-            </div>
-            @if (erreur()) {
-              <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
-            }
-            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Vérifier</button>
-            <button type="button" class="bouton-texte" [disabled]="attenteRenvoi() > 0 || envoi()" (click)="envoyerCode()">
-              {{ attenteRenvoi() > 0 ? 'Renvoyer le code dans ' + attenteRenvoi() + ' s' : 'Renvoyer le code' }}
+<lce-cadre-compte titre="Créer un compte" sousTitre="Créons votre compte">
+  @switch (etape()) {
+    @case ('formulaire') {
+      <form (ngSubmit)="envoyerCode()" novalidate>
+        <div class="champ">
+          <label for="nom">Nom complet</label>
+          <input id="nom" name="nom" class="saisie" autocomplete="name" placeholder="Saisissez votre nom complet" required [(ngModel)]="nom" />
+        </div>
+        <div class="champ">
+          <label for="identifiant">Téléphone ou e-mail</label>
+          <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" placeholder="Saisissez votre téléphone ou e-mail" required [(ngModel)]="identifiant" />
+        </div>
+        <div class="champ">
+          <label for="mdp">Mot de passe</label>
+          <div class="mot-de-passe">
+            <input id="mdp" name="mdp" class="saisie" [type]="motDePasseVisible() ? 'text' : 'password'" autocomplete="new-password" placeholder="Saisissez votre mot de passe" required [(ngModel)]="motDePasse" aria-describedby="mdp-aide" />
+            <button type="button" [attr.aria-label]="motDePasseVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'" [attr.aria-pressed]="motDePasseVisible()" (click)="motDePasseVisible.set(!motDePasseVisible())">
+              <lce-icone [nom]="motDePasseVisible() ? 'voir' : 'masquer'" [taille]="28" />
             </button>
-          </form>
+          </div>
+          <span id="mdp-aide" class="aide">8 caractères, une lettre et un chiffre.</span>
+        </div>
+        @if (erreur()) {
+          <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
         }
+        <button type="submit" class="principal" [disabled]="envoi()">{{ envoi() ? 'Envoi…' : "S'inscrire" }}</button>
+        <p class="mention">En vous inscrivant, vous acceptez les <a routerLink="/mentions-legales">conditions de vente</a> et la <a routerLink="/confidentialite">politique de confidentialité</a>.</p>
+      </form>
+      <lce-connexion-sociale action="S'inscrire" (jeton)="inscriptionGoogle($event)" />
+    }
 
-        @case ('profil') {
-          <form (ngSubmit)="creerCompte()" novalidate>
-            <div class="empile">
-              <h1 class="titre-2">Vos informations</h1>
-              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />{{ parEmail() ? 'Adresse vérifiée' : 'Numéro vérifié' }}</span>
-            </div>
-            <div class="champ">
-              <label for="nom">Prénom et nom</label>
-              <input id="nom" name="nom" class="saisie" autocomplete="name" required [(ngModel)]="nom" />
-            </div>
-            @if (!parEmail()) {
-              <div class="champ">
-                <label for="email">E-mail <span class="attenue">(facultatif)</span></label>
-                <input id="email" name="email" class="saisie" type="email" autocomplete="email" [(ngModel)]="email" />
-              </div>
-            }
-            <div class="champ">
-              <label for="mdp">Mot de passe</label>
-              <input id="mdp" name="mdp" class="saisie" type="password" autocomplete="new-password" required [(ngModel)]="motDePasse" aria-describedby="mdp-aide" />
-              <span id="mdp-aide" class="aide">8 caractères, une lettre et un chiffre.</span>
-            </div>
-            <label class="case"><input type="checkbox" name="conditions" [(ngModel)]="conditions" />J'accepte les conditions de vente et la politique de confidentialité.</label>
-            @if (erreur()) {
-              <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
-            }
-            <button lceBouton variante="primaire" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Création…' : 'Créer mon compte' }}</button>
-          </form>
+    @case ('code') {
+      <form (ngSubmit)="verifierCode()" novalidate>
+        <button type="button" class="bouton-texte retour-etape" (click)="modifier()">← Modifier mes informations</button>
+        <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Code envoyé {{ parEmail() ? 'par e-mail à' : 'par SMS au' }} {{ masque() }}</span>
+        <div class="champ">
+          <label for="code">Code</label>
+          <input id="code" name="code" class="saisie code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required [(ngModel)]="code" />
+        </div>
+        @if (erreur()) {
+          <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
         }
-      }
-    </section>
-  </div>
-</div>
+        <button type="submit" class="principal" [disabled]="envoi()">{{ envoi() ? 'Création…' : 'Créer mon compte' }}</button>
+        <button type="button" class="bouton-texte" [disabled]="attenteRenvoi() > 0 || envoi()" (click)="envoyerCode()">
+          {{ attenteRenvoi() > 0 ? 'Renvoyer le code dans ' + attenteRenvoi() + ' s' : 'Renvoyer le code' }}
+        </button>
+      </form>
+    }
+  }
+
+  <p bas>Déjà membre ? <a routerLink="/connexion" [queryParams]="{ retour: retour() }">Se connecter</a></p>
+</lce-cadre-compte>

@@ -36,6 +36,9 @@ abstract final class CouleursLce {
   static const onNavy = Color(0xFFFFFFFF);
   static const focus = Color(0xFF1C1CB0);
   static const admBg = Color(0xFFF4F5F9);
+  static const noir = Color(0xFF000000);
+  static const saisieFond = Color(0xFFF1F1F1);
+  static const facebook = Color(0xFF166FE5);
 }
 
 abstract final class PolicesLce {
