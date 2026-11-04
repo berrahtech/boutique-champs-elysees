@@ -1,9 +1,13 @@
+import { httpResource } from '@angular/common/http';
 import { afterNextRender, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Badge, Bouton, FcfaPipe, Icone } from '@lce/ui';
+import type { Accueil as DonneesAccueil } from '@lce/contrats';
+import { API } from '@lce/session';
+import { Badge, Bouton, FcfaPipe, Icone, NomIcone } from '@lce/ui';
 import { Cartes } from '../composants/cartes';
-import { Catalogue, estEnPromotion, Produit } from '../donnees/catalogue';
+import { ErreurChargement, Squelettes } from '../composants/etats';
+import { Catalogue } from '../donnees/catalogue';
 
 /** Fin des promotions de la semaine : dimanche 23 h 59, heure de Bamako (UTC). */
 function finDeSemaine(maintenant: Date): Date {
@@ -15,35 +19,16 @@ function finDeSemaine(maintenant: Date): Date {
 
 @Component({
   selector: 'lce-accueil',
-  imports: [FormsModule, RouterLink, Badge, Bouton, Cartes, FcfaPipe, Icone],
+  imports: [FormsModule, RouterLink, Badge, Bouton, Cartes, ErreurChargement, FcfaPipe, Icone, Squelettes],
   templateUrl: './accueil.html',
   styleUrl: './accueil.scss',
 })
 export class Accueil {
   protected readonly catalogue = inject(Catalogue);
 
-  protected readonly nouveautes = this.catalogue.nouveautes(4);
-  protected readonly promotions = this.catalogue.promotions(4);
-  protected readonly meilleuresVentes = this.catalogue.meilleuresVentes(4);
-  protected readonly selectionBeaute = this.catalogue.deCategorie('parfums-cosmetiques', 3);
-  protected readonly selectionMaison = [
-    ...this.catalogue.deCategorie('electromenager', 2),
-    ...this.catalogue.deCategorie('maison-decoration', 1),
-  ];
-  protected readonly populaires = this.catalogue
-    .meilleuresVentes(16)
-    .filter((p) => !this.meilleuresVentes.includes(p))
-    .slice(0, 6);
-
-  protected readonly prixSmartphones = this.catalogue.prixMinimum('Smartphones');
-  protected readonly remiseMaxElectromenager = Math.max(
-    ...this.catalogue
-      .deCategorie('electromenager', 99)
-      .filter(estEnPromotion)
-      .map((p) => Math.round((1 - p.prix / p.prixBarre!) * 100)),
-  );
-  protected readonly remiseMax = Math.max(...this.promotions.map((p) => Math.round((1 - p.prix / p.prixBarre!) * 100)));
-  protected readonly nbParCategorie = computed(() => this.catalogue.rechercher({}).parCategorie);
+  protected readonly donnees = httpResource<DonneesAccueil>(() => `${API}/accueil`);
+  protected readonly a = computed(() => (this.donnees.hasValue() ? this.donnees.value() : undefined));
+  protected readonly erreur = computed(() => this.donnees.status() === 'error');
 
   private readonly maintenant = signal(new Date());
   protected readonly decompte = computed(() => {
@@ -53,7 +38,7 @@ export class Accueil {
   });
 
   protected email = '';
-  protected readonly newsletter = signal<'saisie' | 'merci'>('saisie');
+  protected readonly newsletter = signal<'saisie' | 'annonce'>('saisie');
 
   constructor() {
     const destroy = inject(DestroyRef);
@@ -63,16 +48,16 @@ export class Accueil {
     });
   }
 
+  protected ico(nom: string | null): NomIcone {
+    return (nom ?? 'sac') as NomIcone;
+  }
+
   protected deuxChiffres(n: number): string {
     return String(n).padStart(2, '0');
   }
 
-  protected infoMini(p: Produit): string {
-    return p.rayon;
-  }
-
   protected inscrireNewsletter(): void {
-    // La newsletter n'a pas encore de service d'envoi : on confirme sans rien promettre de plus.
-    if (this.email.includes('@')) this.newsletter.set('merci');
+    // Aucun service d'envoi pour l'instant : on le dit au lieu de faire croire à une inscription.
+    this.newsletter.set('annonce');
   }
 }

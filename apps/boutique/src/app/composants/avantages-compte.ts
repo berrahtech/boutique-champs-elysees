@@ -14,7 +14,7 @@ import { Panier } from '../etat/panier';
     @if (!panier.estVide()) {
       <div class="resume">
         <div class="ligne-montant"><span>Votre panier</span><span>{{ panier.nbArticles() }} article{{ panier.nbArticles() > 1 ? 's' : '' }}</span></div>
-        <div class="ligne-montant"><span>Sous-total</span><b>{{ panier.sousTotal() | fcfa }}</b></div>
+        <div class="ligne-montant"><span>Sous-total</span><b>{{ panier.apercu()?.sousTotal ?? 0 | fcfa }}</b></div>
       </div>
     }
     <ul>

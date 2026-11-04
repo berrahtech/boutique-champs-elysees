@@ -1,9 +1,34 @@
-import type { Categorie, Produit } from './catalogue';
-
 /**
  * Données de démonstration, reprises des maquettes du canevas UX (noms, prix,
- * notes). Elles disparaîtront quand le catalogue viendra de l'API (lot 1).
+ * notes). Chargées en base par prisma/seed.ts pour le développement ; le vrai
+ * catalogue sera saisi dans l'administration.
  */
+export interface Categorie {
+  slug: string;
+  nom: string;
+  court: string;
+  icone: string;
+}
+
+export interface Produit {
+  id: string;
+  slug: string;
+  reference: string;
+  nom: string;
+  categorie: string;
+  rayon: string;
+  prix: number;
+  prixBarre?: number;
+  nouveau?: boolean;
+  noteMoyenne: number;
+  nbAvis: number;
+  stock: number;
+  ventes: number;
+  icone: string;
+  description: string;
+  caracteristiques: [string, string][];
+}
+
 export const CATEGORIES: Categorie[] = [
   { slug: 'mode', nom: 'Mode et vêtements', court: 'Mode', icone: 'mode' },
   { slug: 'chaussures-accessoires', nom: 'Chaussures et accessoires', court: 'Chaussures', icone: 'chaussure' },
@@ -117,6 +142,6 @@ export const PRODUITS: Produit[] = BRUTS.map((b, i) => {
     description:
       b.description ??
       `${b.nom}, sélectionné par nos équipes dans le rayon ${categorie.nom.toLowerCase()}. Produit neuf, livré à domicile par nos livreurs.`,
-    caracteristiques: b.caracteristiques ?? [['Rayon', b.rayon], ['État', 'Neuf']],
+    caracteristiques: b.caracteristiques ?? [['Rayon', b.rayon], ['État', 'Neuf']] as [string, string][],
   };
 });

@@ -4,7 +4,7 @@ import { Bouton, Icone, MenuClient } from '@lce/ui';
 import { Favoris } from '../etat/favoris';
 import { Notifications } from '../etat/notifications';
 import { Panier } from '../etat/panier';
-import { Session } from '../etat/session';
+import { Session } from '@lce/session';
 
 /** Espace client (maquette « Compte »). Les rubriques détaillées arrivent avec les commandes. */
 @Component({
@@ -30,7 +30,7 @@ import { Session } from '../etat/session';
               <h2 id="infos-titre" class="titre-3">Informations personnelles</h2>
               <dl>
                 <dt>Nom</dt><dd>{{ profil.nom }}</dd>
-                <dt>Téléphone</dt><dd>{{ profil.telephone }}</dd>
+                <dt>Téléphone</dt><dd>{{ profil.telephone ?? 'Non renseigné' }}</dd>
                 <dt>E-mail</dt><dd>{{ profil.email ?? 'Non renseigné' }}</dd>
               </dl>
             </section>

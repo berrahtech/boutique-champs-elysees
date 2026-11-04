@@ -14,26 +14,36 @@
     <a routerLink="/boutique" class="lien"><lce-icone nom="chevron-gauche" [taille]="16" />Continuer mes achats</a>
   </div>
 
+  @for (message of panier.ajustements(); track message) {
+    <p class="ajustement" role="status"><lce-icone nom="alerte" [taille]="18" />{{ message }}</p>
+  }
+
   @if (panier.estVide()) {
     <div class="vide panneau-ivoire">
       <lce-icone nom="panier" [taille]="48" />
       <h2 class="titre-3">Votre panier est vide</h2>
-      <p class="attenue">Parcourez nos rayons : vos articles restent enregistrés sur cet appareil, même sans connexion.</p>
+      <p class="attenue">Parcourez nos rayons : vos articles restent enregistrés sur cet appareil.</p>
       <a lceBouton variante="nuit" routerLink="/boutique">Découvrir la boutique</a>
     </div>
-  } @else {
-    <div class="disposition">
+  } @else if (panier.erreur() && !apercu()) {
+    <lce-erreur-chargement titre="Impossible de calculer votre panier" (reessayer)="panier.recharger()" />
+  } @else if (apercu(); as a) {
+    <div class="disposition" [attr.aria-busy]="panier.chargement()">
       <section class="articles" aria-label="Articles">
         <div class="tete-colonnes petit attenue"><span>Article</span><span>Sous-total</span></div>
         <ul>
-          @for (ligne of panier.lignes(); track ligne.produitId) {
+          @for (ligne of a.lignes; track ligne.produit.id) {
             <li class="article">
               <a [routerLink]="['/produit', ligne.produit.slug]" class="vignette" [attr.aria-label]="ligne.produit.nom">
-                <lce-icone [nom]="ligne.produit.icone" [taille]="44" />
+                @if (ligne.produit.images[0]; as image) {
+                  <img [src]="image.url200" alt="" width="96" height="96" loading="lazy" />
+                } @else {
+                  <lce-icone [nom]="ico(ligne.produit.icone)" [taille]="44" />
+                }
               </a>
               <div class="article-infos">
                 <a [routerLink]="['/produit', ligne.produit.slug]" class="article-nom">{{ ligne.produit.nom }}</a>
-                <span class="petit attenue">{{ ligne.produit.rayon }} · Réf. {{ ligne.produit.reference }}</span>
+                <span class="petit attenue">{{ ligne.produit.rayon || ligne.produit.categorie.nom }}{{ ligne.produit.reference ? ' · Réf. ' + ligne.produit.reference : '' }}</span>
                 <span class="petit">Prix unitaire : <b class="chiffres">{{ ligne.produit.prix | fcfa }}</b></span>
                 @if (ligne.quantite >= ligne.produit.stock) {
                   <span class="petit stock-max">Quantité maximale disponible</span>
@@ -43,12 +53,12 @@
                     [valeur]="ligne.quantite"
                     [max]="ligne.produit.stock"
                     [libelle]="'Quantité de ' + ligne.produit.nom"
-                    (valeurChange)="panier.changerQuantite(ligne.produitId, $event)"
+                    (valeurChange)="panier.changerQuantite(ligne.produit.id, $event)"
                   />
-                  <button type="button" class="action" (click)="retirer(ligne.produitId, ligne.produit.nom)">
+                  <button type="button" class="action" (click)="retirer(ligne.produit)">
                     <lce-icone nom="supprimer" [taille]="16" />Supprimer
                   </button>
-                  <button type="button" class="action" (click)="mettreDeCote(ligne.produitId)">
+                  <button type="button" class="action" (click)="mettreDeCote(ligne.produit)">
                     <lce-icone nom="favoris" [taille]="16" />Mettre de côté
                   </button>
                 </div>
@@ -58,46 +68,47 @@
           }
         </ul>
         <p class="petit attenue note">
-          <lce-icone nom="information" [taille]="16" />Votre panier est conservé sur cet appareil. Connecté, vous le retrouverez sur l'application.
+          <lce-icone nom="information" [taille]="16" />
+          {{ session.connecte() ? 'Votre panier est enregistré sur votre compte : vous le retrouvez sur tous vos appareils.' : 'Votre panier est conservé sur cet appareil. Connecté, vous le retrouvez partout.' }}
         </p>
       </section>
 
       <aside class="recapitulatif panneau" aria-labelledby="recap-titre">
         <h2 id="recap-titre" class="titre-3">Récapitulatif</h2>
-        <div class="ligne-montant"><span>Sous-total</span><b class="chiffres">{{ panier.sousTotal() | fcfa }}</b></div>
+        <div class="ligne-montant"><span>Sous-total</span><b class="chiffres">{{ a.sousTotal | fcfa }}</b></div>
 
         <div class="champ">
           <label for="zone">Zone de livraison</label>
-          <select id="zone" class="liste-deroulante" [ngModel]="zoneId()" (ngModelChange)="zoneId.set($event)">
-            @for (z of zones; track z.id) {
-              <option [value]="z.id">{{ z.libelle }}</option>
+          <select id="zone" class="liste-deroulante" [ngModel]="zone()?.id" (ngModelChange)="panier.zoneId.set($event)">
+            @for (z of zones(); track z.id) {
+              <option [value]="z.id">{{ z.nom }}</option>
             }
           </select>
-          <span class="aide">Délai estimé : {{ zone().delai }}</span>
+          <span class="aide">Délai estimé : {{ delai() }}</span>
         </div>
-        <div class="ligne-montant"><span>Livraison</span><b class="chiffres">{{ frais() | fcfa }}</b></div>
+        <div class="ligne-montant"><span>Livraison</span><b class="chiffres">{{ a.frais ? (a.frais | fcfa) : 'Offerte' }}</b></div>
 
         <form class="champ" (ngSubmit)="appliquerCode()">
           <label for="code">Code promotionnel</label>
           <div class="code">
-            <input id="code" name="code" class="saisie" autocomplete="off" [(ngModel)]="saisieCode" [attr.aria-invalid]="erreurCode() ? 'true' : null" aria-describedby="code-aide" />
+            <input id="code" name="code" class="saisie" autocomplete="off" [(ngModel)]="saisieCode" [attr.aria-invalid]="a.codeRefuse ? 'true' : null" aria-describedby="code-aide" />
             <button lceBouton variante="contour" type="submit">Appliquer</button>
           </div>
           <span id="code-aide" role="status">
-            @if (code()) {
-              <span class="succes petit"><lce-icone nom="valide-rond" [taille]="16" />Code {{ code() }} appliqué : −10 %
+            @if (a.codeApplique; as c) {
+              <span class="succes petit"><lce-icone nom="valide-rond" [taille]="16" />Code {{ c.code }} appliqué : {{ c.libelle }}
                 <button type="button" class="bouton-texte" (click)="retirerCode()">Retirer</button></span>
-            } @else if (erreurCode()) {
-              <span class="petit refus">{{ erreurCode() }}</span>
+            } @else if (a.codeRefuse) {
+              <span class="petit refus">{{ a.codeRefuse }}</span>
             }
           </span>
         </form>
-        @if (remise()) {
-          <div class="ligne-montant"><span>Réduction</span><b class="chiffres promo">− {{ remise() | fcfa }}</b></div>
+        @if (a.remise) {
+          <div class="ligne-montant"><span>Réduction</span><b class="chiffres promo">− {{ a.remise | fcfa }}</b></div>
         }
 
         <hr class="filet" />
-        <div class="ligne-montant"><span class="total-libelle">Total TTC</span><b class="total chiffres">{{ total() | fcfa }}</b></div>
+        <div class="ligne-montant"><span class="total-libelle">Total TTC</span><b class="total chiffres">{{ a.total | fcfa }}</b></div>
 
         <button lceBouton variante="or" type="button" [pleineLargeur]="true" class="commander" (click)="commander()">
           Commander<lce-icone nom="fleche-droite" [taille]="18" />
@@ -113,5 +124,7 @@
         <span class="petit attenue centre moyens"><lce-icone nom="cadenas" [taille]="16" />Orange Money · Moov Money · Carte · À la livraison</span>
       </aside>
     </div>
+  } @else {
+    <p class="attente" role="status">Calcul de votre panier…</p>
   }
 </div>

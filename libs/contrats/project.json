@@ -1,0 +1,8 @@
+{
+  "name": "contrats",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/contrats/src",
+  "projectType": "library",
+  "tags": ["scope:partage", "type:util"],
+  "targets": {}
+}

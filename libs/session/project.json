@@ -1,0 +1,9 @@
+{
+  "name": "session",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/session/src",
+  "prefix": "lce",
+  "projectType": "library",
+  "tags": ["scope:web", "type:util"],
+  "targets": {}
+}

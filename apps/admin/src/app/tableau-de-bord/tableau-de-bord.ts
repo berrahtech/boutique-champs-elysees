@@ -1,85 +1,70 @@
-import { Component } from '@angular/core';
-import { FcfaPipe, PastilleStatut, STATUTS_COMMANDE } from '@lce/ui';
+import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Session } from '@lce/session';
+import { Icone } from '@lce/ui';
+import { EtatStocks } from '../etat-stocks';
 
-/** Tableau de bord provisoire (lot 0) : vérifie la mise en page de l'administration. */
+/**
+ * Tableau de bord : seulement des chiffres réels. Les ventes et les commandes
+ * arriveront avec le module commande.
+ */
 @Component({
   selector: 'lce-tableau-de-bord',
-  imports: [FcfaPipe, PastilleStatut],
+  imports: [RouterLink, Icone],
   template: `
-    <h1>Tableau de bord</h1>
-    <div class="indicateurs">
-      <article>
-        <p>Ventes du jour</p>
-        <strong>{{ 1284500 | fcfa }}</strong>
-      </article>
-      <article>
-        <p>Commandes à traiter</p>
-        <strong>12</strong>
-      </article>
-      <article>
-        <p>Produits en alerte de stock</p>
-        <strong>3</strong>
-      </article>
+    <div class="adm-corps">
+      <div class="adm-titre">
+        <div class="empile">
+          <h1>Bonjour {{ session.prenom() }}</h1>
+          <span class="attenue petit">Rôle : {{ session.profil()?.role }}</span>
+        </div>
+      </div>
+
+      @if (indicateurs(); as i) {
+        <div class="indicateurs">
+          <div class="indicateur"><span class="l">Produits au catalogue</span><span class="v">{{ i.produits }}</span></div>
+          <div class="indicateur"><span class="l">En rupture</span><span class="v rouge">{{ i.ruptures }}</span><span class="d">affichés « Rupture » sur le site</span></div>
+          <div class="indicateur"><span class="l">Sous le seuil d'alerte</span><span class="v or">{{ i.sousSeuil }}</span><span class="d">à réapprovisionner</span></div>
+        </div>
+      }
+
+      <div class="raccourcis">
+        @if (session.permissions().has('produit.voir')) {
+          <a class="carte raccourci" routerLink="/admin/produits"><lce-icone nom="produits" [taille]="28" /><b>Produits</b><span class="petit attenue">Fiches, prix, photos, publication</span></a>
+        }
+        @if (session.permissions().has('stock.ajuster')) {
+          <a class="carte raccourci" routerLink="/admin/stocks"><lce-icone nom="stock" [taille]="28" /><b>Stocks et alertes</b><span class="petit attenue">Réceptions, inventaires, mouvements</span></a>
+        }
+      </div>
+      <p class="attenue petit">Les ventes et les commandes s'afficheront ici avec le module commande.</p>
     </div>
-    <h2>Dernières commandes</h2>
-    <table>
-      <thead>
-        <tr><th scope="col">Commande</th><th scope="col">Statut</th><th scope="col" class="montant">Total</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>LCE-2026-000124</td><td><lce-pastille-statut [statut]="statuts.EN_ATTENTE_AFFECTATION" /></td><td class="montant">{{ 41900 | fcfa }}</td></tr>
-        <tr><td>LCE-2026-000123</td><td><lce-pastille-statut [statut]="statuts.EN_COURS_LIVRAISON" /></td><td class="montant">{{ 153600 | fcfa }}</td></tr>
-        <tr><td>LCE-2026-000122</td><td><lce-pastille-statut [statut]="statuts.LIVREE" /></td><td class="montant">{{ 8500 | fcfa }}</td></tr>
-      </tbody>
-    </table>
   `,
   styles: `
-    :host {
+    .raccourcis {
       display: grid;
-      gap: var(--lce-espace-5);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
     }
-    .indicateurs {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: var(--lce-espace-4);
+    .raccourci {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: var(--lce-ink);
+      text-decoration: none;
     }
-    article,
-    table {
-      background: var(--lce-surface);
-      border: 1px solid var(--lce-line);
-      border-radius: var(--lce-rayon-carte-mobile);
+    .raccourci:hover {
+      border-color: var(--lce-gold);
     }
-    article {
-      padding: var(--lce-espace-5);
+    .raccourci lce-icone {
+      color: var(--lce-gold-deep);
     }
-    article p {
-      margin: 0 0 var(--lce-espace-2);
-      color: var(--lce-ink-muted);
-    }
-    strong {
-      font-size: 24px;
-      font-variant-numeric: tabular-nums;
-    }
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-    }
-    th,
-    td {
-      padding: var(--lce-espace-3) var(--lce-espace-4);
-      text-align: left;
-      border-bottom: 1px solid var(--lce-line);
-    }
-    tr:last-child td {
-      border-bottom: 0;
-    }
-    .montant {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
+    p {
+      margin: 0;
     }
   `,
 })
 export class TableauDeBord {
-  protected readonly statuts = STATUTS_COMMANDE;
+  protected readonly session = inject(Session);
+  private readonly stocks = inject(EtatStocks);
+  protected readonly indicateurs = computed(() => this.stocks.vue()?.indicateurs);
 }

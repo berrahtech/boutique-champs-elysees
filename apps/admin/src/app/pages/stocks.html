@@ -1,0 +1,109 @@
+<div class="adm-corps">
+  <div class="adm-titre">
+    <div class="empile">
+      <h1>Stocks</h1>
+      <span class="attenue petit">Le site et l'application affichent ces quantités en temps réel.</span>
+    </div>
+  </div>
+
+  @if (ressource.status() === 'error' && !vue()) {
+    <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />Impossible de charger les stocks. Vérifiez votre connexion.</p>
+  } @else if (vue(); as v) {
+    <div class="indicateurs">
+      <div class="indicateur"><span class="l">Produits en rupture</span><span class="v rouge">{{ v.indicateurs.ruptures }}</span><span class="d">affichés « Rupture » sur le site</span></div>
+      <div class="indicateur"><span class="l">Sous le seuil d'alerte</span><span class="v or">{{ v.indicateurs.sousSeuil }}</span><span class="d">à réapprovisionner</span></div>
+      <div class="indicateur"><span class="l">Unités réservées</span><span class="v">{{ v.indicateurs.unitesReservees }}</span><span class="d">dans des commandes en cours</span></div>
+      <div class="indicateur"><span class="l">Produits suivis</span><span class="v">{{ v.indicateurs.produits }}</span></div>
+    </div>
+
+    <div class="onglets" role="tablist" aria-label="Filtre des stocks">
+      @for (o of onglets(); track o.id) {
+        <button type="button" role="tab" class="onglet" [class.on]="onglet() === o.id" [attr.aria-selected]="onglet() === o.id" (click)="onglet.set(o.id)">
+          {{ o.libelle }}<span>{{ o.nombre }}</span>
+        </button>
+      }
+    </div>
+
+    @if (erreur()) {
+      <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
+    }
+    @if (message()) {
+      <p class="succes" role="status"><lce-icone nom="valide-rond" [taille]="18" />{{ message() }}</p>
+    }
+
+    <div class="tableau-cadre">
+      <table class="tableau">
+        <thead>
+          <tr>
+            <th scope="col">Produit</th>
+            <th scope="col">Référence</th>
+            <th scope="col" class="a-droite">Disponible</th>
+            <th scope="col" class="a-droite">Réservé</th>
+            <th scope="col" class="a-droite">Seuil</th>
+            <th scope="col">État</th>
+            <th scope="col">Ajuster</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of lignes(); track l.produitId) {
+            <tr>
+              <td><span class="produit-cellule"><span class="vignette"><lce-icone [nom]="ico(l.icone)" [taille]="20" /></span>{{ l.nom }}</span></td>
+              <td class="petit chiffres">{{ l.reference ?? '—' }}</td>
+              <td class="a-droite chiffres"><b [class.rupture]="l.etat === 'rupture'" [class.sous-seuil]="l.etat === 'sous-seuil'">{{ l.disponible }}</b></td>
+              <td class="a-droite chiffres">{{ l.reserve }}</td>
+              <td class="a-droite chiffres">{{ l.seuilAlerte }}</td>
+              <td><lce-pastille-statut [statut]="etats[l.etat]" /></td>
+              <td>
+                <form class="ajustement" (ngSubmit)="valider(l)">
+                  <select class="choix-liste type" name="type" [attr.aria-label]="'Type de mouvement pour ' + l.nom" [ngModel]="saisie(l.produitId).type" (ngModelChange)="changerSaisie(l.produitId, { type: $event })">
+                    <option value="ENTREE">Réception +</option>
+                    <option value="SORTIE">Sortie −</option>
+                    <option value="INVENTAIRE">Inventaire =</option>
+                  </select>
+                  <input class="saisie quantite" name="quantite" type="number" min="0" placeholder="Qté" [attr.aria-label]="'Quantité pour ' + l.nom" [ngModel]="saisie(l.produitId).quantite" (ngModelChange)="changerSaisie(l.produitId, { quantite: $event })" />
+                  <button lceBouton variante="contour" [petit]="true" type="submit" [disabled]="envoi() === l.produitId">Valider</button>
+                </form>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="attente">Rien à signaler dans cette liste.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <section class="carte">
+      <h2>Derniers mouvements</h2>
+      <div class="tableau-cadre">
+        <table class="tableau">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Produit</th>
+              <th scope="col">Mouvement</th>
+              <th scope="col" class="a-droite">Quantité</th>
+              <th scope="col">Par</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of v.mouvements; track m.id) {
+              <tr>
+                <td class="petit chiffres">{{ m.date | date: 'dd/MM HH:mm' }}</td>
+                <td>{{ m.produit }}</td>
+                <td>{{ libelleMouvement(m.type) }}{{ m.motif ? ' · ' + m.motif : '' }}</td>
+                <td class="a-droite chiffres" [class.plus]="signe(m.type, m.quantite) > 0" [class.moins]="signe(m.type, m.quantite) < 0">
+                  {{ signe(m.type, m.quantite) > 0 ? '+' : '−' }}{{ m.quantite < 0 ? -m.quantite : m.quantite }}
+                </td>
+                <td class="petit">{{ m.acteur }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="attente">Aucun mouvement pour l'instant.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  } @else {
+    <p class="attente" role="status">Chargement des stocks…</p>
+  }
+</div>

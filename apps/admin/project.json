@@ -73,6 +73,9 @@
         "development": {
           "buildTarget": "admin:build:development"
         }
+      },
+      "options": {
+        "proxyConfig": "apps/admin/proxy.conf.json"
       }
     },
     "serve-static": {

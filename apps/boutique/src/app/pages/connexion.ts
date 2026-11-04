@@ -3,16 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Bouton, Icone } from '@lce/ui';
 import { AvantagesCompte } from '../composants/avantages-compte';
-import { normaliserTelephone } from '../donnees/telephone';
+import { BoutonGoogle } from '../composants/bouton-google';
 import { Notifications } from '../etat/notifications';
-import { ErreurApi, Session, versErreurApi } from '../etat/session';
+import { ErreurApi, masquerIdentifiant, normaliserIdentifiant, Session, versErreurApi } from '@lce/session';
 
 type Etape = 'connexion' | 'double-authentification' | 'oubli-numero' | 'oubli-code';
 
 /** Connexion (maquette « Connexion ») avec double authentification et mot de passe oublié. */
 @Component({
   selector: 'lce-connexion',
-  imports: [FormsModule, RouterLink, AvantagesCompte, Bouton, Icone],
+  imports: [FormsModule, RouterLink, AvantagesCompte, BoutonGoogle, Bouton, Icone],
   templateUrl: './connexion.html',
   styleUrl: './compte-formulaires.scss',
 })
@@ -29,16 +29,16 @@ export class Connexion {
   protected readonly erreur = signal<string | null>(null);
   protected readonly motDePasseVisible = signal(false);
 
-  protected telephone = '';
+  protected identifiant = '';
   protected motDePasse = '';
   protected code = '';
   protected nouveauMotDePasse = '';
 
   protected async seConnecter(): Promise<void> {
-    const telephone = this.telephoneValide();
-    if (!telephone) return;
+    const identifiant = this.identifiantValide();
+    if (!identifiant) return;
     await this.executer(async () => {
-      await this.session.connecter(telephone, this.motDePasse, this.etape() === 'double-authentification' ? this.code : undefined);
+      await this.session.connecter(identifiant, this.motDePasse, this.etape() === 'double-authentification' ? this.code : undefined);
       this.notifications.afficher(`Bienvenue ${this.session.prenom() ?? ''} !`);
       await this.router.navigateByUrl(this.destination());
     }, (e) => {
@@ -51,21 +51,21 @@ export class Connexion {
   }
 
   protected async demanderCodeOubli(): Promise<void> {
-    const telephone = this.telephoneValide();
-    if (!telephone) return;
+    const identifiant = this.identifiantValide();
+    if (!identifiant) return;
     await this.executer(async () => {
-      await this.session.demanderCode(telephone, 'MOT_DE_PASSE');
+      await this.session.demanderCode(identifiant, 'MOT_DE_PASSE');
       this.etape.set('oubli-code');
     });
   }
 
   protected async reinitialiser(): Promise<void> {
-    const telephone = this.telephoneValide();
-    if (!telephone) return;
+    const identifiant = this.identifiantValide();
+    if (!identifiant) return;
     await this.executer(async () => {
-      const preuve = await this.session.verifierCode(telephone, 'MOT_DE_PASSE', this.code.replace(/\s/g, ''));
+      const preuve = await this.session.verifierCode(identifiant, 'MOT_DE_PASSE', this.code.replace(/\s/g, ''));
       await this.session.reinitialiserMotDePasse(preuve, this.nouveauMotDePasse);
-      await this.session.connecter(telephone, this.nouveauMotDePasse);
+      await this.session.connecter(identifiant, this.nouveauMotDePasse);
       this.notifications.afficher('Mot de passe modifié. Vous êtes connecté.');
       await this.router.navigateByUrl(this.destination());
     });
@@ -77,15 +77,22 @@ export class Connexion {
     this.etape.set(etape);
   }
 
-  protected masque(): string {
-    const t = normaliserTelephone(this.telephone);
-    return t ? `+223 •• •• •• ${t.slice(-2)}` : this.telephone;
+  protected async connexionGoogle(jeton: string): Promise<void> {
+    await this.executer(async () => {
+      await this.session.connecterAvecGoogle(jeton);
+      this.notifications.afficher(`Bienvenue ${this.session.prenom() ?? ''} !`);
+      await this.router.navigateByUrl(this.destination());
+    });
   }
 
-  private telephoneValide(): string | null {
-    const t = normaliserTelephone(this.telephone);
-    if (!t) this.erreur.set('Saisissez un numéro malien à 8 chiffres, par exemple 76 12 34 56.');
-    return t;
+  protected masque(): string {
+    return masquerIdentifiant(this.identifiant);
+  }
+
+  private identifiantValide(): string | null {
+    const i = normaliserIdentifiant(this.identifiant);
+    if (!i) this.erreur.set('Saisissez un numéro malien à 8 chiffres (76 12 34 56) ou une adresse e-mail.');
+    return i;
   }
 
   private destination(): string {

@@ -12,7 +12,9 @@
   <header class="empile">
     <h1 class="titre-1">{{ intitule() }}</h1>
     <span class="attenue">
-      {{ resultats().total }} article{{ resultats().total > 1 ? 's' : '' }} · livrés par nos équipes
+      @if (resultats(); as r) {
+        {{ r.total }} article{{ r.total > 1 ? 's' : '' }} · livrés par nos équipes
+      }
     </span>
   </header>
 
@@ -54,11 +56,11 @@
               <span>Toutes</span>
             </a>
           </li>
-          @for (c of categories; track c.slug) {
+          @for (c of categories(); track c.slug) {
             <li>
               <a [routerLink]="['/categorie', c.slug]" [queryParams]="{ page: null }" queryParamsHandling="merge" [class.on]="slug() === c.slug" [attr.aria-current]="slug() === c.slug ? 'page' : null">
                 <span>{{ c.nom }}</span>
-                <span class="attenue">{{ resultats().parCategorie[c.slug] ?? 0 }}</span>
+                <span class="attenue">{{ resultats()?.parCategorie?.[c.slug] ?? 0 }}</span>
               </a>
             </li>
           }
@@ -86,7 +88,7 @@
 
     <section class="resultats" aria-label="Produits">
       <div class="barre-tri panneau-ivoire">
-        <span class="petit" aria-live="polite"><b>{{ bornes() }}</b> sur {{ resultats().total }} articles</span>
+        <span class="petit" aria-live="polite"><b>{{ bornes() }}</b> sur {{ resultats()?.total ?? 0 }} articles</span>
         <span class="tri">
           <label for="tri" class="petit">Trier par</label>
           <select id="tri" class="liste-deroulante" [ngModel]="tri() ?? 'popularite'" (ngModelChange)="changerTri($event)">
@@ -97,25 +99,31 @@
         </span>
       </div>
 
-      @if (resultats().total > 0) {
-        <lce-cartes [produits]="resultats().produits" colonnes="grille-3" />
+      @if (erreur() && !resultats()) {
+        <lce-erreur-chargement (reessayer)="ressource.reload()" />
+      } @else if (!resultats()) {
+        <lce-squelettes colonnes="grille-3" [nombre]="6" />
+      } @else if (resultats()!.total > 0) {
+        <div [class.rafraichit]="chargement()" [attr.aria-busy]="chargement()">
+          <lce-cartes [produits]="resultats()!.produits" colonnes="grille-3" />
+        </div>
 
-        @if (resultats().pages > 1) {
+        @if (resultats()!.pages > 1) {
           <nav class="pagination" aria-label="Pagination">
-            @if (resultats().page > 1) {
-              <a class="num-page" [routerLink]="[]" [queryParams]="{ page: resultats().page - 1 }" queryParamsHandling="merge" aria-label="Page précédente">
+            @if (resultats()!.page > 1) {
+              <a class="num-page" [routerLink]="[]" [queryParams]="{ page: resultats()!.page - 1 }" queryParamsHandling="merge" aria-label="Page précédente">
                 <lce-icone nom="chevron-gauche" [taille]="18" />
               </a>
             }
             @for (n of numerosDePage(); track $index) {
               @if (estNumero(n)) {
-                <a class="num-page" [class.on]="n === resultats().page" [attr.aria-current]="n === resultats().page ? 'page' : null" [routerLink]="[]" [queryParams]="{ page: n === 1 ? null : n }" queryParamsHandling="merge">{{ n }}</a>
+                <a class="num-page" [class.on]="n === resultats()!.page" [attr.aria-current]="n === resultats()!.page ? 'page' : null" [routerLink]="[]" [queryParams]="{ page: n === 1 ? null : n }" queryParamsHandling="merge">{{ n }}</a>
               } @else {
                 <span class="attenue">…</span>
               }
             }
-            @if (resultats().page < resultats().pages) {
-              <a class="num-page" [routerLink]="[]" [queryParams]="{ page: resultats().page + 1 }" queryParamsHandling="merge" aria-label="Page suivante">
+            @if (resultats()!.page < resultats()!.pages) {
+              <a class="num-page" [routerLink]="[]" [queryParams]="{ page: resultats()!.page + 1 }" queryParamsHandling="merge" aria-label="Page suivante">
                 <lce-icone nom="chevron-droite" [taille]="18" />
               </a>
             }

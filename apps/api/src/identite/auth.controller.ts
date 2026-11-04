@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { PrismaService } from '../commun/prisma/prisma.service';
 import { AuthService } from './auth.service';
-import { ConnexionDto, DemandeOtpDto, InscriptionDto, RafraichissementDto, ReinitialisationDto, VerificationOtpDto } from './dto';
+import { ConnexionDto, ConnexionGoogleDto, DemandeOtpDto, InscriptionDto, RafraichissementDto, ReinitialisationDto, VerificationOtpDto } from './dto';
 import { Public, UtilisateurCourant } from './gardes';
 import { JetonAcces, JetonsService } from './jetons.service';
 
@@ -12,13 +12,20 @@ export class AuthController {
     private readonly jetons: JetonsService,
   ) {}
 
-  /** Envoie un code SMS. Réponse identique que le numéro soit connu ou non (sauf inscription). */
+  /** Moyens de connexion disponibles, pour l'affichage. */
+  @Public()
+  @Get('options')
+  options() {
+    return this.auth.options();
+  }
+
+  /** Envoie un code par SMS ou par e-mail. Réponse identique que le compte existe ou non (sauf inscription). */
   @Public()
   @Post('otp')
   @HttpCode(HttpStatus.ACCEPTED)
   async demanderOtp(@Body() corps: DemandeOtpDto) {
     await this.auth.demanderOtp(corps);
-    return { message: 'Si ce numéro est concerné, un code a été envoyé par SMS.' };
+    return { message: 'Si ce compte est concerné, un code a été envoyé.' };
   }
 
   /** Vérifie le code et renvoie une preuve à usage unique, valable 10 minutes. */
@@ -40,6 +47,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   connecter(@Body() corps: ConnexionDto) {
     return this.auth.connecter(corps);
+  }
+
+  /** Connexion ou inscription avec le jeton d'identité du bouton Google. */
+  @Public()
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  connecterAvecGoogle(@Body() corps: ConnexionGoogleDto) {
+    return this.auth.connecterAvecGoogle(corps.jeton);
   }
 
   @Public()

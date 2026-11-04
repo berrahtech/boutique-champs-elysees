@@ -103,13 +103,13 @@ export class JetonsService {
   }
 
   /** Preuve qu'un code SMS a été validé, à usage unique, 10 minutes. */
-  async emettrePreuveOtp(telephone: string, objet: ObjetOtp): Promise<string> {
+  async emettrePreuveOtp(identifiant: string, objet: ObjetOtp): Promise<string> {
     const jti = randomUUID();
     await this.magasin.ecrire(`otp:preuve:${jti}`, '1', DUREE_PREUVE_OTP_SECONDES);
-    return this.jwt.signAsync({ sub: telephone, objet, typ: 'preuve-otp' }, { expiresIn: DUREE_PREUVE_OTP_SECONDES, jwtid: jti });
+    return this.jwt.signAsync({ sub: identifiant, objet, typ: 'preuve-otp' }, { expiresIn: DUREE_PREUVE_OTP_SECONDES, jwtid: jti });
   }
 
-  /** Consomme la preuve et renvoie le numéro vérifié. */
+  /** Consomme la preuve et renvoie l'identifiant vérifié (téléphone ou e-mail). */
   async consommerPreuveOtp(preuve: string, objet: ObjetOtp): Promise<string> {
     let contenu: { sub: string; objet: ObjetOtp; typ: string; jti: string };
     try {

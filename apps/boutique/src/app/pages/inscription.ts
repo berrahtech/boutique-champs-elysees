@@ -3,18 +3,18 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Bouton, Icone } from '@lce/ui';
 import { AvantagesCompte } from '../composants/avantages-compte';
-import { normaliserTelephone } from '../donnees/telephone';
+import { BoutonGoogle } from '../composants/bouton-google';
 import { Notifications } from '../etat/notifications';
-import { Session, versErreurApi } from '../etat/session';
+import { estEmail, masquerIdentifiant, normaliserIdentifiant, Session, versErreurApi } from '@lce/session';
 
 type Etape = 'numero' | 'code' | 'profil';
 
 const DELAI_RENVOI = 60;
 
-/** Inscription en 3 étapes (maquette « Inscription ») : numéro, code SMS, profil. */
+/** Inscription en 3 étapes (maquette « Inscription ») : téléphone ou e-mail, code, profil. Ou Google, en une étape. */
 @Component({
   selector: 'lce-inscription',
-  imports: [FormsModule, RouterLink, AvantagesCompte, Bouton, Icone],
+  imports: [FormsModule, RouterLink, AvantagesCompte, BoutonGoogle, Bouton, Icone],
   templateUrl: './inscription.html',
   styleUrl: './compte-formulaires.scss',
 })
@@ -30,7 +30,7 @@ export class Inscription {
   protected readonly erreur = signal<string | null>(null);
   protected readonly attenteRenvoi = signal(0);
 
-  protected telephone = '';
+  protected identifiant = '';
   protected code = '';
   protected nom = '';
   protected email = '';
@@ -45,22 +45,22 @@ export class Inscription {
   }
 
   protected async envoyerCode(): Promise<void> {
-    const telephone = normaliserTelephone(this.telephone);
-    if (!telephone) {
-      this.erreur.set('Saisissez un numéro malien à 8 chiffres, par exemple 76 12 34 56.');
+    const identifiant = normaliserIdentifiant(this.identifiant);
+    if (!identifiant) {
+      this.erreur.set('Saisissez un numéro malien à 8 chiffres (76 12 34 56) ou une adresse e-mail.');
       return;
     }
     await this.executer(async () => {
-      await this.session.demanderCode(telephone, 'INSCRIPTION');
+      await this.session.demanderCode(identifiant, 'INSCRIPTION');
       this.etape.set('code');
       this.demarrerAttente();
     });
   }
 
   protected async verifierCode(): Promise<void> {
-    const telephone = normaliserTelephone(this.telephone)!;
+    const identifiant = normaliserIdentifiant(this.identifiant)!;
     await this.executer(async () => {
-      this.preuve = await this.session.verifierCode(telephone, 'INSCRIPTION', this.code.replace(/\s/g, ''));
+      this.preuve = await this.session.verifierCode(identifiant, 'INSCRIPTION', this.code.replace(/\s/g, ''));
       this.etape.set('profil');
     });
   }
@@ -72,9 +72,7 @@ export class Inscription {
     }
     await this.executer(async () => {
       await this.session.inscrire(this.preuve, this.nom.trim(), this.motDePasse, this.email.trim() || undefined);
-      this.notifications.afficher(`Bienvenue ${this.session.prenom() ?? ''} ! Votre compte est créé.`);
-      const r = this.retour();
-      await this.router.navigateByUrl(r && r.startsWith('/') && !r.startsWith('//') ? r : '/compte');
+      await this.terminer();
     });
   }
 
@@ -84,9 +82,26 @@ export class Inscription {
     this.etape.set('numero');
   }
 
+  protected async inscriptionGoogle(jeton: string): Promise<void> {
+    await this.executer(async () => {
+      await this.session.connecterAvecGoogle(jeton);
+      await this.terminer();
+    });
+  }
+
   protected masque(): string {
-    const t = normaliserTelephone(this.telephone);
-    return t ? `+223 •• •• •• ${t.slice(-2)}` : this.telephone;
+    return masquerIdentifiant(this.identifiant);
+  }
+
+  /** Inscrit avec son e-mail : l'adresse est déjà connue et vérifiée, inutile de la redemander. */
+  protected parEmail(): boolean {
+    return estEmail(this.identifiant);
+  }
+
+  private async terminer(): Promise<void> {
+    this.notifications.afficher(`Bienvenue ${this.session.prenom() ?? ''} ! Votre compte est prêt.`);
+    const r = this.retour();
+    await this.router.navigateByUrl(r && r.startsWith('/') && !r.startsWith('//') ? r : '/compte');
   }
 
   private demarrerAttente(): void {

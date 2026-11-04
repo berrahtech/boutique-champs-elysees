@@ -1,0 +1,153 @@
+<div class="adm-corps">
+  @if (id() && ressource.status() === 'error') {
+    <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />Ce produit est introuvable ou n'a pas pu être chargé.</p>
+    <a class="petit" routerLink="/admin/produits">Retour aux produits</a>
+  } @else if (id() && !produit()) {
+    <p class="attente" role="status">Chargement du produit…</p>
+  } @else {
+    <form class="formulaire" (ngSubmit)="enregistrer()" novalidate>
+      <div class="adm-titre">
+        <div class="empile">
+          <h1>{{ creation() ? 'Nouveau produit' : nom }}</h1>
+          <span class="petit attenue">
+            {{ publie() ? 'Publié' : 'Brouillon' }}
+            @if (produit(); as p) {
+              · Réf. {{ p.reference ?? '—' }}
+            }
+          </span>
+        </div>
+        <div class="outils">
+          <a lceBouton variante="contour" [petit]="true" routerLink="/admin/produits">Retour</a>
+          @if (peutModifier()) {
+            <button lceBouton variante="or" type="submit" [disabled]="envoi()">{{ envoi() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+          }
+        </div>
+      </div>
+
+      @if (erreur()) {
+        <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
+      }
+      @if (succes()) {
+        <p class="succes" role="status"><lce-icone nom="valide-rond" [taille]="18" />{{ succes() }}</p>
+      }
+
+      <div class="deux-colonnes">
+        <div class="principal">
+          <section class="carte formulaire">
+            <h2>Informations générales</h2>
+            <div class="champ"><label for="nom">Nom du produit</label><input id="nom" name="nom" class="saisie" required [(ngModel)]="nom" /></div>
+            <div class="deux">
+              <div class="champ"><label for="ref">Référence (SKU)</label><input id="ref" name="ref" class="saisie" [(ngModel)]="reference" /></div>
+              <div class="champ"><label for="rayon">Rayon (sous-catégorie)</label><input id="rayon" name="rayon" class="saisie" placeholder="Smartphones" [(ngModel)]="rayon" /></div>
+            </div>
+            <div class="champ">
+              <label for="cat">Catégorie</label>
+              <select id="cat" name="cat" class="saisie" required [(ngModel)]="categorieId">
+                <option value="" disabled>Choisir…</option>
+                @for (c of categories(); track c.id) {
+                  <option [value]="c.id">{{ c.nom }}</option>
+                }
+              </select>
+            </div>
+            <div class="champ"><label for="desc">Description</label><textarea id="desc" name="desc" class="zone-texte" [(ngModel)]="description"></textarea></div>
+          </section>
+
+          <section class="carte formulaire">
+            <div class="entre">
+              <h2 class="titre-section">Images ({{ produit()?.images?.length ?? 0 }})</h2>
+              <span class="petit attenue">JPG, PNG ou WebP, carré, fond blanc ou ivoire, 5 Mo au plus · optimisées automatiquement</span>
+            </div>
+            @if (creation()) {
+              <p class="petit attenue">Enregistrez d'abord le produit pour ajouter des photos.</p>
+            } @else {
+              <div class="images">
+                @for (image of produit()?.images ?? []; track image.id; let premiere = $first) {
+                  <div class="image">
+                    <img [src]="image.url200" alt="" />
+                    @if (premiere) {
+                      <span class="principale">Principale</span>
+                    }
+                    @if (peutModifier()) {
+                      <button type="button" class="retirer-image" aria-label="Supprimer cette photo" [disabled]="envoi()" (click)="supprimerImage(image.id)">
+                        <lce-icone nom="supprimer" [taille]="16" />
+                      </button>
+                    }
+                  </div>
+                }
+                @if (peutModifier()) {
+                  <label class="image ajouter-image">
+                    <lce-icone nom="plus" [taille]="24" />Ajouter
+                    <input class="lce-visuellement-masque" type="file" accept="image/jpeg,image/png,image/webp" (change)="televerser($event)" />
+                  </label>
+                }
+              </div>
+            }
+          </section>
+
+          <section class="carte formulaire">
+            <div class="entre">
+              <h2 class="titre-section">Caractéristiques techniques</h2>
+              <button lceBouton variante="contour" [petit]="true" type="button" (click)="ajouterCaracteristique()"><lce-icone nom="plus" [taille]="16" />Ajouter</button>
+            </div>
+            @for (c of caracteristiques(); track $index; let i = $index) {
+              <div class="caracteristique">
+                <input class="saisie" [attr.aria-label]="'Caractéristique ' + (i + 1)" placeholder="Écran" [name]="'cle' + i" [(ngModel)]="c.cle" />
+                <input class="saisie" [attr.aria-label]="'Valeur ' + (i + 1)" placeholder="6,7 pouces" [name]="'valeur' + i" [(ngModel)]="c.valeur" />
+                <button type="button" class="supprimer" [attr.aria-label]="'Supprimer la caractéristique ' + (i + 1)" (click)="retirerCaracteristique(i)"><lce-icone nom="supprimer" [taille]="18" /></button>
+              </div>
+            } @empty {
+              <p class="petit attenue">Aucune caractéristique.</p>
+            }
+          </section>
+        </div>
+
+        <div class="lateral">
+          <section class="carte formulaire">
+            <h2>Publication</h2>
+            <lce-bascule [active]="publie()" (activeChange)="publie.set($event)" libelle="Visible sur le site et l'application" />
+            <label class="case"><input type="checkbox" name="nouveau" [ngModel]="nouveau()" (ngModelChange)="nouveau.set($event)" />Afficher dans « Nouveautés »</label>
+          </section>
+
+          <section class="carte formulaire">
+            <h2>Prix</h2>
+            <div class="champ"><label for="prix">Prix de vente (FCFA)</label><input id="prix" name="prix" class="saisie" type="number" min="1" step="100" required [(ngModel)]="prix" /></div>
+            <div class="champ">
+              <label for="barre">Ancien prix (FCFA, facultatif)</label>
+              <input id="barre" name="barre" class="saisie" type="number" min="1" step="100" [(ngModel)]="prixBarre" aria-describedby="barre-aide" />
+              <span id="barre-aide" class="aide">Affiché barré : le produit passe alors « En promotion ».</span>
+            </div>
+          </section>
+
+          <section class="carte formulaire">
+            <h2>Stock</h2>
+            @if (produit(); as p) {
+              <div class="ligne petit"><span>Disponible</span><b class="chiffres">{{ p.disponible }}</b></div>
+              <div class="ligne petit"><span>Réservé</span><b class="chiffres">{{ p.reserve }}</b></div>
+            }
+            <div class="champ">
+              <label for="seuil">Seuil d'alerte</label>
+              <input id="seuil" name="seuil" class="saisie" type="number" min="0" [(ngModel)]="seuilAlerte" />
+            </div>
+            <a class="petit" routerLink="/admin/stocks">{{ creation() ? 'Le stock se saisit dans Stocks, une fois le produit créé.' : 'Saisir une réception ou un inventaire' }}</a>
+          </section>
+
+          <section class="carte formulaire">
+            <h2>Icône sans photo</h2>
+            <div class="outils">
+              <span class="vignette"><lce-icone [nom]="ico(icone)" [taille]="20" /></span>
+              <select class="choix-liste" name="icone" aria-label="Icône affichée sans photo" [(ngModel)]="icone">
+                @for (i of icones; track i) {
+                  <option [value]="i">{{ i }}</option>
+                }
+              </select>
+            </div>
+          </section>
+
+          @if (!creation() && peutModifier()) {
+            <button lceBouton variante="contour" [petit]="true" type="button" class="retirer-produit" [disabled]="envoi()" (click)="retirer()">Retirer le produit du catalogue</button>
+          }
+        </div>
+      </div>
+    </form>
+  }
+</div>

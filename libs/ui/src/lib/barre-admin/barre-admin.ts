@@ -1,33 +1,18 @@
-import { ChangeDetectionStrategy, Component, input, model, output } from '@angular/core';
-import { Bascule } from '../bascule/bascule';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { Icone } from '../icone/icone';
 
-/** Barre supérieure de l'administration : recherche globale, état de la boutique, notifications, utilisateur. */
+/** Barre supérieure de l'administration : recherche, utilisateur, déconnexion. */
 @Component({
   selector: 'lce-barre-admin',
-  imports: [Bascule, Icone],
+  imports: [Icone],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header>
       <form class="recherche" role="search" (submit)="$event.preventDefault(); rechercher.emit(champ.value.trim())">
-        <label for="lce-recherche-admin" class="lce-visuellement-masque">Rechercher une commande, un client, un produit</label>
+        <label for="lce-recherche-admin" class="lce-visuellement-masque">Rechercher un produit</label>
         <lce-icone nom="recherche" [taille]="20" />
-        <input id="lce-recherche-admin" #champ type="search" placeholder="Commande, client, produit…" />
+        <input id="lce-recherche-admin" #champ type="search" placeholder="Rechercher un produit…" />
       </form>
-
-      <lce-bascule [(active)]="boutiqueOuverte" [libelle]="boutiqueOuverte() ? 'Boutique ouverte' : 'Boutique fermée'" />
-
-      <button
-        type="button"
-        class="notifications"
-        [attr.aria-label]="'Notifications, ' + nbNotifications() + ' non lue(s)'"
-        (click)="ouvrirNotifications.emit()"
-      >
-        <lce-icone nom="notification" />
-        @if (nbNotifications() > 0) {
-          <span class="compteur" aria-hidden="true">{{ nbNotifications() }}</span>
-        }
-      </button>
 
       <div class="utilisateur">
         <span class="initiales" aria-hidden="true">{{ initiales() }}</span>
@@ -35,6 +20,9 @@ import { Icone } from '../icone/icone';
           <strong>{{ nomUtilisateur() }}</strong><br />
           <small>{{ role() }}</small>
         </span>
+        <button type="button" class="deconnexion" aria-label="Se déconnecter" (click)="deconnecter.emit()">
+          <lce-icone nom="deconnexion" [taille]="20" />
+        </button>
       </div>
     </header>
   `,
@@ -69,34 +57,21 @@ import { Icone } from '../icone/icone';
       background: transparent;
       color: var(--lce-ink);
     }
-    lce-bascule {
-      margin-left: auto;
-    }
-    .notifications {
-      position: relative;
+    .deconnexion {
       display: grid;
       place-items: center;
       width: var(--lce-cible-tactile);
       height: var(--lce-cible-tactile);
       border: 0;
       background: none;
-      color: var(--lce-navy);
+      color: var(--lce-ink-muted);
       cursor: pointer;
     }
-    .compteur {
-      position: absolute;
-      top: 4px;
-      right: 2px;
-      min-width: 18px;
-      border-radius: var(--lce-rayon-pastille);
-      background: var(--lce-danger);
-      color: var(--lce-on-navy);
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 18px;
-      text-align: center;
+    .deconnexion:hover {
+      color: var(--lce-danger);
     }
     .utilisateur {
+      margin-left: auto;
       @include t.texte-small;
       display: flex;
       align-items: center;
@@ -120,10 +95,8 @@ import { Icone } from '../icone/icone';
 export class BarreAdmin {
   readonly nomUtilisateur = input.required<string>();
   readonly role = input.required<string>();
-  readonly nbNotifications = input(0);
-  readonly boutiqueOuverte = model(true);
   readonly rechercher = output<string>();
-  readonly ouvrirNotifications = output<void>();
+  readonly deconnecter = output<void>();
 
   protected initiales(): string {
     return this.nomUtilisateur()

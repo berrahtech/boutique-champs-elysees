@@ -12,7 +12,28 @@ export function normaliserTelephone(saisie: string): string | null {
   return `+223${m[1]}`;
 }
 
+/** Adresse e-mail en minuscules, ou null si elle n'a pas la bonne forme. */
+export function normaliserEmail(saisie: string): string | null {
+  const email = saisie.trim().toLowerCase();
+  return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) ? email : null;
+}
+
+/** Téléphone ou e-mail : la forme canonique, ou null si la saisie n'est ni l'un ni l'autre. */
+export function normaliserIdentifiant(saisie: string): string | null {
+  return saisie.includes('@') ? normaliserEmail(saisie) : normaliserTelephone(saisie);
+}
+
+export function estEmail(identifiant: string): boolean {
+  return identifiant.includes('@');
+}
+
 /** Masque un numéro pour l'affichage et les journaux : +223 •• •• •• 56. */
 export function masquerTelephone(telephone: string): string {
   return `+223 •• •• •• ${telephone.slice(-2)}`;
+}
+
+/** Masque une adresse pour les journaux : a•••@exemple.ml. */
+export function masquerEmail(email: string): string {
+  const [local, domaine] = email.split('@');
+  return `${local[0]}•••@${domaine}`;
 }

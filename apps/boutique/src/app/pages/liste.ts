@@ -1,13 +1,19 @@
-import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { Component, computed, effect, inject, input, linkedSignal, numberAttribute, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
+import type { Filtre, ResultatsCatalogue, Tri } from '@lce/contrats';
+import { API } from '@lce/session';
 import { Bouton, Icone } from '@lce/ui';
 import { Cartes } from '../composants/cartes';
-import { Catalogue, Criteres, Filtre, PAR_PAGE, SEUIL_PETITS_PRIX, Tri } from '../donnees/catalogue';
+import { ErreurChargement, Squelettes } from '../composants/etats';
+import { Catalogue } from '../donnees/catalogue';
 import { titreDePage } from '../titres';
 
 export type ModeListe = 'boutique' | 'categorie' | 'promotions' | 'recherche';
+
+const PAR_PAGE = 12;
 
 const FILTRES: { valeur: Filtre; libelle: string }[] = [
   { valeur: 'tout', libelle: 'Tout' },
@@ -32,7 +38,7 @@ const entierOuNul = (v: unknown) => (v == null || v === '' ? undefined : numberA
  */
 @Component({
   selector: 'lce-liste',
-  imports: [FormsModule, RouterLink, Bouton, Cartes, Icone],
+  imports: [FormsModule, RouterLink, Bouton, Cartes, ErreurChargement, Icone, Squelettes],
   templateUrl: './liste.html',
   styleUrl: './liste.scss',
 })
@@ -62,22 +68,30 @@ export class Liste {
   protected readonly categorie = computed(() => (this.slug() ? this.catalogue.categorie(this.slug()!) : undefined));
   protected readonly filtreActif = computed<Filtre>(() => (this.mode() === 'promotions' ? 'promotions' : (this.filtre() ?? 'tout')));
 
-  protected readonly criteres = computed<Criteres>(() => ({
-    categorie: this.slug(),
-    recherche: this.q(),
-    filtre: this.filtreActif(),
-    prixMin: this.min(),
-    prixMax: this.max(),
-    enStock: this.stock(),
-    tri: this.tri(),
-    page: this.page(),
-  }));
-  protected readonly resultats = computed(() => this.catalogue.rechercher(this.criteres()));
+  protected readonly ressource = httpResource<ResultatsCatalogue>(() => {
+    const params: Record<string, string | number> = { parPage: PAR_PAGE, page: this.page() };
+    if (this.slug()) params['categorie'] = this.slug()!;
+    if (this.q()) params['q'] = this.q()!;
+    if (this.filtreActif() !== 'tout') params['filtre'] = this.filtreActif();
+    if (this.tri()) params['tri'] = this.tri()!;
+    if (this.min() != null) params['min'] = this.min()!;
+    if (this.max() != null) params['max'] = this.max()!;
+    if (this.stock()) params['enStock'] = '1';
+    return { url: `${API}/produits`, params };
+  });
+
+  /** Derniers résultats : la liste reste affichée pendant le chargement de la suivante. */
+  protected readonly resultats = linkedSignal<ResultatsCatalogue | undefined, ResultatsCatalogue | undefined>({
+    source: () => (this.ressource.hasValue() ? this.ressource.value() : undefined),
+    computation: (valeur, precedent) => valeur ?? precedent?.value,
+  });
+  protected readonly erreur = computed(() => this.ressource.status() === 'error');
+  protected readonly chargement = computed(() => this.ressource.isLoading());
 
   protected readonly intitule = computed(() => {
     switch (this.mode()) {
       case 'categorie':
-        return this.categorie()?.nom ?? 'Catégorie introuvable';
+        return this.categorie()?.nom ?? 'Catégorie';
       case 'promotions':
         return 'Promotions';
       case 'recherche':
@@ -88,20 +102,19 @@ export class Liste {
   });
 
   protected readonly bornes = computed(() => {
-    const { page, total } = this.resultats();
-    return total ? `${(page - 1) * PAR_PAGE + 1}–${Math.min(page * PAR_PAGE, total)}` : '0';
+    const r = this.resultats();
+    return r?.total ? `${(r.page - 1) * PAR_PAGE + 1}–${Math.min(r.page * PAR_PAGE, r.total)}` : '0';
   });
 
   /** Pages affichées : la première, la dernière et les voisines de la page courante. */
   protected readonly numerosDePage = computed(() => {
-    const { page, pages } = this.resultats();
+    const { page, pages } = this.resultats() ?? { page: 1, pages: 1 };
     const garder = new Set([1, pages, page - 1, page, page + 1].filter((n) => n >= 1 && n <= pages));
     const triees = [...garder].sort((a, b) => a - b);
     return triees.flatMap((n, i) => (i > 0 && n - triees[i - 1] > 1 ? ['…', n] : [n]));
   });
 
   protected readonly filtresAppliques = computed(() => this.min() != null || this.max() != null || this.stock());
-  protected readonly seuilPetitsPrix = SEUIL_PETITS_PRIX;
 
   constructor() {
     effect(() => {

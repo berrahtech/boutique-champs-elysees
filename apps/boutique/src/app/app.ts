@@ -1,18 +1,18 @@
-import { afterNextRender, Component, inject } from '@angular/core';
+import { afterNextRender, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { CategorieMenu, Coordonnees, Entete, Icone, PiedDePage } from '@lce/ui';
 import { Catalogue } from './donnees/catalogue';
 import { Favoris } from './etat/favoris';
 import { Notifications } from './etat/notifications';
 import { Panier } from './etat/panier';
-import { Session } from './etat/session';
+import { Session } from '@lce/session';
 
 @Component({
   selector: 'lce-root',
   imports: [RouterOutlet, RouterLink, Entete, PiedDePage, Icone],
   template: `
     <lce-entete
-      [categories]="categories"
+      [categories]="categories()"
       [nbArticles]="panier.nbArticles()"
       [nbFavoris]="favoris.nombre()"
       [prenom]="session.prenom()"
@@ -115,7 +115,8 @@ export class App {
   protected readonly session = inject(Session);
   protected readonly notifications = inject(Notifications);
 
-  protected readonly categories: CategorieMenu[] = inject(Catalogue).categories.map((c) => ({ slug: c.slug, nom: c.court }));
+  private readonly catalogue = inject(Catalogue);
+  protected readonly categories = computed<CategorieMenu[]>(() => this.catalogue.categories().map((c) => ({ slug: c.slug, nom: c.court })));
 
   // Provisoire : coordonnées à fournir par Les Champs Élysées.
   protected readonly coordonnees: Coordonnees = {

@@ -107,6 +107,10 @@
     height: 40px;
   }
 }
+.rafraichit {
+  opacity: 0.6;
+  transition: opacity 150ms;
+}
 .pagination {
   display: flex;
   flex-wrap: wrap;

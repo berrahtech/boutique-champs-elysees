@@ -3,7 +3,7 @@
     <lce-avantages-compte
       surtitre="Nouveau client"
       titre="Créez votre compte en 1 minute"
-      texte="Votre numéro de téléphone suffit : nous le vérifions par SMS, sans frais."
+      texte="Votre téléphone ou votre e-mail suffit : nous le vérifions par un code, sans frais."
     />
 
     <section class="panneau formulaire">
@@ -17,13 +17,14 @@
         @case ('numero') {
           <form (ngSubmit)="envoyerCode()" novalidate>
             <div class="empile">
-              <h2 class="titre-2">Votre numéro</h2>
+              <h2 class="titre-2">Créer mon compte</h2>
               <span class="attenue">Déjà client ? <a routerLink="/connexion" [queryParams]="{ retour: retour() }">Se connecter</a></span>
             </div>
+            <lce-bouton-google (jeton)="inscriptionGoogle($event)" />
             <div class="champ">
-              <label for="tel">Numéro de téléphone</label>
-              <div class="telephone"><span>+223</span><input id="tel" name="tel" class="saisie" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="76 12 34 56" required [(ngModel)]="telephone" aria-describedby="tel-aide" /></div>
-              <span id="tel-aide" class="aide">Nous vous envoyons un code à 6 chiffres par SMS.</span>
+              <label for="identifiant">Téléphone ou e-mail</label>
+              <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" placeholder="76 12 34 56 ou vous@exemple.ml" required [(ngModel)]="identifiant" aria-describedby="identifiant-aide" />
+              <span id="identifiant-aide" class="aide">Nous vous envoyons un code à 6 chiffres par SMS ou par e-mail.</span>
             </div>
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
@@ -34,10 +35,10 @@
 
         @case ('code') {
           <form (ngSubmit)="verifierCode()" novalidate>
-            <button type="button" class="bouton-texte retour" (click)="changerNumero()">← Changer de numéro</button>
+            <button type="button" class="bouton-texte retour" (click)="changerNumero()">← Changer d'identifiant</button>
             <div class="empile">
               <h2 class="titre-2">Code de vérification</h2>
-              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Code envoyé par SMS au {{ masque() }}</span>
+              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Code envoyé {{ parEmail() ? 'par e-mail à' : 'par SMS au' }} {{ masque() }}</span>
             </div>
             <div class="champ">
               <label for="code">Code reçu (6 chiffres)</label>
@@ -58,17 +59,19 @@
           <form (ngSubmit)="creerCompte()" novalidate>
             <div class="empile">
               <h2 class="titre-2">Vos informations</h2>
-              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Numéro vérifié</span>
+              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />{{ parEmail() ? 'Adresse vérifiée' : 'Numéro vérifié' }}</span>
             </div>
             <div class="champ">
               <label for="nom">Prénom et nom</label>
               <input id="nom" name="nom" class="saisie" autocomplete="name" required [(ngModel)]="nom" />
             </div>
-            <div class="champ">
-              <label for="email">E-mail <span class="attenue">(facultatif)</span></label>
-              <input id="email" name="email" class="saisie" type="email" autocomplete="email" [(ngModel)]="email" aria-describedby="email-aide" />
-              <span id="email-aide" class="aide">Pour recevoir vos factures.</span>
-            </div>
+            @if (!parEmail()) {
+              <div class="champ">
+                <label for="email">E-mail <span class="attenue">(facultatif)</span></label>
+                <input id="email" name="email" class="saisie" type="email" autocomplete="email" [(ngModel)]="email" aria-describedby="email-aide" />
+                <span id="email-aide" class="aide">Pour recevoir vos factures.</span>
+              </div>
+            }
             <div class="champ">
               <label for="mdp">Mot de passe</label>
               <input id="mdp" name="mdp" class="saisie" type="password" autocomplete="new-password" required [(ngModel)]="motDePasse" aria-describedby="mdp-aide" />

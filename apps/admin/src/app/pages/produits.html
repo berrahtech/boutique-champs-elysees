@@ -1,0 +1,118 @@
+<div class="adm-corps">
+  <div class="adm-titre">
+    <div class="empile">
+      <h1>Produits</h1>
+      <span class="attenue petit">{{ liste()?.total ?? 0 }} produit(s) · {{ categories().length }} catégories</span>
+    </div>
+    @if (peutModifier()) {
+      <div class="outils">
+        <a lceBouton variante="or" routerLink="/admin/produits/nouveau"><lce-icone nom="plus" [taille]="18" />Nouveau produit</a>
+      </div>
+    }
+  </div>
+
+  <div class="outils">
+    <div class="champ-recherche recherche">
+      <lce-icone nom="recherche" [taille]="16" />
+      <input aria-label="Rechercher un produit" placeholder="Nom ou référence" [(ngModel)]="recherche" (ngModelChange)="saisirRecherche($event)" />
+    </div>
+    <select class="choix-liste" aria-label="Catégorie" [ngModel]="categorieId()" (ngModelChange)="changerFiltre(categorieId, $event)">
+      <option value="">Toutes les catégories</option>
+      @for (c of categories(); track c.id) {
+        <option [value]="c.id">{{ c.nom }}</option>
+      }
+    </select>
+    <select class="choix-liste" aria-label="Publication" [ngModel]="publication()" (ngModelChange)="changerFiltre(publication, $event)">
+      <option value="">Tous les statuts</option>
+      <option value="publies">Publiés</option>
+      <option value="brouillons">Brouillons</option>
+    </select>
+    <select class="choix-liste" aria-label="Stock" [ngModel]="etatStock()" (ngModelChange)="changerFiltre(etatStock, $event)">
+      <option value="">Tous les stocks</option>
+      <option value="sous-seuil">Sous le seuil d'alerte</option>
+      <option value="rupture">En rupture</option>
+    </select>
+  </div>
+
+  @if (erreur()) {
+    <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
+  }
+
+  @if (ressource.status() === 'error' && !liste()) {
+    <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />Impossible de charger les produits. Vérifiez votre connexion.</p>
+  } @else if (liste(); as l) {
+    <div class="tableau-cadre" [attr.aria-busy]="ressource.isLoading()">
+      <table class="tableau">
+        <thead>
+          <tr>
+            <th scope="col">Produit</th>
+            <th scope="col">Référence</th>
+            <th scope="col">Catégorie</th>
+            <th scope="col" class="a-droite">Prix</th>
+            <th scope="col" class="a-droite">Ancien prix</th>
+            <th scope="col" class="a-droite">Stock</th>
+            <th scope="col">Publié</th>
+            <th scope="col"><span class="lce-visuellement-masque">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of l.produits; track p.id) {
+            <tr [class.brouillon]="!p.publie">
+              <td>
+                <span class="produit-cellule">
+                  <span class="vignette">
+                    @if (p.imagePrincipale) {
+                      <img [src]="p.imagePrincipale" alt="" loading="lazy" />
+                    } @else {
+                      <lce-icone [nom]="ico(p.icone)" [taille]="20" />
+                    }
+                  </span>
+                  <a [routerLink]="['/admin/produits', p.id]">{{ p.nom }}</a>
+                </span>
+              </td>
+              <td class="petit chiffres">{{ p.reference ?? '—' }}</td>
+              <td class="petit">{{ p.categorie.nom }}</td>
+              <td class="a-droite chiffres">{{ p.prix | fcfa }}</td>
+              <td class="a-droite chiffres promo">{{ p.prixBarre ? (p.prixBarre | fcfa) : '—' }}</td>
+              <td class="a-droite chiffres">
+                <b [class.rupture]="p.etatStock === 'rupture'" [class.sous-seuil]="p.etatStock === 'sous-seuil'">{{ p.disponible }}</b>
+                @if (p.etatStock === 'rupture') {
+                  <br /><span class="petit rupture">Rupture</span>
+                } @else if (p.etatStock === 'sous-seuil') {
+                  <br /><span class="petit sous-seuil">Sous le seuil ({{ p.seuilAlerte }})</span>
+                }
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="bascule"
+                  role="switch"
+                  [attr.aria-checked]="p.publie"
+                  [attr.aria-label]="'Publier ' + p.nom"
+                  [disabled]="!peutModifier()"
+                  (click)="basculerPublication(p)"
+                ></button>
+              </td>
+              <td class="a-droite"><a lceBouton variante="contour" [petit]="true" [routerLink]="['/admin/produits', p.id]">{{ peutModifier() ? 'Modifier' : 'Voir' }}</a></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="8" class="attente">Aucun produit ne correspond à ces critères.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="entre petit">
+      <span class="attenue">La suppression est logique : un produit retiré reste dans l'historique des commandes.</span>
+      @if (l.pages > 1) {
+        <span class="outils">
+          <button lceBouton variante="contour" [petit]="true" type="button" [disabled]="l.page <= 1" aria-label="Page précédente" (click)="page.set(l.page - 1)">‹</button>
+          <span>Page {{ l.page }} sur {{ l.pages }}</span>
+          <button lceBouton variante="contour" [petit]="true" type="button" [disabled]="l.page >= l.pages" aria-label="Page suivante" (click)="page.set(l.page + 1)">›</button>
+        </span>
+      }
+    </div>
+  } @else {
+    <p class="attente" role="status">Chargement des produits…</p>
+  }
+</div>

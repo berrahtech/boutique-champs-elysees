@@ -11,7 +11,16 @@ export interface Configuration {
   jwtSecret: string;
   otpPoivre: string;
   smsPasserelle: 'console';
+  /** Dossier local des photos produit, servi sur /medias. */
+  mediasDossier: string;
+  /** SMTP des e-mails ; null = journaux (développement). */
+  smtpUrl: string | null;
+  emailExpediteur: string;
+  /** Identifiant client OAuth ; null = bouton Google masqué. */
+  googleClientId: string | null;
 }
+
+const texteOuNul = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
 
 export function validerConfiguration(env: Record<string, unknown>): Configuration {
   const erreurs: string[] = [];
@@ -53,7 +62,15 @@ export function validerConfiguration(env: Record<string, unknown>): Configuratio
     jwtSecret,
     otpPoivre,
     smsPasserelle: 'console',
+    mediasDossier: String(env['MEDIAS_DOSSIER'] ?? 'medias'),
+    smtpUrl: texteOuNul(env['SMTP_URL']),
+    emailExpediteur: texteOuNul(env['EMAIL_EXPEDITEUR']) ?? 'Les Champs Élysées <no-reply@leschampselysees.ml>',
+    googleClientId: texteOuNul(env['GOOGLE_CLIENT_ID']),
   };
+
+  if (production && !configuration.smtpUrl) {
+    erreurs.push('SMTP_URL est obligatoire en production');
+  }
 
   if (erreurs.length) {
     throw new Error(`Configuration invalide :\n  - ${erreurs.join('\n  - ')}`);

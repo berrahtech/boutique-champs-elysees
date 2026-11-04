@@ -8,6 +8,8 @@ Monorepo de la boutique en ligne LCE (Bamako, paiements en FCFA, Orange Money et
 | `apps/admin` | Administration | Angular 22 |
 | `apps/api` | API REST `/api/v1`, base de données | NestJS 11, Prisma 7, PostgreSQL 16, Redis 7 |
 | `libs/ui` | Composants Angular partagés | Angular |
+| `libs/session` | Session, jetons et renouvellement automatique (boutique et admin) | Angular |
+| `libs/contrats` | Types échangés entre l'API et les interfaces | TypeScript |
 | `libs/design-tokens` | Jetons de design et icônes : **source unique** | JSON → CSS, TS, Dart |
 | `mobile/lce_ui` | Thème et composants Flutter partagés | Flutter 3.35 |
 | `mobile/client`, `mobile/livreur` | Applications mobiles | Flutter 3.35 |
@@ -23,7 +25,7 @@ Monorepo de la boutique en ligne LCE (Bamako, paiements en FCFA, Orange Money et
 
 ```bash
 npm ci
-npm run services          # PostgreSQL (port 5433) et Redis (port 6380)
+npm run services          # PostgreSQL (5433), Redis (6380), boîte mail de test (http://localhost:8025)
 cp apps/api/.env.example apps/api/.env
 ```
 
@@ -35,17 +37,19 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 
 ```bash
 npm run migrer            # applique les migrations SQL
+npx nx run api:seed       # zones, catégories, produits de démonstration, compte admin de test
 npm run api               # http://localhost:3000/api/v1
 npm run boutique          # http://localhost:4200
 npm run admin             # http://localhost:4300/admin
 ```
 
-En développement, les codes SMS s'affichent dans les journaux de l'API (`SMS_PASSERELLE=console`, interdit en production).
+En développement, les codes SMS s'affichent dans les journaux de l'API (`SMS_PASSERELLE=console`, interdit en production) et les e-mails arrivent dans Mailpit, sur http://localhost:8025. Le compte administrateur de test est celui de `apps/api/.env.example`.
 
 ## Vérifier
 
 ```bash
 npm test                  # tests web et API
+npx nx run api:e2e        # tests d'intégration (base et Redis réels)
 npx nx run-many -t lint
 npm run build
 cd mobile/lce_ui && flutter analyze && flutter test
@@ -88,18 +92,29 @@ Les règles critiques sont tenues par la base elle-même, même si le code a un 
 
 | Route | Rôle |
 | --- | --- |
-| `POST /auth/otp` | envoie un code SMS (6 chiffres, 5 min, 3 essais, 60 s entre deux envois, 5 par heure) |
+| `POST /auth/otp` | envoie un code par SMS ou par e-mail selon l'identifiant (6 chiffres, 5 min, 3 essais, 60 s entre deux envois, 5 par heure) |
 | `POST /auth/otp/verifier` | vérifie le code, renvoie une preuve à usage unique (10 min) |
 | `POST /auth/inscription` | crée le compte client avec la preuve |
-| `POST /auth/connexion` | téléphone + mot de passe (+ code SMS si double authentification) ; 5 échecs = 15 min de blocage |
+| `POST /auth/connexion` | téléphone ou e-mail vérifié + mot de passe (+ code si double authentification) ; 5 échecs = 15 min de blocage |
+| `POST /auth/google` | connexion ou inscription avec le jeton du bouton Google |
+| `GET /auth/options` | moyens de connexion disponibles |
 | `POST /auth/rafraichir` | rotation du jeton de session (30 jours) ; un jeton réutilisé ferme toutes les sessions |
 | `POST /auth/deconnexion` | ferme la session |
 | `POST /auth/mot-de-passe/reinitialiser` | nouveau mot de passe avec une preuve SMS ; ferme toutes les sessions |
 | `GET /moi` | profil et permissions de l'utilisateur connecté |
 | `GET /sante` | sonde de supervision |
 
+### Activer la connexion Google
+
+1. Dans la [console Google Cloud](https://console.cloud.google.com/apis/credentials), créez un « ID client OAuth » de type *Application Web*.
+2. Ajoutez aux « origines JavaScript autorisées » `http://localhost:4200` et l'adresse du site.
+3. Copiez l'identifiant dans `GOOGLE_CLIENT_ID` (`apps/api/.env`) et relancez l'API : le bouton apparaît.
+
+Règle de sécurité : un compte existant n'est rattaché à Google que si son adresse est déjà vérifiée, et les comptes à double authentification (personnel) ne passent jamais par Google.
+
 ## À fournir ou à décider
 
 - **Polices :** les fichiers `.ttf` de Playfair Display et Montserrat sont à placer dans `mobile/lce_ui/fonts`. Voir `pubspec.yaml`.
+- **E-mails :** le service d'envoi (`SMTP_URL`) reste à choisir pour la production.
 - **SMS :** le prestataire (Orange, Moov ou un agrégateur) reste à choisir. Il faudra une implémentation de `PasserelleSms`.
 - **Rubriques :** les 10 rubriques de l'espace client et les 8 catégories sont à confronter aux maquettes.

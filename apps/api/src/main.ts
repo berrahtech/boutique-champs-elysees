@@ -1,11 +1,12 @@
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app/app.module';
 import { configurerApplication } from './application';
 
 async function demarrer() {
-  const app = configurerApplication(await NestFactory.create(AppModule));
+  const app = configurerApplication(await NestFactory.create<NestExpressApplication>(AppModule));
   const config = app.get(ConfigService);
   app.enableCors({ origin: config.get<string[]>('originesAutorisees') });
   app.enableShutdownHooks();

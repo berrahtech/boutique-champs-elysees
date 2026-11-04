@@ -1,21 +1,22 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { CarteProduit, ProduitCarte } from '@lce/ui';
-import { Produit } from '../donnees/catalogue';
+import type { ProduitPublic } from '@lce/contrats';
+import { CarteProduit, NomIcone, ProduitCarte } from '@lce/ui';
 import { Favoris } from '../etat/favoris';
 import { ActionsProduit } from './actions-produit';
 
-export function versCarte(p: Produit): ProduitCarte {
+export function versCarte(p: ProduitPublic): ProduitCarte {
   return {
     id: p.id,
     slug: p.slug,
     nom: p.nom,
-    categorie: p.rayon,
+    categorie: p.rayon || p.categorie.nom,
     prix: p.prix,
     prixBarre: p.prixBarre,
-    nouveau: !!p.nouveau,
+    nouveau: p.nouveau,
     noteMoyenne: p.noteMoyenne,
     nbAvis: p.nbAvis,
-    icone: p.icone,
+    imageUrl: p.images[0]?.url400 ?? null,
+    icone: (p.icone ?? 'sac') as NomIcone,
     enRupture: p.stock === 0,
   };
 }
@@ -27,13 +28,13 @@ export function versCarte(p: Produit): ProduitCarte {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ul [class]="colonnes()">
-      @for (carte of cartes(); track carte.id) {
+      @for (p of produits(); track p.id; let i = $index) {
         <li>
           <lce-carte-produit
-            [produit]="carte"
-            [favori]="favoris.ensemble().has(carte.id)"
-            (ajouterAuPanier)="actions.ajouterAuPanier($event)"
-            (basculerFavori)="actions.basculerFavori($event)"
+            [produit]="cartes()[i]"
+            [favori]="favoris.ensemble().has(p.id)"
+            (ajouterAuPanier)="actions.ajouterAuPanier(p)"
+            (basculerFavori)="actions.basculerFavori(p)"
           />
         </li>
       }
@@ -48,7 +49,7 @@ export function versCarte(p: Produit): ProduitCarte {
   `,
 })
 export class Cartes {
-  readonly produits = input.required<Produit[]>();
+  readonly produits = input.required<ProduitPublic[]>();
   readonly colonnes = input<'grille-4' | 'grille-3'>('grille-4');
 
   protected readonly favoris = inject(Favoris);

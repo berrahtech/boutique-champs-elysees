@@ -112,6 +112,24 @@
       "dependsOn": [
         "prisma-generer"
       ]
+    },
+    "seed": {
+      "command": "tsx prisma/seed.ts",
+      "options": {
+        "cwd": "apps/api"
+      },
+      "dependsOn": [
+        "prisma-generer"
+      ]
+    },
+    "e2e": {
+      "command": "vitest run --config vitest.e2e.config.mts",
+      "options": {
+        "cwd": "apps/api"
+      },
+      "dependsOn": [
+        "prisma-generer"
+      ]
     }
   }
 }

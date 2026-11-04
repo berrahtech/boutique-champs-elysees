@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
 import { problemes } from '../../commun/erreurs/probleme';
 import { Magasin } from '../../commun/redis/magasin';
+import { messageCode, PasserelleEmail } from '../email/passerelle-email';
 import { PasserelleSms } from '../sms/passerelle-sms';
+import { estEmail } from '../telephone';
 
 /** Pourquoi le code est demandé : un code ne vaut que pour son objet. */
 export type ObjetOtp = 'INSCRIPTION' | 'CONNEXION' | 'MOT_DE_PASSE';
@@ -13,16 +15,25 @@ export const REGLES_OTP = {
   chiffres: 6,
   dureeSecondes: 5 * 60,
   essais: 3,
-  /** Délai minimum entre deux envois au même numéro. */
+  /** Délai minimum entre deux envois au même destinataire. */
   delaiRenvoiSecondes: 60,
-  /** Au plus 5 envois par numéro sur 1 heure (coût des SMS, abus). */
+  /** Au plus 5 envois par destinataire sur 1 heure (coût des SMS, abus). */
   envoisParHeure: 5,
 } as const;
 
-const MESSAGES: Record<ObjetOtp, string> = {
-  INSCRIPTION: 'Votre code Les Champs Élysées : {code}. Valable 5 minutes. Ne le partagez avec personne.',
-  CONNEXION: 'Code de connexion Les Champs Élysées : {code}. Valable 5 minutes. Ne le partagez avec personne.',
-  MOT_DE_PASSE: 'Code pour changer votre mot de passe Les Champs Élysées : {code}. Valable 5 minutes.',
+const MESSAGES: Record<ObjetOtp, { sms: string; sujet: string }> = {
+  INSCRIPTION: {
+    sms: 'Votre code Les Champs Élysées : {code}. Valable 5 minutes. Ne le partagez avec personne.',
+    sujet: 'Votre code de vérification',
+  },
+  CONNEXION: {
+    sms: 'Code de connexion Les Champs Élysées : {code}. Valable 5 minutes. Ne le partagez avec personne.',
+    sujet: 'Votre code de connexion',
+  },
+  MOT_DE_PASSE: {
+    sms: 'Code pour changer votre mot de passe Les Champs Élysées : {code}. Valable 5 minutes.',
+    sujet: 'Votre code pour changer de mot de passe',
+  },
 };
 
 interface OtpStocke {
@@ -37,18 +48,23 @@ export class OtpService {
   constructor(
     private readonly magasin: Magasin,
     private readonly sms: PasserelleSms,
+    private readonly email: PasserelleEmail,
     config: ConfigService,
   ) {
     this.poivre = config.getOrThrow<string>('otpPoivre');
   }
 
-  /** Envoie un nouveau code ; l'ancien, s'il existe, ne vaut plus rien. */
-  async envoyer(telephone: string, objet: ObjetOtp): Promise<void> {
-    const cleDelai = `otp:delai:${telephone}`;
+  /**
+   * Envoie un nouveau code ; l'ancien, s'il existe, ne vaut plus rien.
+   * `destinataires` : par défaut l'identifiant lui-même. La double authentification
+   * envoie le même code au téléphone et à l'e-mail vérifié du compte.
+   */
+  async envoyer(identifiant: string, objet: ObjetOtp, destinataires: string[] = [identifiant]): Promise<void> {
+    const cleDelai = `otp:delai:${identifiant}`;
     if (!(await this.magasin.ecrireSiAbsent(cleDelai, '1', REGLES_OTP.delaiRenvoiSecondes))) {
       throw problemes.tropDeTentatives(await this.magasin.dureeRestante(cleDelai));
     }
-    const cleQuota = `otp:quota:${telephone}`;
+    const cleQuota = `otp:quota:${identifiant}`;
     if ((await this.magasin.incrementer(cleQuota, 3600)) > REGLES_OTP.envoisParHeure) {
       throw problemes.tropDeTentatives(await this.magasin.dureeRestante(cleQuota));
     }
@@ -56,20 +72,26 @@ export class OtpService {
     const code = randomInt(0, 10 ** REGLES_OTP.chiffres)
       .toString()
       .padStart(REGLES_OTP.chiffres, '0');
-    const stocke: OtpStocke = { empreinte: this.empreinte(telephone, objet, code), essaisRestants: REGLES_OTP.essais };
-    await this.magasin.ecrire(this.cle(telephone, objet), JSON.stringify(stocke), REGLES_OTP.dureeSecondes);
-    await this.sms.envoyer(telephone, MESSAGES[objet].replace('{code}', code));
+    const stocke: OtpStocke = { empreinte: this.empreinte(identifiant, objet, code), essaisRestants: REGLES_OTP.essais };
+    await this.magasin.ecrire(this.cle(identifiant, objet), JSON.stringify(stocke), REGLES_OTP.dureeSecondes);
+
+    const texte = MESSAGES[objet].sms.replace('{code}', code);
+    await Promise.all(
+      destinataires.map((d) =>
+        estEmail(d) ? this.email.envoyer(messageCode(d, MESSAGES[objet].sujet, texte, code)) : this.sms.envoyer(d, texte),
+      ),
+    );
   }
 
   /** Vérifie le code ; il est consommé dès qu'il est juste ou que les essais sont épuisés. */
-  async verifier(telephone: string, objet: ObjetOtp, code: string): Promise<void> {
-    const cle = this.cle(telephone, objet);
+  async verifier(identifiant: string, objet: ObjetOtp, code: string): Promise<void> {
+    const cle = this.cle(identifiant, objet);
     const brut = await this.magasin.lire(cle);
     if (!brut) throw problemes.otpExpire();
     const stocke = JSON.parse(brut) as OtpStocke;
 
     const attendu = Buffer.from(stocke.empreinte, 'hex');
-    const recu = Buffer.from(this.empreinte(telephone, objet, code), 'hex');
+    const recu = Buffer.from(this.empreinte(identifiant, objet, code), 'hex');
     if (timingSafeEqual(attendu, recu)) {
       await this.magasin.supprimer(cle);
       return;
@@ -85,12 +107,12 @@ export class OtpService {
     throw problemes.otpInvalide(essaisRestants);
   }
 
-  private cle(telephone: string, objet: ObjetOtp): string {
-    return `otp:${objet}:${telephone}`;
+  private cle(identifiant: string, objet: ObjetOtp): string {
+    return `otp:${objet}:${identifiant}`;
   }
 
   // HMAC poivré : une fuite de Redis ne donne pas les codes (10^6 possibilités sinon).
-  private empreinte(telephone: string, objet: ObjetOtp, code: string): string {
-    return createHmac('sha256', this.poivre).update(`${objet}:${telephone}:${code}`).digest('hex');
+  private empreinte(identifiant: string, objet: ObjetOtp, code: string): string {
+    return createHmac('sha256', this.poivre).update(`${objet}:${identifiant}:${code}`).digest('hex');
   }
 }

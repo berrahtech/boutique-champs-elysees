@@ -365,34 +365,42 @@ model Permission {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Produit {
-  id              String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  categorieId     String                   @map("categorie_id") @db.Uuid
-  marqueId        String?                  @map("marque_id") @db.Uuid
+  id               String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categorieId      String                   @map("categorie_id") @db.Uuid
+  marqueId         String?                  @map("marque_id") @db.Uuid
   /// Unique en base seulement si (supprime_le IS NULL) (index ux_produit_slug).
-  slug            String                   @db.VarChar(120)
-  nom             String                   @db.VarChar(160)
-  description     String                   @default("")
-  prix            Int
-  prixBarre       Int?                     @map("prix_barre")
-  nouveau         Boolean                  @default(false)
-  noteMoyenne     Decimal                  @default(0) @map("note_moyenne") @db.Decimal(2, 1)
-  nbAvis          Int                      @default(0) @map("nb_avis")
-  recherche       Unsupported("tsvector")? @default(dbgenerated("(setweight(to_tsvector('french'::regconfig, (nom)::text), 'A'::\"char\") || setweight(to_tsvector('french'::regconfig, description), 'B'::\"char\"))"))
-  creeLe          DateTime                 @default(now()) @map("cree_le") @db.Timestamptz(6)
-  majLe           DateTime                 @default(now()) @map("maj_le") @db.Timestamptz(6)
-  supprimeLe      DateTime?                @map("supprime_le") @db.Timestamptz(6)
-  avis            Avis[]
-  favoris         Favori[]
-  imageProduits   ImageProduit[]
-  ligneCommandes  LigneCommande[]
-  lignePaniers    LignePanier[]
-  mouvementStocks MouvementStock[]
-  categorie       Categorie                @relation(fields: [categorieId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  marque          Marque?                  @relation(fields: [marqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  stock           Stock?
+  slug             String                   @db.VarChar(120)
+  nom              String                   @db.VarChar(160)
+  description      String                   @default("")
+  prix             Int
+  prixBarre        Int?                     @map("prix_barre")
+  nouveau          Boolean                  @default(false)
+  noteMoyenne      Decimal                  @default(0) @map("note_moyenne") @db.Decimal(2, 1)
+  nbAvis           Int                      @default(0) @map("nb_avis")
+  creeLe           DateTime                 @default(now()) @map("cree_le") @db.Timestamptz(6)
+  majLe            DateTime                 @default(now()) @map("maj_le") @db.Timestamptz(6)
+  supprimeLe       DateTime?                @map("supprime_le") @db.Timestamptz(6)
+  /// Unique en base seulement si ((reference IS NOT NULL) AND (supprime_le IS NULL)) (index ux_produit_reference).
+  reference        String?                  @db.VarChar(40)
+  rayon            String                   @default("") @db.VarChar(80)
+  publie           Boolean                  @default(false)
+  nbVentes         Int                      @default(0) @map("nb_ventes")
+  icone            String?                  @db.VarChar(40)
+  caracteristiques Json                     @default("[]")
+  recherche        Unsupported("tsvector")? @default(dbgenerated("((setweight(to_tsvector('french'::regconfig, sans_accents((nom)::text)), 'A'::\"char\") || setweight(to_tsvector('french'::regconfig, sans_accents((((rayon)::text || ' '::text) || (COALESCE(reference, ''::character varying))::text))), 'B'::\"char\")) || setweight(to_tsvector('french'::regconfig, sans_accents(description)), 'C'::\"char\"))"))
+  avis             Avis[]
+  favoris          Favori[]
+  imageProduits    ImageProduit[]
+  ligneCommandes   LigneCommande[]
+  lignePaniers     LignePanier[]
+  mouvementStocks  MouvementStock[]
+  categorie        Categorie                @relation(fields: [categorieId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  marque           Marque?                  @relation(fields: [marqueId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  stock            Stock?
 
   @@index([categorieId], map: "ix_produit_categorie", where: raw("(supprime_le IS NULL)"))
   @@index([marqueId], map: "ix_produit_marque", where: raw("(supprime_le IS NULL)"))
+  @@index([nbVentes(sort: Desc)], map: "ix_produit_publie_ventes", where: raw("(publie AND (supprime_le IS NULL))"))
   @@index([recherche], map: "ix_produit_recherche", type: Gin)
   @@map("produit")
 }
@@ -480,16 +488,19 @@ model TransactionPaiement {
 model Utilisateur {
   id                     String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   /// Unique en base seulement si (supprime_le IS NULL) (index ux_utilisateur_telephone).
-  telephone              String                  @db.VarChar(20)
+  telephone              String?                 @db.VarChar(20)
   email                  String?                 @db.VarChar(254)
   nom                    String                  @db.VarChar(120)
-  motDePasseHash         String                  @map("mot_de_passe_hash")
+  motDePasseHash         String?                 @map("mot_de_passe_hash")
   roleId                 String                  @map("role_id") @db.Uuid
   deuxFacteurs           Boolean                 @default(false) @map("deux_facteurs")
   actif                  Boolean                 @default(true)
   creeLe                 DateTime                @default(now()) @map("cree_le") @db.Timestamptz(6)
   majLe                  DateTime                @default(now()) @map("maj_le") @db.Timestamptz(6)
   supprimeLe             DateTime?               @map("supprime_le") @db.Timestamptz(6)
+  emailVerifieLe         DateTime?               @map("email_verifie_le") @db.Timestamptz(6)
+  /// Unique en base seulement si ((google_id IS NOT NULL) AND (supprime_le IS NULL)) (index ux_utilisateur_google).
+  googleId               String?                 @map("google_id") @db.VarChar(64)
   adresses               Adresse[]
   appareils              Appareil[]
   avis                   Avis[]

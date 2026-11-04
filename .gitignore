@@ -57,3 +57,6 @@ apps/api/src/generated/
 
 # Configuration locale de l’aperçu (chemin de Node propre à cette machine)
 .claude/launch.json
+
+# Photos produit envoyées en développement
+medias/

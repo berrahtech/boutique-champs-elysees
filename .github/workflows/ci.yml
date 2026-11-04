@@ -24,8 +24,16 @@ jobs:
         ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U lce -d lce" --health-interval 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
     env:
       DATABASE_URL: postgresql://lce:lce_ci@localhost:5432/lce?schema=lce
+      REDIS_URL: redis://localhost:6379
+      # Valeurs propres à la CI, sans rapport avec la production.
+      JWT_SECRET: secret-de-la-ci-uniquement-sans-valeur-ailleurs
+      OTP_POIVRE: poivre-de-la-ci-uniquement-sans-valeur-ailleurs
+      SMS_PASSERELLE: console
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,8 +47,12 @@ jobs:
         run: npx nx run design-tokens:verifier
       - name: Migrations SQL applicables sur une base vide
         run: npx nx run api:migrer
+      - name: Données de démonstration
+        run: npx nx run api:seed
       - run: npx nx run-many -t lint
       - run: npx nx run-many -t test
+      - name: Tests d'intégration de l'API
+        run: npx nx run api:e2e
       - run: npx nx run-many -t build
 
   flutter:

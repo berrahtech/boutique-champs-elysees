@@ -23,9 +23,10 @@
               <h2 class="titre-2">Connexion</h2>
               <span class="attenue">Pas encore de compte ? <a routerLink="/inscription" [queryParams]="{ retour: retour() }">Créer un compte</a></span>
             </div>
+            <lce-bouton-google (jeton)="connexionGoogle($event)" />
             <div class="champ">
-              <label for="tel">Numéro de téléphone</label>
-              <div class="telephone"><span>+223</span><input id="tel" name="tel" class="saisie" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="76 12 34 56" required [(ngModel)]="telephone" /></div>
+              <label for="identifiant">Téléphone ou e-mail</label>
+              <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" placeholder="76 12 34 56 ou vous@exemple.ml" required [(ngModel)]="identifiant" />
             </div>
             <div class="champ">
               <div class="ligne-etiquette">
@@ -56,7 +57,7 @@
             <button type="button" class="bouton-texte retour" (click)="allerA('connexion')">← Retour</button>
             <div class="empile">
               <h2 class="titre-2">Vérification en 2 étapes</h2>
-              <span class="attenue">Nous avons envoyé un code par SMS au {{ masque() }}.</span>
+              <span class="attenue">Nous avons envoyé un code sur votre téléphone et votre e-mail vérifié.</span>
             </div>
             <div class="champ">
               <label for="code2fa">Code reçu (6 chiffres)</label>
@@ -74,11 +75,11 @@
             <button type="button" class="bouton-texte retour" (click)="allerA('connexion')">← Retour à la connexion</button>
             <div class="empile">
               <h2 class="titre-2">Mot de passe oublié</h2>
-              <span class="attenue">Saisissez votre numéro : nous vous envoyons un code pour choisir un nouveau mot de passe.</span>
+              <span class="attenue">Saisissez votre numéro ou votre e-mail : nous y envoyons un code pour choisir un nouveau mot de passe.</span>
             </div>
             <div class="champ">
-              <label for="tel-oubli">Numéro de téléphone</label>
-              <div class="telephone"><span>+223</span><input id="tel-oubli" name="tel" class="saisie" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="76 12 34 56" required [(ngModel)]="telephone" /></div>
+              <label for="identifiant-oubli">Téléphone ou e-mail</label>
+              <input id="identifiant-oubli" name="identifiant" class="saisie" autocomplete="username" placeholder="76 12 34 56 ou vous@exemple.ml" required [(ngModel)]="identifiant" />
             </div>
             @if (erreur()) {
               <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
@@ -89,10 +90,10 @@
 
         @case ('oubli-code') {
           <form (ngSubmit)="reinitialiser()" novalidate>
-            <button type="button" class="bouton-texte retour" (click)="allerA('oubli-numero')">← Changer de numéro</button>
+            <button type="button" class="bouton-texte retour" (click)="allerA('oubli-numero')">← Changer d'identifiant</button>
             <div class="empile">
               <h2 class="titre-2">Nouveau mot de passe</h2>
-              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Si ce numéro a un compte, un code a été envoyé au {{ masque() }}.</span>
+              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Si ce compte existe, un code a été envoyé à {{ masque() }}.</span>
             </div>
             <div class="champ">
               <label for="code-oubli">Code reçu (6 chiffres)</label>

@@ -51,6 +51,17 @@ ul {
   background: var(--lce-surface-ivoire);
   color: var(--lce-gold-deep);
 }
+.visuel img,
+.vignette img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+}
+.attente {
+  padding: 96px 16px;
+  text-align: center;
+}
 .badges {
   position: absolute;
   top: 16px;
