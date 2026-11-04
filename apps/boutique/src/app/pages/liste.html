@@ -1,0 +1,140 @@
+<div class="lce-conteneur page">
+  <nav class="fil" aria-label="Fil d'Ariane">
+    <a routerLink="/">Accueil</a>
+    <lce-icone nom="chevron-droite" [taille]="14" />
+    @if (mode() === 'categorie') {
+      <a routerLink="/boutique">Toute la boutique</a>
+      <lce-icone nom="chevron-droite" [taille]="14" />
+    }
+    <span aria-current="page">{{ intitule() }}</span>
+  </nav>
+
+  <header class="empile">
+    <h1 class="titre-1">{{ intitule() }}</h1>
+    <span class="attenue">
+      {{ resultats().total }} article{{ resultats().total > 1 ? 's' : '' }} · livrés par nos équipes
+    </span>
+  </header>
+
+  @if (mode() !== 'promotions') {
+    <nav class="puces" aria-label="Raccourcis">
+      @for (f of filtres; track f.valeur) {
+        <a
+          class="puce"
+          [class.on]="filtreActif() === f.valeur"
+          [attr.aria-current]="filtreActif() === f.valeur ? 'true' : null"
+          [routerLink]="[]"
+          [queryParams]="avec({ filtre: f.valeur === 'tout' ? null : f.valeur })"
+          queryParamsHandling="merge"
+          >{{ f.libelle }}</a
+        >
+      }
+    </nav>
+  }
+
+  <div class="disposition">
+    <button type="button" class="ouvrir-filtres" lceBouton variante="contour" [petit]="true" (click)="filtresOuverts.set(!filtresOuverts())" [attr.aria-expanded]="filtresOuverts()" aria-controls="filtres">
+      <lce-icone nom="filtre" [taille]="18" />Filtres
+      @if (filtresAppliques()) {
+        <span class="pastille-filtre" aria-label="filtres actifs">•</span>
+      }
+    </button>
+
+    <aside id="filtres" class="panneau filtres" [class.ouvert]="filtresOuverts()" aria-label="Filtres">
+      <div class="filtres-tete">
+        <b><lce-icone nom="filtre" [taille]="18" />Filtres</b>
+        <button type="button" class="bouton-texte" (click)="toutEffacer()">Tout effacer</button>
+      </div>
+
+      <div>
+        <h2>Catégories</h2>
+        <ul class="categories">
+          <li>
+            <a [routerLink]="mode() === 'recherche' ? [] : ['/boutique']" [queryParams]="mode() === 'recherche' ? { page: null } : {}" queryParamsHandling="merge" [class.on]="!slug()">
+              <span>Toutes</span>
+            </a>
+          </li>
+          @for (c of categories; track c.slug) {
+            <li>
+              <a [routerLink]="['/categorie', c.slug]" [queryParams]="{ page: null }" queryParamsHandling="merge" [class.on]="slug() === c.slug" [attr.aria-current]="slug() === c.slug ? 'page' : null">
+                <span>{{ c.nom }}</span>
+                <span class="attenue">{{ resultats().parCategorie[c.slug] ?? 0 }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <hr class="filet" />
+
+      <form (ngSubmit)="appliquerPrix()">
+        <h2>Prix (FCFA)</h2>
+        <div class="prix">
+          <div class="champ"><label for="pmin">Min.</label><input id="pmin" name="min" class="saisie" type="number" min="0" step="500" inputmode="numeric" [(ngModel)]="prixMin" /></div>
+          <div class="champ"><label for="pmax">Max.</label><input id="pmax" name="max" class="saisie" type="number" min="0" step="500" inputmode="numeric" [(ngModel)]="prixMax" /></div>
+        </div>
+        <button lceBouton variante="nuit" [pleineLargeur]="true" [petit]="true" type="submit">Appliquer le prix</button>
+      </form>
+
+      <hr class="filet" />
+
+      <div>
+        <h2>Disponibilité</h2>
+        <label class="case"><input type="checkbox" [checked]="stock()" (change)="basculerStock()" />En stock uniquement</label>
+      </div>
+    </aside>
+
+    <section class="resultats" aria-label="Produits">
+      <div class="barre-tri panneau-ivoire">
+        <span class="petit" aria-live="polite"><b>{{ bornes() }}</b> sur {{ resultats().total }} articles</span>
+        <span class="tri">
+          <label for="tri" class="petit">Trier par</label>
+          <select id="tri" class="liste-deroulante" [ngModel]="tri() ?? 'popularite'" (ngModelChange)="changerTri($event)">
+            @for (t of tris; track t.valeur) {
+              <option [value]="t.valeur">{{ t.libelle }}</option>
+            }
+          </select>
+        </span>
+      </div>
+
+      @if (resultats().total > 0) {
+        <lce-cartes [produits]="resultats().produits" colonnes="grille-3" />
+
+        @if (resultats().pages > 1) {
+          <nav class="pagination" aria-label="Pagination">
+            @if (resultats().page > 1) {
+              <a class="num-page" [routerLink]="[]" [queryParams]="{ page: resultats().page - 1 }" queryParamsHandling="merge" aria-label="Page précédente">
+                <lce-icone nom="chevron-gauche" [taille]="18" />
+              </a>
+            }
+            @for (n of numerosDePage(); track $index) {
+              @if (estNumero(n)) {
+                <a class="num-page" [class.on]="n === resultats().page" [attr.aria-current]="n === resultats().page ? 'page' : null" [routerLink]="[]" [queryParams]="{ page: n === 1 ? null : n }" queryParamsHandling="merge">{{ n }}</a>
+              } @else {
+                <span class="attenue">…</span>
+              }
+            }
+            @if (resultats().page < resultats().pages) {
+              <a class="num-page" [routerLink]="[]" [queryParams]="{ page: resultats().page + 1 }" queryParamsHandling="merge" aria-label="Page suivante">
+                <lce-icone nom="chevron-droite" [taille]="18" />
+              </a>
+            }
+          </nav>
+        }
+      } @else {
+        <div class="vide panneau-ivoire">
+          <lce-icone nom="recherche" [taille]="44" />
+          <h2 class="titre-3">Aucun article ne correspond</h2>
+          <p class="attenue">
+            @if (q()) {
+              Vérifiez l'orthographe de « {{ q() }} » ou essayez un mot plus général.
+            } @else {
+              Élargissez la fourchette de prix ou retirez un filtre.
+            }
+          </p>
+          <button lceBouton variante="nuit" type="button" (click)="toutEffacer()">Effacer les filtres</button>
+        </div>
+      }
+    </section>
+  </div>
+</div>

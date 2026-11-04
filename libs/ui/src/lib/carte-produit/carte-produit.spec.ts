@@ -30,7 +30,7 @@ describe('CarteProduit', () => {
     const fixture = await rendre({ ...base, prixBarre: 50000 });
     const badges = (fixture.nativeElement as HTMLElement).querySelectorAll('lce-badge');
     expect(badges.length).toBe(1);
-    expect(badges[0].textContent?.trim()).toBe('-20 %');
+    expect(badges[0].textContent?.trim()).toBe('−20 %');
   });
 
   it('affiche « Nouveau » sans réduction', async () => {

@@ -2,8 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { RouterLink } from '@angular/router';
 import { Badge } from '../badge/badge';
 import { Bouton } from '../bouton/bouton';
+import { Etoiles } from '../etoiles/etoiles';
 import { FcfaPipe } from '../format/fcfa';
 import { Icone } from '../icone/icone';
+import { NomIcone } from '../icone/icones';
 
 export interface ProduitCarte {
   id: string;
@@ -15,66 +17,83 @@ export interface ProduitCarte {
   nouveau: boolean;
   noteMoyenne: number;
   nbAvis: number;
-  imageUrl: string;
+  /** Photo produit (carrée, fond blanc ou ivoire). Sans photo, l'icône dorée la remplace. */
+  imageUrl?: string | null;
+  icone?: NomIcone;
   enRupture?: boolean;
 }
 
 /**
- * Carte produit du site : badge promo rouge OU « Nouveau », prix en promo si
- * réduit, bouton bleu nuit « Ajouter au panier ».
+ * Carte produit du site (maquette « Carte ») : badge promo rouge OU « Nouveau »,
+ * favori, catégorie, nom, note, prix (en rouge si réduit, ancien prix barré),
+ * bouton bleu nuit « Ajouter au panier » toujours en bas de carte.
  */
 @Component({
   selector: 'lce-carte-produit',
-  imports: [RouterLink, Badge, Bouton, FcfaPipe, Icone],
+  imports: [RouterLink, Badge, Bouton, Etoiles, FcfaPipe, Icone],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="carte">
-      <a class="visuel" [routerLink]="['/produit', produit().slug]">
-        <img [src]="produit().imageUrl" [alt]="produit().nom" loading="lazy" width="400" height="400" />
-        @if (remise()) {
-          <lce-badge type="promo" class="badge">-{{ remise() }} %</lce-badge>
-        } @else if (produit().nouveau) {
-          <lce-badge type="nouveau" class="badge">Nouveau</lce-badge>
-        }
-      </a>
-      <button
-        type="button"
-        class="favori"
-        [class.actif]="favori()"
-        [attr.aria-pressed]="favori()"
-        [attr.aria-label]="favori() ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-        (click)="basculerFavori.emit(produit().id)"
-      >
-        <lce-icone nom="coeur" [taille]="20" />
-      </button>
+      <div class="visuel">
+        <a [routerLink]="['/produit', produit().slug]" [attr.aria-label]="produit().nom" tabindex="-1">
+          @if (produit().imageUrl) {
+            <img [src]="produit().imageUrl" alt="" loading="lazy" width="400" height="400" />
+          } @else {
+            <lce-icone [nom]="produit().icone ?? 'sac'" [taille]="72" />
+          }
+        </a>
+        <div class="badges">
+          @if (remise()) {
+            <lce-badge type="promo">−{{ remise() }} %</lce-badge>
+          } @else if (produit().nouveau) {
+            <lce-badge type="nouveau">Nouveau</lce-badge>
+          }
+        </div>
+        <button
+          type="button"
+          class="favori"
+          [class.actif]="favori()"
+          [attr.aria-pressed]="favori()"
+          [attr.aria-label]="(favori() ? 'Retirer ' : 'Ajouter ') + produit().nom + (favori() ? ' des favoris' : ' aux favoris')"
+          (click)="basculerFavori.emit(produit().id)"
+        >
+          <lce-icone nom="favoris" [taille]="20" [plein]="favori()" />
+        </button>
+      </div>
 
-      <p class="categorie">{{ produit().categorie }}</p>
-      <h3 class="nom">
-        <a [routerLink]="['/produit', produit().slug]">{{ produit().nom }}</a>
-      </h3>
-      @if (produit().nbAvis > 0) {
-        <p class="note">
-          <lce-icone nom="etoile" [taille]="16" />
-          {{ produit().noteMoyenne }}
-          <span class="lce-visuellement-masque">sur 5,</span>
-          ({{ produit().nbAvis }} avis)
-        </p>
-      }
-      <p class="prix">
-        <span [class.promo]="remise()">{{ produit().prix | fcfa }}</span>
-        @if (remise()) {
-          <s>{{ produit().prixBarre | fcfa }}</s>
+      <div class="corps">
+        <span class="categorie">{{ produit().categorie }}</span>
+        <h3 class="nom">
+          <a [routerLink]="['/produit', produit().slug]">{{ produit().nom }}</a>
+        </h3>
+        @if (produit().nbAvis > 0) {
+          <span class="note">
+            <lce-etoiles [note]="produit().noteMoyenne" />
+            <span>({{ produit().nbAvis }} avis)</span>
+          </span>
         }
-      </p>
-      <button
-        lceBouton
-        variante="nuit"
-        [pleineLargeur]="true"
-        [disabled]="produit().enRupture"
-        (click)="ajouterAuPanier.emit(produit().id)"
-      >
-        {{ produit().enRupture ? 'Rupture de stock' : 'Ajouter au panier' }}
-      </button>
+        <p class="prix">
+          <b [class.promo]="remise()">{{ produit().prix | fcfa }}</b>
+          @if (remise()) {
+            <s><span class="lce-visuellement-masque">au lieu de </span>{{ produit().prixBarre | fcfa }}</s>
+          }
+        </p>
+        <button
+          lceBouton
+          variante="nuit"
+          [petit]="true"
+          [pleineLargeur]="true"
+          [disabled]="produit().enRupture"
+          (click)="ajouterAuPanier.emit(produit().id)"
+        >
+          @if (produit().enRupture) {
+            Rupture de stock
+          } @else {
+            <lce-icone nom="panier-ajouter" [taille]="18" />
+            Ajouter au panier
+          }
+        </button>
+      </div>
     </article>
   `,
   styles: `
@@ -86,41 +105,44 @@ export interface ProduitCarte {
     }
     .carte {
       height: 100%;
-      position: relative;
       display: flex;
       flex-direction: column;
-      gap: var(--lce-espace-2);
-      padding: var(--lce-espace-4);
+      background: var(--lce-surface);
       border: 1px solid var(--lce-line);
       border-radius: var(--lce-rayon-carte);
-      background: var(--lce-surface);
-      transition: box-shadow 150ms;
+      overflow: hidden;
+      transition: box-shadow 200ms;
     }
     .carte:hover {
       box-shadow: var(--lce-ombre-card);
     }
     .visuel {
       position: relative;
-      display: block;
+    }
+    .visuel > a {
+      display: grid;
+      place-items: center;
       aspect-ratio: 1;
-      border-radius: var(--lce-rayon-carte-mobile);
       background: var(--lce-surface-ivoire);
-      overflow: hidden;
+      color: var(--lce-gold-deep);
     }
     .visuel img {
       width: 100%;
       height: 100%;
       object-fit: contain;
     }
-    .badge {
+    .badges {
       position: absolute;
-      top: var(--lce-espace-3);
-      left: var(--lce-espace-3);
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 6px;
     }
     .favori {
       position: absolute;
-      top: var(--lce-espace-5);
-      right: var(--lce-espace-5);
+      z-index: 1;
+      top: 8px;
+      right: 8px;
       display: grid;
       place-items: center;
       width: var(--lce-cible-tactile);
@@ -128,60 +150,80 @@ export interface ProduitCarte {
       border: 0;
       border-radius: 50%;
       background: var(--lce-surface);
-      color: var(--lce-navy);
+      color: var(--lce-ink);
       cursor: pointer;
     }
+    .favori:hover,
     .favori.actif {
       color: var(--lce-danger);
     }
-    .favori.actif ::ng-deep svg {
-      fill: currentColor;
+    .corps {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: var(--lce-espace-4);
     }
     .categorie {
       @include t.texte-surtitre;
-      margin: 0;
-      color: var(--lce-gold-text);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--lce-ink-muted);
     }
     .nom {
-      @include t.texte-h3;
       margin: 0;
+      font: 600 17px/24px var(--lce-police-titre);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
     .nom a {
-      color: inherit;
+      color: var(--lce-ink);
       text-decoration: none;
     }
+    .nom a:hover {
+      color: var(--lce-gold-text);
+    }
     .note {
-      @include t.texte-small;
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin: 0;
+      gap: 6px;
+      font-size: 12px;
       color: var(--lce-ink-muted);
     }
-    .note lce-icone {
-      color: var(--lce-gold-deep);
-    }
     .prix {
-      @include t.texte-prix;
       display: flex;
-      gap: var(--lce-espace-2);
+      flex-wrap: wrap;
       align-items: baseline;
-      margin: 0 0 var(--lce-espace-2);
+      gap: 8px;
+      margin: 4px 0 12px;
+    }
+    .prix b {
+      @include t.texte-prix;
     }
     .prix .promo {
       color: var(--lce-promo);
     }
-    // Bouton toujours en bas : les cartes d'une même ligne restent alignées.
-    .carte > [lceBouton] {
+    .prix s {
+      font-size: 13px;
+      color: var(--lce-ink-muted);
+    }
+    .corps > [lceBouton] {
       margin-top: auto;
     }
-    .prix s {
-      @include t.texte-small;
-      color: var(--lce-ink-muted);
+    // Deux cartes par ligne sur téléphone : on gagne la place de l'icône du bouton.
+    @media (max-width: 520px) {
+      .corps {
+        padding: var(--lce-espace-3);
+      }
+      .corps > [lceBouton] {
+        padding-inline: 8px;
+        font-size: 12px;
+      }
+      .corps > [lceBouton] lce-icone {
+        display: none;
+      }
     }
   `,
 })

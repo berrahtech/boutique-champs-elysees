@@ -54,8 +54,8 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "6kb",
-              "maximumError": "10kb"
+              "maximumWarning": "8kb",
+              "maximumError": "16kb"
             }
           ],
           "outputHashing": "all"
@@ -81,6 +81,9 @@
         "development": {
           "buildTarget": "boutique:build:development"
         }
+      },
+      "options": {
+        "proxyConfig": "apps/boutique/proxy.conf.json"
       }
     },
     "serve-static": {

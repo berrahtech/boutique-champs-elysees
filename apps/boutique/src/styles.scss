@@ -1,1 +1,334 @@
-// Styles propres à l'application. Les styles communs viennent de libs/ui/src/styles/lce.scss.
+// Classes de mise en page communes aux pages de la boutique (reprises de lce.css
+// des maquettes). Les couleurs viennent toutes des jetons --lce-*.
+@use 'typographie' as t;
+
+.sec {
+  padding-block: 56px;
+
+  @media (max-width: 520px) {
+    padding-block: 40px;
+  }
+}
+.sec-ivoire {
+  background: var(--lce-surface-ivoire);
+}
+.sec-tete {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.empile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.surtitre {
+  @include t.texte-surtitre;
+  color: var(--lce-gold-text);
+}
+.titre-1 {
+  @include t.texte-h1;
+  margin: 0;
+  text-wrap: balance;
+}
+.titre-2 {
+  @include t.texte-h2;
+  margin: 0;
+  text-wrap: balance;
+}
+.titre-3 {
+  @include t.texte-h3;
+  margin: 0;
+}
+.attenue {
+  color: var(--lce-ink-muted);
+}
+.petit {
+  font-size: 13px;
+  line-height: 20px;
+}
+.chiffres {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 14px/20px var(--lce-police-texte);
+  color: var(--lce-navy);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--lce-gold-text);
+  }
+}
+
+.grille-4,
+.grille-3,
+.grille-2 {
+  display: grid;
+  gap: 24px;
+}
+.grille-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.grille-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.grille-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 1100px) {
+  .grille-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 860px) {
+  .grille-4,
+  .grille-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grille-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .grille-4,
+  .grille-3 {
+    gap: 12px;
+  }
+}
+
+.fil {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lce-ink-muted);
+
+  a {
+    color: var(--lce-ink-muted);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--lce-navy);
+    }
+  }
+}
+
+.panneau {
+  background: var(--lce-surface);
+  border: 1px solid var(--lce-line);
+  border-radius: var(--lce-rayon-carte);
+  padding: 24px;
+}
+.panneau-ivoire {
+  background: var(--lce-surface-ivoire);
+  border-radius: var(--lce-rayon-carte);
+  padding: 24px;
+}
+.filet {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: var(--lce-line);
+}
+.ligne-montant {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--lce-line);
+  border-radius: var(--lce-rayon-pastille);
+  background: var(--lce-surface);
+  color: var(--lce-ink);
+  font: 600 13px/20px var(--lce-police-texte);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--lce-navy);
+  }
+  &.on {
+    background: var(--lce-navy);
+    border-color: var(--lce-navy);
+    color: var(--lce-on-navy);
+  }
+}
+
+// Formulaires
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  > label,
+  .etiquette {
+    font: 600 13px/20px var(--lce-police-texte);
+    color: var(--lce-ink);
+  }
+}
+.saisie,
+.liste-deroulante {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid #c9c2b2;
+  border-radius: var(--lce-rayon-controle);
+  background: var(--lce-surface);
+  color: var(--lce-ink);
+  font: 400 15px/24px var(--lce-police-texte);
+
+  &:focus {
+    outline: 2px solid var(--lce-focus);
+    outline-offset: 1px;
+    border-color: var(--lce-navy-500);
+  }
+  &[aria-invalid='true'] {
+    border-color: var(--lce-danger);
+  }
+}
+.aide {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lce-ink-muted);
+}
+.erreur {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: var(--lce-rayon-controle);
+  background: var(--lce-danger-soft);
+  color: var(--lce-danger);
+  font: 600 14px/20px var(--lce-police-texte);
+}
+.succes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--lce-success);
+  font: 600 14px/20px var(--lce-police-texte);
+}
+.telephone {
+  display: flex;
+
+  span {
+    display: grid;
+    place-items: center;
+    padding: 0 14px;
+    border: 1px solid #c9c2b2;
+    border-right: 0;
+    border-radius: var(--lce-rayon-controle) 0 0 var(--lce-rayon-controle);
+    background: var(--lce-surface-ivoire);
+    font-weight: 600;
+  }
+  .saisie {
+    border-radius: 0 var(--lce-rayon-controle) var(--lce-rayon-controle) 0;
+  }
+}
+.case {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    margin: 3px 0 0;
+    accent-color: var(--lce-navy);
+  }
+}
+.bouton-texte {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lce-gold-text);
+  font: 600 13px/20px var(--lce-police-texte);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+// Étapes de commande
+.etapes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 600 13px/20px var(--lce-police-texte);
+  color: var(--lce-ink-muted);
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  li + li::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    margin-right: 8px;
+    background: var(--lce-line);
+  }
+  i {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--lce-line);
+    border-radius: 50%;
+    background: var(--lce-surface);
+    font-style: normal;
+  }
+  .fait {
+    color: var(--lce-success);
+
+    i {
+      background: var(--lce-success);
+      border-color: var(--lce-success);
+      color: var(--lce-on-navy);
+    }
+  }
+  [aria-current='step'] {
+    color: var(--lce-navy);
+
+    i {
+      background: var(--lce-navy);
+      border-color: var(--lce-navy);
+      color: var(--lce-on-navy);
+    }
+  }
+}
+
+// Page « contenu à venir »
+.a-venir {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 72px 16px;
+  text-align: center;
+  color: var(--lce-ink);
+}

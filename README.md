@@ -100,8 +100,6 @@ Les règles critiques sont tenues par la base elle-même, même si le code a un 
 
 ## À fournir ou à décider
 
-- **Logo :** le logo officiel est à déposer dans `apps/*/public/logo-lce-fond-sombre.svg`. Le fichier actuel est un logo texte provisoire.
-- **Icônes :** les 50 icônes SVG du design system remplaceront les tracés provisoires de `libs/design-tokens/src/icones.json`, en gardant les mêmes noms.
 - **Polices :** les fichiers `.ttf` de Playfair Display et Montserrat sont à placer dans `mobile/lce_ui/fonts`. Voir `pubspec.yaml`.
 - **SMS :** le prestataire (Orange, Moov ou un agrégateur) reste à choisir. Il faudra une implémentation de `PasserelleSms`.
 - **Rubriques :** les 10 rubriques de l'espace client et les 8 catégories sont à confronter aux maquettes.

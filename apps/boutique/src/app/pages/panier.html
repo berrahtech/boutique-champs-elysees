@@ -1,0 +1,117 @@
+<div class="lce-conteneur page">
+  <ol class="etapes" aria-label="Étapes de la commande">
+    <li aria-current="step"><i>1</i>Panier</li>
+    <li [class.fait]="session.connecte()"><i>2</i>Compte</li>
+    <li><i>3</i>Livraison et paiement</li>
+    <li><i>4</i>Confirmation</li>
+  </ol>
+
+  <div class="entete">
+    <h1 class="titre-1">
+      Mon panier
+      <span class="compte">({{ panier.nbArticles() }} article{{ panier.nbArticles() > 1 ? 's' : '' }})</span>
+    </h1>
+    <a routerLink="/boutique" class="lien"><lce-icone nom="chevron-gauche" [taille]="16" />Continuer mes achats</a>
+  </div>
+
+  @if (panier.estVide()) {
+    <div class="vide panneau-ivoire">
+      <lce-icone nom="panier" [taille]="48" />
+      <h2 class="titre-3">Votre panier est vide</h2>
+      <p class="attenue">Parcourez nos rayons : vos articles restent enregistrés sur cet appareil, même sans connexion.</p>
+      <a lceBouton variante="nuit" routerLink="/boutique">Découvrir la boutique</a>
+    </div>
+  } @else {
+    <div class="disposition">
+      <section class="articles" aria-label="Articles">
+        <div class="tete-colonnes petit attenue"><span>Article</span><span>Sous-total</span></div>
+        <ul>
+          @for (ligne of panier.lignes(); track ligne.produitId) {
+            <li class="article">
+              <a [routerLink]="['/produit', ligne.produit.slug]" class="vignette" [attr.aria-label]="ligne.produit.nom">
+                <lce-icone [nom]="ligne.produit.icone" [taille]="44" />
+              </a>
+              <div class="article-infos">
+                <a [routerLink]="['/produit', ligne.produit.slug]" class="article-nom">{{ ligne.produit.nom }}</a>
+                <span class="petit attenue">{{ ligne.produit.rayon }} · Réf. {{ ligne.produit.reference }}</span>
+                <span class="petit">Prix unitaire : <b class="chiffres">{{ ligne.produit.prix | fcfa }}</b></span>
+                @if (ligne.quantite >= ligne.produit.stock) {
+                  <span class="petit stock-max">Quantité maximale disponible</span>
+                }
+                <div class="article-actions">
+                  <lce-quantite
+                    [valeur]="ligne.quantite"
+                    [max]="ligne.produit.stock"
+                    [libelle]="'Quantité de ' + ligne.produit.nom"
+                    (valeurChange)="panier.changerQuantite(ligne.produitId, $event)"
+                  />
+                  <button type="button" class="action" (click)="retirer(ligne.produitId, ligne.produit.nom)">
+                    <lce-icone nom="supprimer" [taille]="16" />Supprimer
+                  </button>
+                  <button type="button" class="action" (click)="mettreDeCote(ligne.produitId)">
+                    <lce-icone nom="favoris" [taille]="16" />Mettre de côté
+                  </button>
+                </div>
+              </div>
+              <b class="chiffres sous-total">{{ ligne.sousTotal | fcfa }}</b>
+            </li>
+          }
+        </ul>
+        <p class="petit attenue note">
+          <lce-icone nom="information" [taille]="16" />Votre panier est conservé sur cet appareil. Connecté, vous le retrouverez sur l'application.
+        </p>
+      </section>
+
+      <aside class="recapitulatif panneau" aria-labelledby="recap-titre">
+        <h2 id="recap-titre" class="titre-3">Récapitulatif</h2>
+        <div class="ligne-montant"><span>Sous-total</span><b class="chiffres">{{ panier.sousTotal() | fcfa }}</b></div>
+
+        <div class="champ">
+          <label for="zone">Zone de livraison</label>
+          <select id="zone" class="liste-deroulante" [ngModel]="zoneId()" (ngModelChange)="zoneId.set($event)">
+            @for (z of zones; track z.id) {
+              <option [value]="z.id">{{ z.libelle }}</option>
+            }
+          </select>
+          <span class="aide">Délai estimé : {{ zone().delai }}</span>
+        </div>
+        <div class="ligne-montant"><span>Livraison</span><b class="chiffres">{{ frais() | fcfa }}</b></div>
+
+        <form class="champ" (ngSubmit)="appliquerCode()">
+          <label for="code">Code promotionnel</label>
+          <div class="code">
+            <input id="code" name="code" class="saisie" autocomplete="off" [(ngModel)]="saisieCode" [attr.aria-invalid]="erreurCode() ? 'true' : null" aria-describedby="code-aide" />
+            <button lceBouton variante="contour" type="submit">Appliquer</button>
+          </div>
+          <span id="code-aide" role="status">
+            @if (code()) {
+              <span class="succes petit"><lce-icone nom="valide-rond" [taille]="16" />Code {{ code() }} appliqué : −10 %
+                <button type="button" class="bouton-texte" (click)="retirerCode()">Retirer</button></span>
+            } @else if (erreurCode()) {
+              <span class="petit refus">{{ erreurCode() }}</span>
+            }
+          </span>
+        </form>
+        @if (remise()) {
+          <div class="ligne-montant"><span>Réduction</span><b class="chiffres promo">− {{ remise() | fcfa }}</b></div>
+        }
+
+        <hr class="filet" />
+        <div class="ligne-montant"><span class="total-libelle">Total TTC</span><b class="total chiffres">{{ total() | fcfa }}</b></div>
+
+        <button lceBouton variante="or" type="button" [pleineLargeur]="true" class="commander" (click)="commander()">
+          Commander<lce-icone nom="fleche-droite" [taille]="18" />
+        </button>
+        @if (commandeAnnoncee()) {
+          <p class="annonce" role="status">
+            <lce-icone nom="information" [taille]="18" />
+            La validation de commande (livraison et paiement Orange Money, Moov Money, carte ou à la livraison) arrive avec le module commande.
+          </p>
+        } @else {
+          <span class="petit attenue centre">{{ session.connecte() ? 'Connecté : ' + session.prenom() : "Connexion ou création de compte à l'étape suivante" }}</span>
+        }
+        <span class="petit attenue centre moyens"><lce-icone nom="cadenas" [taille]="16" />Orange Money · Moov Money · Carte · À la livraison</span>
+      </aside>
+    </div>
+  }
+</div>

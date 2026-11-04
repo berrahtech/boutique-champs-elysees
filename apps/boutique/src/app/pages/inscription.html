@@ -1,0 +1,87 @@
+<div class="lce-conteneur page">
+  <div class="colonnes">
+    <lce-avantages-compte
+      surtitre="Nouveau client"
+      titre="Créez votre compte en 1 minute"
+      texte="Votre numéro de téléphone suffit : nous le vérifions par SMS, sans frais."
+    />
+
+    <section class="panneau formulaire">
+      <ol class="progression" aria-label="Étape {{ etape() === 'numero' ? 1 : etape() === 'code' ? 2 : 3 }} sur 3">
+        <li class="fait"></li>
+        <li [class.fait]="etape() !== 'numero'"></li>
+        <li [class.fait]="etape() === 'profil'"></li>
+      </ol>
+
+      @switch (etape()) {
+        @case ('numero') {
+          <form (ngSubmit)="envoyerCode()" novalidate>
+            <div class="empile">
+              <h2 class="titre-2">Votre numéro</h2>
+              <span class="attenue">Déjà client ? <a routerLink="/connexion" [queryParams]="{ retour: retour() }">Se connecter</a></span>
+            </div>
+            <div class="champ">
+              <label for="tel">Numéro de téléphone</label>
+              <div class="telephone"><span>+223</span><input id="tel" name="tel" class="saisie" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="76 12 34 56" required [(ngModel)]="telephone" aria-describedby="tel-aide" /></div>
+              <span id="tel-aide" class="aide">Nous vous envoyons un code à 6 chiffres par SMS.</span>
+            </div>
+            @if (erreur()) {
+              <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
+            }
+            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Envoi…' : 'Recevoir le code' }}</button>
+          </form>
+        }
+
+        @case ('code') {
+          <form (ngSubmit)="verifierCode()" novalidate>
+            <button type="button" class="bouton-texte retour" (click)="changerNumero()">← Changer de numéro</button>
+            <div class="empile">
+              <h2 class="titre-2">Code de vérification</h2>
+              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Code envoyé par SMS au {{ masque() }}</span>
+            </div>
+            <div class="champ">
+              <label for="code">Code reçu (6 chiffres)</label>
+              <input id="code" name="code" class="saisie code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required [(ngModel)]="code" aria-describedby="code-aide" />
+              <span id="code-aide" class="aide">Valable 5 minutes, 3 essais.</span>
+            </div>
+            @if (erreur()) {
+              <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
+            }
+            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">Vérifier</button>
+            <button type="button" class="bouton-texte" [disabled]="attenteRenvoi() > 0 || envoi()" (click)="envoyerCode()">
+              {{ attenteRenvoi() > 0 ? 'Renvoyer le code dans ' + attenteRenvoi() + ' s' : 'Renvoyer le code' }}
+            </button>
+          </form>
+        }
+
+        @case ('profil') {
+          <form (ngSubmit)="creerCompte()" novalidate>
+            <div class="empile">
+              <h2 class="titre-2">Vos informations</h2>
+              <span class="succes"><lce-icone nom="valide-rond" [taille]="18" />Numéro vérifié</span>
+            </div>
+            <div class="champ">
+              <label for="nom">Prénom et nom</label>
+              <input id="nom" name="nom" class="saisie" autocomplete="name" required [(ngModel)]="nom" />
+            </div>
+            <div class="champ">
+              <label for="email">E-mail <span class="attenue">(facultatif)</span></label>
+              <input id="email" name="email" class="saisie" type="email" autocomplete="email" [(ngModel)]="email" aria-describedby="email-aide" />
+              <span id="email-aide" class="aide">Pour recevoir vos factures.</span>
+            </div>
+            <div class="champ">
+              <label for="mdp">Mot de passe</label>
+              <input id="mdp" name="mdp" class="saisie" type="password" autocomplete="new-password" required [(ngModel)]="motDePasse" aria-describedby="mdp-aide" />
+              <span id="mdp-aide" class="aide">8 caractères minimum, avec au moins une lettre et un chiffre.</span>
+            </div>
+            <label class="case"><input type="checkbox" name="conditions" [(ngModel)]="conditions" />J'accepte les conditions générales de vente et la politique de confidentialité.</label>
+            @if (erreur()) {
+              <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
+            }
+            <button lceBouton variante="or" type="submit" [pleineLargeur]="true" class="principal" [disabled]="envoi()">{{ envoi() ? 'Création…' : 'Créer mon compte' }}</button>
+          </form>
+        }
+      }
+    </section>
+  </div>
+</div>

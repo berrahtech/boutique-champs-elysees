@@ -68,8 +68,9 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav aria-label="Administration">
-      <a routerLink="/admin" class="logo">
-        <img [src]="logoUrl()" alt="Les Champs Élysées, administration" height="40" />
+      <a routerLink="/admin" class="logo" aria-label="Les Champs Élysées, administration">
+        <img [src]="logoUrl()" alt="" width="40" height="40" />
+        <span>Les Champs Élysées<small>Administration</small></span>
       </a>
       @for (section of sectionsVisibles(); track section.titre) {
         <h2>{{ section.titre }}</h2>
@@ -114,8 +115,23 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
       padding: var(--lce-espace-5) var(--lce-espace-3);
     }
     .logo {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 0 var(--lce-espace-3) var(--lce-espace-5);
+      color: var(--lce-on-navy);
+      text-decoration: none;
+      font: 600 16px/20px var(--lce-police-titre);
+    }
+    .logo img {
+      object-fit: contain;
+    }
+    .logo small {
+      display: block;
+      font: 600 10px/14px var(--lce-police-texte);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--lce-gold-bright);
     }
     h2 {
       @include t.texte-surtitre;
@@ -166,7 +182,7 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
 export class MenuAdmin {
   readonly sections = input<SectionAdmin[]>(SECTIONS_ADMIN);
   readonly permissions = input.required<ReadonlySet<string>>();
-  readonly logoUrl = input('/logo-lce-fond-sombre.svg');
+  readonly logoUrl = input('/logo-lce.png');
 
   protected readonly sectionsVisibles = computed(() =>
     this.sections()

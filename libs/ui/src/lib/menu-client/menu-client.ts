@@ -18,7 +18,7 @@ export const RUBRIQUES_CLIENT: RubriqueClient[] = [
   { libelle: 'Tableau de bord', lien: '/compte', icone: 'tableau-de-bord' },
   { libelle: 'Mes commandes', lien: '/compte/commandes', icone: 'commandes' },
   { libelle: 'Suivi de livraison', lien: '/compte/suivi', icone: 'livraison' },
-  { libelle: 'Mes favoris', lien: '/compte/favoris', icone: 'coeur' },
+  { libelle: 'Mes favoris', lien: '/favoris', icone: 'favoris' },
   { libelle: 'Mes adresses', lien: '/compte/adresses', icone: 'adresse' },
   { libelle: 'Informations personnelles', lien: '/compte/profil', icone: 'profil' },
   { libelle: 'Moyens de paiement', lien: '/compte/paiement', icone: 'caisse' },

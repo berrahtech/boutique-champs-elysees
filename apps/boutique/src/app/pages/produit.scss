@@ -1,0 +1,272 @@
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-block: 24px 64px;
+}
+.haut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 48px;
+}
+
+.galerie {
+  flex: 1 1 520px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 16px;
+}
+.vignettes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.vignette {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--lce-line);
+  border-radius: var(--lce-rayon-controle);
+  background: var(--lce-surface-ivoire);
+  color: var(--lce-gold-deep);
+  cursor: pointer;
+
+  &.on {
+    border: 2px solid var(--lce-navy);
+  }
+}
+.visuel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: var(--lce-rayon-carte);
+  background: var(--lce-surface-ivoire);
+  color: var(--lce-gold-deep);
+}
+.badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 6px;
+}
+
+.infos {
+  flex: 1 1 440px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lce-ink);
+  font: inherit;
+  cursor: pointer;
+}
+.prix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+
+  b {
+    font: 700 32px/40px var(--lce-police-texte);
+  }
+  .promo {
+    color: var(--lce-promo);
+  }
+  s {
+    color: var(--lce-ink-muted);
+  }
+}
+.economie {
+  padding: 2px 8px;
+  border-radius: var(--lce-rayon-badge);
+  background: var(--lce-danger-soft);
+  color: var(--lce-danger);
+  font: 600 13px/20px var(--lce-police-texte);
+}
+.description-courte {
+  margin: 0;
+}
+.stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 13px/20px var(--lce-police-texte);
+  color: var(--lce-success);
+
+  &.faible {
+    color: var(--lce-gold-text);
+  }
+  &.rupture {
+    color: var(--lce-danger);
+  }
+}
+.achat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+
+  .ajouter {
+    flex: 1 1 200px;
+  }
+}
+.favori {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--lce-line);
+  border-radius: 50%;
+  background: var(--lce-surface);
+  color: var(--lce-ink);
+  cursor: pointer;
+
+  &:hover,
+  &.actif {
+    color: var(--lce-danger);
+  }
+}
+.info-panier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.rassurance {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  lce-icone {
+    flex: none;
+    color: var(--lce-gold-deep);
+  }
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.onglets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  border-bottom: 1px solid var(--lce-line);
+
+  button {
+    padding: 14px 4px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--lce-ink-muted);
+    font: 600 15px/20px var(--lce-police-texte);
+    cursor: pointer;
+
+    &.on {
+      color: var(--lce-navy);
+      border-bottom-color: var(--lce-gold);
+    }
+  }
+}
+.panneau-onglet p {
+  margin: 0;
+}
+.specs {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--lce-line);
+
+  &.large {
+    max-width: 760px;
+  }
+  th,
+  td {
+    padding: 12px 16px;
+    border-top: 1px solid var(--lce-line);
+    font-size: 14px;
+    text-align: left;
+  }
+  th {
+    width: 40%;
+    font-weight: 400;
+    color: var(--lce-ink-muted);
+  }
+}
+.avis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 48px;
+}
+.avis-synthese {
+  flex: 0 1 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.avis-note {
+  font: 700 48px/52px var(--lce-police-texte);
+
+  span {
+    font-size: 20px;
+  }
+}
+.avis-liste {
+  flex: 1 1 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+
+  lce-icone {
+    color: var(--lce-gold-deep);
+  }
+}
+
+@media (max-width: 520px) {
+  .galerie {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .vignettes {
+    order: 2;
+    flex-direction: row;
+
+    .vignette {
+      width: 72px;
+    }
+  }
+  .visuel lce-icone {
+    transform: scale(0.75);
+  }
+  .onglets {
+    gap: 16px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+}

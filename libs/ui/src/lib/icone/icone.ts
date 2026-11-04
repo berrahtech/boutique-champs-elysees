@@ -38,11 +38,13 @@ export class Icone {
   readonly nom = input.required<NomIcone>();
   readonly taille = input(24);
   readonly libelle = input<string>();
+  /** Remplit le tracé (étoile notée, favori actif). */
+  readonly plein = input(false);
 
   // Les tracés viennent d'une table interne, jamais d'une saisie : sûrs à injecter.
   protected readonly svg = computed(() =>
     this.sanitizer.bypassSecurityTrustHtml(
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" ' +
+      `<svg viewBox="0 0 24 24" fill="${this.plein() ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.75" ` +
         'stroke-linecap="round" stroke-linejoin="round">' + ICONES[this.nom()] + '</svg>',
     ),
   );

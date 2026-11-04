@@ -4,6 +4,7 @@ export * from './lib/bascule/bascule';
 export * from './lib/bouton/bouton';
 export * from './lib/carte-produit/carte-produit';
 export * from './lib/entete/entete';
+export * from './lib/etoiles/etoiles';
 export * from './lib/format/fcfa';
 export * from './lib/icone/icone';
 export * from './lib/icone/icones';
