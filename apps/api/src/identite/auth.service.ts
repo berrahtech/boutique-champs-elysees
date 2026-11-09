@@ -106,7 +106,10 @@ export class AuthService {
     if (compte.deuxFacteurs) {
       if (!code) {
         const destinataires = [compte.telephone, compte.emailVerifieLe ? compte.email : null].filter((d): d is string => !!d);
-        await this.otp.envoyer(identifiant, 'CONNEXION', destinataires);
+        // Nouvel essai juste après un envoi : le code reçu reste valable, on le redemande.
+        if (!(await this.otp.enCours(identifiant, 'CONNEXION'))) {
+          await this.otp.envoyer(identifiant, 'CONNEXION', destinataires);
+        }
         throw problemes.otpRequis();
       }
       await this.otp.verifier(identifiant, 'CONNEXION', code);

@@ -83,6 +83,11 @@ export class OtpService {
     );
   }
 
+  /** Un code de cet objet a été envoyé et peut encore servir. */
+  async enCours(identifiant: string, objet: ObjetOtp): Promise<boolean> {
+    return (await this.magasin.lire(this.cle(identifiant, objet))) !== null;
+  }
+
   /** Vérifie le code ; il est consommé dès qu'il est juste ou que les essais sont épuisés. */
   async verifier(identifiant: string, objet: ObjetOtp, code: string): Promise<void> {
     const cle = this.cle(identifiant, objet);

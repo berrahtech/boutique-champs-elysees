@@ -196,6 +196,21 @@ describe('API (intégration)', () => {
       expect(dernierCode(sms.at(-1)?.message)).toBe(code);
       await api().post('/api/v1/auth/connexion').send({ identifiant: email, motDePasse: MOT_DE_PASSE, code }).expect(200);
     });
+
+    it('redemande le code déjà envoyé au lieu de bloquer un nouvel essai', async () => {
+      const email = adresse('deuxfacteurs-reessai');
+      await inscrireParEmail(email);
+      await prisma.utilisateur.updateMany({ where: { email }, data: { deuxFacteurs: true } });
+      await sansDelai(email);
+
+      await api().post('/api/v1/auth/connexion').send({ identifiant: email, motDePasse: MOT_DE_PASSE }).expect(401);
+      const code = dernierCode(emails.at(-1)?.texte);
+      const envois = emails.length;
+      const r = await api().post('/api/v1/auth/connexion').send({ identifiant: email, motDePasse: MOT_DE_PASSE }).expect(401);
+      expect(r.body.type).toBe('/problemes/otp-requis');
+      expect(emails).toHaveLength(envois);
+      await api().post('/api/v1/auth/connexion').send({ identifiant: email, motDePasse: MOT_DE_PASSE, code }).expect(200);
+    });
   });
 
   describe('délai entre deux envois', () => {
