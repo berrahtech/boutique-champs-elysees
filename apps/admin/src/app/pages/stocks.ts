@@ -2,63 +2,109 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import type { EcritureMouvement, LigneStock } from '@lce/contrats';
 import { API, versErreurApi } from '@lce/session';
-import { Bouton, Icone, NomIcone, PastilleStatut } from '@lce/ui';
+import { Bouton, Icone, NomIcone } from '@lce/ui';
 import { firstValueFrom } from 'rxjs';
-import { EtatStocks } from '../etat-stocks';
+import { EtatStocks, LIBELLES_MOUVEMENT, signeMouvement } from '../etat-stocks';
 
 type Onglet = 'alertes' | 'ruptures' | 'tout';
 
-const STATUT_ETAT = {
-  rupture: { libelle: 'Rupture', famille: 'echec' },
-  'sous-seuil': { libelle: 'Sous le seuil', famille: 'attente' },
-  normal: { libelle: 'Normal', famille: 'termine' },
-} as const;
-
-const LIBELLES_MOUVEMENT: Record<string, string> = {
-  ENTREE: 'Réception',
-  SORTIE: 'Sortie',
-  RESERVATION: 'Réservation',
-  LIBERATION: 'Libération',
-  REINTEGRATION: 'Retour à l’entrepôt',
-  INVENTAIRE: 'Correction d’inventaire',
-};
+const LIBELLES_ETAT = { rupture: 'Rupture', 'sous-seuil': 'Bas', normal: 'Normal' } as const;
 
 /** Stocks et alertes (maquette « A-Stocks »). */
 @Component({
   selector: 'lce-stocks',
-  imports: [DatePipe, FormsModule, Bouton, Icone, PastilleStatut],
+  imports: [DatePipe, FormsModule, RouterLink, Bouton, Icone],
   templateUrl: './stocks.html',
   styles: `
+    .tableau {
+      min-width: 820px;
+    }
     .ajustement {
       display: flex;
       align-items: center;
       gap: 8px;
     }
+    .type {
+      height: 38px;
+      font-size: 13px;
+    }
     .quantite {
       width: 84px;
-      height: 36px;
+      height: 38px;
       padding: 0 10px;
       font-size: 14px;
     }
-    .type {
+    .dispo.rupture {
+      color: var(--lce-danger);
+    }
+    .dispo.sous-seuil {
+      color: var(--lce-gold-text);
+    }
+    .aucun {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 40px 16px;
+      text-align: center;
+    }
+    .aucun .icone-teinte {
+      margin-bottom: 6px;
+    }
+    .mouvements {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .mouvements li:not(.vide) {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--adm-ligne);
+    }
+    .mouvements li:last-child {
+      border-bottom: 0;
+    }
+    .mouvements .icone-teinte {
+      width: 36px;
       height: 36px;
+      border-radius: 10px;
     }
-    .rupture {
-      color: var(--lce-danger);
+    .detail {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      font-size: 14px;
+      line-height: 20px;
     }
-    .sous-seuil {
-      color: var(--lce-navy-500);
+    .detail small {
+      overflow: hidden;
+      color: var(--lce-ink-muted);
+      font-size: 12px;
+      line-height: 16px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
-    .plus {
+    .delta {
+      min-width: 48px;
       color: var(--lce-success);
+      font: 800 15px/20px var(--lce-police-texte);
+      text-align: right;
     }
-    .moins {
+    .moins .delta {
       color: var(--lce-danger);
     }
-    .carte .tableau {
-      min-width: 640px;
+    @media (max-width: 640px) {
+      .quand {
+        display: none;
+      }
     }
   `,
 })
@@ -76,7 +122,7 @@ export class Stocks {
   /** Saisie par ligne : quantité et type de mouvement. */
   protected readonly saisies = signal<Record<string, { quantite: number | null; type: EcritureMouvement['type'] }>>({});
 
-  protected readonly etats = STATUT_ETAT;
+  protected readonly etats = LIBELLES_ETAT;
   protected readonly onglets = computed(() => {
     const l = this.vue()?.lignes ?? [];
     return [
@@ -105,9 +151,8 @@ export class Stocks {
     return LIBELLES_MOUVEMENT[type] ?? type;
   }
 
-  /** Sortie et réservation retirent du stock ; l'inventaire porte déjà son signe. */
   protected signe(type: string, quantite: number): number {
-    return type === 'SORTIE' || type === 'RESERVATION' ? -quantite : quantite;
+    return signeMouvement(type, quantite);
   }
 
   protected saisie(id: string) {

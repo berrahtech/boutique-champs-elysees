@@ -51,9 +51,7 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
   },
   {
     titre: 'Administration',
-    rubriques: [
-      { libelle: 'Utilisateurs et rôles', lien: '/admin/roles', icone: 'roles', permission: 'role.gerer' },
-    ],
+    rubriques: [{ libelle: 'Utilisateurs et rôles', lien: '/admin/roles', icone: 'roles', permission: 'role.gerer' }],
   },
 ];
 
@@ -67,11 +65,11 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
   imports: [RouterLink, RouterLinkActive, Icone],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <a routerLink="/admin" class="logo" aria-label="Les Champs Élysées, administration">
+      <img [src]="logoUrl()" alt="" width="40" height="40" />
+      <span>Les Champs Élysées<small>Administration</small></span>
+    </a>
     <nav aria-label="Administration">
-      <a routerLink="/admin" class="logo" aria-label="Les Champs Élysées, administration">
-        <img [src]="logoUrl()" alt="" width="40" height="40" />
-        <span>Les Champs Élysées<small>Administration</small></span>
-      </a>
       @for (section of sectionsVisibles(); track section.titre) {
         <h2>{{ section.titre }}</h2>
         <ul>
@@ -103,74 +101,109 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
     </nav>
   `,
   styles: `
-    @use 'typographie' as t;
-
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       height: 100%;
       background: var(--lce-navy);
       color: var(--lce-on-navy);
     }
-    nav {
-      padding: var(--lce-espace-5) var(--lce-espace-3);
-    }
     .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 0 var(--lce-espace-3) var(--lce-espace-5);
+      gap: 12px;
+      margin: 0 14px;
+      padding: 22px 10px 20px;
+      border-bottom: 1px solid rgb(255 255 255 / 8%);
       color: var(--lce-on-navy);
+      font: 800 16px/20px var(--lce-police-titre);
       text-decoration: none;
-      font: 600 16px/20px var(--lce-police-titre);
     }
     .logo img {
       object-fit: contain;
     }
     .logo small {
       display: block;
-      font: 600 10px/14px var(--lce-police-texte);
-      letter-spacing: 0.12em;
+      margin-top: 2px;
+      color: var(--lce-gold);
+      font: 700 10px/14px var(--lce-police-texte);
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--lce-gold-bright);
+    }
+    nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 14px 28px;
+      scrollbar-width: thin;
+      scrollbar-color: rgb(255 255 255 / 18%) transparent;
     }
     h2 {
-      @include t.texte-surtitre;
-      margin: var(--lce-espace-4) var(--lce-espace-3) var(--lce-espace-2);
-      color: var(--lce-gold-bright);
+      margin: 22px 12px 8px;
+      color: rgb(255 255 255 / 42%);
+      font: 700 11px/16px var(--lce-police-texte);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
     ul {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
       margin: 0;
       padding: 0;
       list-style: none;
     }
-    a {
-      @include t.texte-label;
+    a:not(.logo) {
+      position: relative;
       display: flex;
       align-items: center;
-      gap: var(--lce-espace-3);
-      min-height: 40px;
-      padding-inline: var(--lce-espace-3);
-      border-radius: var(--lce-rayon-controle);
-      color: var(--lce-on-navy);
+      gap: 12px;
+      min-height: 42px;
+      padding-inline: 12px;
+      border-radius: 10px;
+      color: rgb(255 255 255 / 74%);
+      font: 500 14px/20px var(--lce-police-texte);
       text-decoration: none;
+      transition:
+        background-color 150ms,
+        color 150ms;
     }
-    a:hover {
-      background: var(--lce-navy-700);
+    a:not(.logo) lce-icone {
+      color: rgb(255 255 255 / 55%);
+      transition: color 150ms;
+    }
+    a:not(.logo):hover {
+      background: rgb(255 255 255 / 6%);
+      color: var(--lce-on-navy);
     }
     a.actif {
-      background: var(--lce-navy-500);
+      background: rgb(255 255 255 / 10%);
+      color: var(--lce-on-navy);
+      font-weight: 700;
+    }
+    a.actif lce-icone {
+      color: var(--lce-gold);
+    }
+    // Repère doré contre le bord, comme l'onglet actif de la boutique.
+    a.actif::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      bottom: 10px;
+      left: -14px;
+      width: 4px;
+      border-radius: 0 4px 4px 0;
+      background: var(--lce-gold);
     }
     .libelle {
       flex: 1;
     }
     .pastille {
       min-width: 22px;
-      padding: 0 6px;
+      padding: 0 7px;
       border-radius: var(--lce-rayon-pastille);
-      background: var(--lce-navy);
-      color: var(--lce-on-navy);
-      font-size: 12px;
-      font-weight: 700;
+      background: var(--lce-gold);
+      color: var(--lce-on-gold);
+      font: 800 11px/20px var(--lce-police-texte);
       text-align: center;
     }
     .pastille.alerte {

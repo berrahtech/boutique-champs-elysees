@@ -17,7 +17,7 @@ const TAILLE_MAX_IMAGE = 5 * 1024 * 1024;
   styles: `
     .titre-section {
       margin: 0;
-      font: 700 15px/22px var(--lce-police-texte);
+      font: 800 16px/22px var(--lce-police-titre);
     }
     .formulaire {
       display: flex;
@@ -117,6 +117,49 @@ const TAILLE_MAX_IMAGE = 5 * 1024 * 1024;
     }
     p {
       margin: 0;
+    }
+    // L'en-tête reste visible sous la barre : « Enregistrer » est toujours à portée.
+    .entete-fiche {
+      position: sticky;
+      z-index: 10;
+      top: 68px;
+      align-items: center;
+      margin: -12px -32px 0;
+      padding: 12px 32px;
+      background: rgb(244 245 249 / 88%);
+      backdrop-filter: blur(12px);
+    }
+    .retour {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--adm-ligne);
+      border-radius: 12px;
+      background: var(--lce-surface);
+      color: var(--lce-ink);
+      transition: border-color 150ms;
+    }
+    .retour:hover {
+      border-color: var(--lce-ink);
+    }
+    .titre-fiche {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .titre-fiche h1 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @media (max-width: 767px) {
+      .entete-fiche {
+        margin-inline: -16px;
+        padding-inline: 16px;
+      }
     }
   `,
 })

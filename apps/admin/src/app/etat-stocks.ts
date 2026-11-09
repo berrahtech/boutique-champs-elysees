@@ -3,6 +3,20 @@ import { computed, inject, Injectable, linkedSignal } from '@angular/core';
 import type { VueStocks } from '@lce/contrats';
 import { API, Session } from '@lce/session';
 
+export const LIBELLES_MOUVEMENT: Record<string, string> = {
+  ENTREE: 'Réception',
+  SORTIE: 'Sortie',
+  RESERVATION: 'Réservation',
+  LIBERATION: 'Libération',
+  REINTEGRATION: 'Retour à l’entrepôt',
+  INVENTAIRE: 'Correction d’inventaire',
+};
+
+/** Sortie et réservation retirent du stock ; l'inventaire porte déjà son signe. */
+export function signeMouvement(type: string, quantite: number): number {
+  return type === 'SORTIE' || type === 'RESERVATION' ? -quantite : quantite;
+}
+
 /** Vue des stocks partagée : menu, tableau de bord et page Stocks affichent les mêmes chiffres. */
 @Injectable({ providedIn: 'root' })
 export class EtatStocks {

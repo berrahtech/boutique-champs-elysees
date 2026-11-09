@@ -10,92 +10,174 @@ import { Bouton, Icone } from '@lce/ui';
   imports: [FormsModule, Bouton, Icone],
   template: `
     <section class="presentation">
-      <div class="marque"><img src="/logo-lce.png" alt="" width="72" height="72" /><span>Les Champs Élysées</span></div>
-      <div class="empile accroche">
-        <span class="surtitre">Espace de gestion</span>
-        <h1>Pilotez la boutique : catalogue, commandes, livraisons et paiements.</h1>
+      <div class="marque"><img src="/logo-lce.png" alt="" width="56" height="56" /><span>Les Champs Élysées<small>Administration</small></span></div>
+      <div class="accroche">
+        <h1>Toute la boutique, <em>en un coup d'œil.</em></h1>
+        <ul>
+          <li><span><lce-icone nom="produits" [taille]="20" /></span>Catalogue, prix et photos</li>
+          <li><span><lce-icone nom="stock" [taille]="20" /></span>Stocks et alertes en temps réel</li>
+          <li><span><lce-icone nom="securite" [taille]="20" /></span>Accès protégé en deux étapes</li>
+        </ul>
       </div>
-      <span class="petit discret">Accès réservé au personnel de Les Champs Élysées. Toutes les connexions sont enregistrées.</span>
+      <span class="discret">Accès réservé au personnel. Toutes les connexions sont enregistrées.</span>
     </section>
 
     <section class="droite">
-      <form class="carte" (ngSubmit)="valider()" novalidate>
+      <form (ngSubmit)="valider()" novalidate>
         @if (etape() === 'identifiants') {
-          <div class="empile"><h2>Connexion</h2><span class="attenue petit">Utilisez votre numéro ou votre adresse professionnelle.</span></div>
+          <div class="tete">
+            <h2>Connexion</h2>
+            <p>Avec votre numéro ou votre adresse professionnelle.</p>
+          </div>
           <div class="champ">
             <label for="identifiant">Téléphone ou e-mail</label>
-            <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" [(ngModel)]="identifiant" />
+            <input id="identifiant" name="identifiant" class="saisie" autocomplete="username" placeholder="70 00 00 00 ou nom@leschampselysees.ml" [(ngModel)]="identifiant" />
           </div>
           <div class="champ">
             <label for="mdp">Mot de passe</label>
-            <input id="mdp" name="mdp" class="saisie" type="password" autocomplete="current-password" [(ngModel)]="motDePasse" />
+            <span class="avec-bouton">
+              <input id="mdp" name="mdp" class="saisie" [type]="mdpVisible() ? 'text' : 'password'" autocomplete="current-password" placeholder="Votre mot de passe" [(ngModel)]="motDePasse" />
+              <button type="button" class="oeil" [attr.aria-label]="mdpVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'" [attr.aria-pressed]="mdpVisible()" (click)="mdpVisible.set(!mdpVisible())">
+                <lce-icone [nom]="mdpVisible() ? 'masquer' : 'voir'" [taille]="20" />
+              </button>
+            </span>
           </div>
         } @else {
-          <span class="pastille-cadenas"><lce-icone nom="cadenas" [taille]="28" /></span>
-          <div class="empile"><h2>Vérification en deux étapes</h2><span class="attenue petit">Saisissez le code à 6 chiffres envoyé sur votre téléphone et votre e-mail vérifié.</span></div>
+          <span class="cadenas"><lce-icone nom="cadenas" [taille]="26" /></span>
+          <div class="tete">
+            <h2>Vérification</h2>
+            <p>Saisissez le code à 6 chiffres reçu par SMS et par e-mail. Il est valable 5 minutes.</p>
+          </div>
           <div class="champ">
             <label for="code">Code de vérification</label>
-            <input id="code" name="code" class="saisie code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" [(ngModel)]="code" />
+            <input id="code" name="code" class="saisie code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" [(ngModel)]="code" />
           </div>
         }
         @if (erreur()) {
           <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
         }
-        <button lceBouton type="submit" [pleineLargeur]="true" [disabled]="envoi()">
-          {{ envoi() ? 'Vérification…' : etape() === 'identifiants' ? 'Continuer' : 'Se connecter' }}
+        <button lceBouton type="submit" class="envoyer" [pleineLargeur]="true" [disabled]="envoi()">
+          @if (envoi()) {
+            <span class="rouage" aria-hidden="true"></span>Vérification…
+          } @else {
+            {{ etape() === 'identifiants' ? 'Continuer' : 'Se connecter' }}<lce-icone nom="fleche-droite" [taille]="18" />
+          }
         </button>
-        <span class="petit attenue">Après 5 tentatives incorrectes, le compte est bloqué 15 minutes.</span>
+        @if (etape() === 'code') {
+          <button type="button" class="retour" (click)="revenir()"><lce-icone nom="chevron-gauche" [taille]="16" />Modifier mes identifiants</button>
+        } @else {
+          <span class="note">Après 5 tentatives incorrectes, le compte est bloqué 15 minutes.</span>
+        }
       </form>
     </section>
   `,
   styles: `
     :host {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       min-height: 100vh;
+      background: var(--lce-surface);
     }
     .presentation {
-      flex: 1 1 480px;
+      position: relative;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: 40px;
-      padding: 64px;
+      overflow: hidden;
+      padding: 48px 64px;
       background: var(--lce-navy);
       color: var(--lce-on-navy);
+      isolation: isolate;
+    }
+    // Disque doré et anneau, comme la bannière de la boutique.
+    .presentation::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      right: -180px;
+      bottom: -200px;
+      width: 520px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--lce-gold);
+    }
+    .presentation::after {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      top: 90px;
+      right: 70px;
+      width: 120px;
+      aspect-ratio: 1;
+      border: 2px solid rgb(255 255 255 / 16%);
+      border-radius: 50%;
     }
     .marque {
       display: flex;
       align-items: center;
       gap: 14px;
-      font: 600 24px/30px var(--lce-police-titre);
+      font: 800 20px/24px var(--lce-police-titre);
     }
     .marque img {
       object-fit: contain;
     }
-    .accroche {
-      max-width: 460px;
-      gap: 14px;
-    }
-    .surtitre {
-      color: var(--lce-gold-bright);
-      font: 600 12px/16px var(--lce-police-texte);
+    .marque small {
+      display: block;
+      margin-top: 2px;
+      color: var(--lce-gold);
+      font: 700 11px/14px var(--lce-police-texte);
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }
+    .accroche {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      max-width: 480px;
+    }
     h1 {
       margin: 0;
-      font: 600 40px/48px var(--lce-police-titre);
+      font: 800 46px/54px var(--lce-police-titre);
+      letter-spacing: -0.02em;
     }
-    h2 {
+    h1 em {
+      display: block;
+      color: var(--lce-gold);
+      font-style: normal;
+    }
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
       margin: 0;
-      font: 600 28px/36px var(--lce-police-titre);
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: rgb(255 255 255 / 86%);
+      font: 500 16px/22px var(--lce-police-texte);
+    }
+    li span {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgb(255 255 255 / 8%);
+      color: var(--lce-gold);
     }
     .discret {
-      color: #a9b2c9;
+      max-width: 300px;
+      color: rgb(255 255 255 / 50%);
+      font-size: 13px;
+      line-height: 20px;
     }
+
     .droite {
-      flex: 1 1 480px;
       display: grid;
       place-items: center;
       padding: 48px 24px;
@@ -103,31 +185,130 @@ import { Bouton, Icone } from '@lce/ui';
     form {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      width: min(100%, 440px);
-      padding: 36px;
+      gap: 20px;
+      width: min(100%, 420px);
+      animation: adm-entree 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
     }
-    .pastille-cadenas {
+    .tete h2 {
+      margin: 0 0 6px;
+      font: 800 34px/42px var(--lce-police-titre);
+      letter-spacing: -0.01em;
+    }
+    .tete p {
+      margin: 0;
+      color: var(--lce-ink-muted);
+      font-size: 15px;
+      line-height: 22px;
+    }
+    .saisie {
+      height: 52px;
+    }
+    .avec-bouton {
+      position: relative;
+    }
+    .avec-bouton .saisie {
+      padding-right: 52px;
+    }
+    .oeil {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--lce-ink-muted);
+      cursor: pointer;
+    }
+    .oeil:hover {
+      color: var(--lce-ink);
+    }
+    .cadenas {
       display: grid;
       place-items: center;
       width: 56px;
       height: 56px;
-      border-radius: 50%;
-      background: var(--lce-primaire-soft);
-      color: var(--lce-navy);
+      border-radius: 16px;
+      background: var(--lce-gold-soft);
+      color: var(--lce-gold-text);
     }
     .code {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.3em;
+      height: 64px;
+      font: 800 28px/1 var(--lce-police-titre);
+      letter-spacing: 0.5em;
+      text-align: center;
     }
-    @media (max-width: 767px) {
+    .envoyer {
+      height: 52px;
+      margin-top: 4px;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+    .rouage {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgb(255 255 255 / 35%);
+      border-top-color: var(--lce-on-navy);
+      border-radius: 50%;
+      animation: tourner 700ms linear infinite;
+    }
+    @keyframes tourner {
+      to {
+        transform: rotate(1turn);
+      }
+    }
+    .note {
+      color: var(--lce-ink-muted);
+      font-size: 13px;
+      line-height: 20px;
+      text-align: center;
+    }
+    .retour {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: 0;
+      background: none;
+      color: var(--lce-navy-500);
+      font: 700 14px/20px var(--lce-police-texte);
+      cursor: pointer;
+    }
+    .retour:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 960px) {
+      :host {
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+      }
       .presentation {
-        padding: 32px 24px;
+        padding: 24px;
+        gap: 20px;
+      }
+      .presentation::before {
+        width: 260px;
+        right: -110px;
+        bottom: -150px;
+      }
+      .presentation::after,
+      ul,
+      .discret {
+        display: none;
       }
       h1 {
         font-size: 28px;
-        line-height: 36px;
+        line-height: 34px;
+      }
+      .droite {
+        padding: 32px 20px 48px;
+      }
+      .tete h2 {
+        font-size: 28px;
+        line-height: 34px;
       }
     }
   `,
@@ -139,6 +320,7 @@ export class Connexion {
   protected readonly etape = signal<'identifiants' | 'code'>('identifiants');
   protected readonly envoi = signal(false);
   protected readonly erreur = signal<string | null>(null);
+  protected readonly mdpVisible = signal(false);
   protected identifiant = '';
   protected motDePasse = '';
   protected code = '';
@@ -148,6 +330,12 @@ export class Connexion {
     effect(() => {
       if (this.session.permissions().has('tableau.voir')) void this.router.navigateByUrl('/admin');
     });
+  }
+
+  protected revenir(): void {
+    this.etape.set('identifiants');
+    this.code = '';
+    this.erreur.set(null);
   }
 
   protected async valider(): Promise<void> {

@@ -3,21 +3,31 @@
     <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />Ce produit est introuvable ou n'a pas pu être chargé.</p>
     <a class="petit" routerLink="/admin/produits">Retour aux produits</a>
   } @else if (id() && !produit()) {
-    <p class="attente" role="status">Chargement du produit…</p>
+    <div class="deux-colonnes" role="status" aria-label="Chargement du produit">
+      <div class="principal">
+        <div class="carte formulaire"><span class="squelette" style="height: 18px; width: 40%"></span><span class="squelette" style="height: 46px"></span><span class="squelette" style="height: 46px"></span><span class="squelette" style="height: 150px"></span></div>
+      </div>
+      <div class="lateral">
+        <div class="carte formulaire"><span class="squelette" style="height: 18px; width: 50%"></span><span class="squelette" style="height: 46px"></span></div>
+        <div class="carte formulaire"><span class="squelette" style="height: 18px; width: 30%"></span><span class="squelette" style="height: 46px"></span></div>
+      </div>
+    </div>
   } @else {
     <form class="formulaire" (ngSubmit)="enregistrer()" novalidate>
-      <div class="adm-titre">
-        <div class="empile">
-          <h1>{{ creation() ? 'Nouveau produit' : nom }}</h1>
-          <span class="petit attenue">
-            {{ publie() ? 'Publié' : 'Brouillon' }}
-            @if (produit(); as p) {
-              · Réf. {{ p.reference ?? '—' }}
-            }
-          </span>
+      <div class="adm-titre entete-fiche">
+        <div class="titre-fiche">
+          <a class="retour" routerLink="/admin/produits" aria-label="Retour aux produits"><lce-icone nom="chevron-gauche" [taille]="20" /></a>
+          <div class="empile">
+            <h1>{{ creation() ? 'Nouveau produit' : nom }}</h1>
+            <span class="outils petit">
+              <span class="etat" [class.normal]="publie()" [class.brouillon]="!publie()">{{ publie() ? 'En ligne' : 'Brouillon' }}</span>
+              @if (produit(); as p) {
+                <span class="attenue chiffres">Réf. {{ p.reference ?? '—' }}</span>
+              }
+            </span>
+          </div>
         </div>
         <div class="outils">
-          <a lceBouton variante="contour" [petit]="true" routerLink="/admin/produits">Retour</a>
           @if (peutModifier()) {
             <button lceBouton variante="primaire" type="submit" [disabled]="envoi()">{{ envoi() ? 'Enregistrement…' : 'Enregistrer' }}</button>
           }
