@@ -17,14 +17,14 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
 
-# Police : Figtree doit être embarquée (connexions instables).
+# Police : Lato doit être embarquée (connexions instables).
 # Déposer les fichiers .ttf dans fonts/ puis décommenter :
 # flutter:
 #   fonts:
-#     - family: Figtree
+#     - family: Lato
 #       fonts:
-#         - asset: packages/lce_ui/fonts/Figtree-Regular.ttf
-#         - asset: packages/lce_ui/fonts/Figtree-SemiBold.ttf
-#           weight: 600
-#         - asset: packages/lce_ui/fonts/Figtree-Bold.ttf
+#         - asset: packages/lce_ui/fonts/Lato-Regular.ttf
+#         - asset: packages/lce_ui/fonts/Lato-Bold.ttf
 #           weight: 700
+#         - asset: packages/lce_ui/fonts/Lato-Black.ttf
+#           weight: 900

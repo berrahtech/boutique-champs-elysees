@@ -14,10 +14,9 @@
 
 @mixin texte-h1 {
   font-family: var(--lce-police-titre);
-  font-size: 26px;
-  line-height: 32px;
+  font-size: 30px;
+  line-height: 38px;
   font-weight: 700;
-  letter-spacing: -0.015em;
   @media (max-width: 767px) {
     font-size: 26px;
     line-height: 32px;
@@ -28,19 +27,14 @@
   font-family: var(--lce-police-titre);
   font-size: 22px;
   line-height: 28px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  @media (max-width: 767px) {
-    font-size: 22px;
-    line-height: 28px;
-  }
+  font-weight: 700;
 }
 
 @mixin texte-h3 {
   font-family: var(--lce-police-titre);
-  font-size: 18px;
-  line-height: 26px;
-  font-weight: 600;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 700;
 }
 
 @mixin texte-body-lg {
@@ -61,7 +55,7 @@
   font-family: var(--lce-police-texte);
   font-size: 14px;
   line-height: 20px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 @mixin texte-small {
@@ -75,13 +69,13 @@
   font-family: var(--lce-police-texte);
   font-size: 13px;
   line-height: 18px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 @mixin texte-prix {
   font-family: var(--lce-police-texte);
   font-size: 18px;
   line-height: 24px;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }

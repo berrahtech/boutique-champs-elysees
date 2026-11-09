@@ -1,104 +1,96 @@
 @if (produit(); as p) {
-  <div class="lce-conteneur page">
-    <nav class="fil" aria-label="Fil d'Ariane">
-      <a routerLink="/">Accueil</a>
+  <nav class="fil-bande" aria-label="Fil d'Ariane">
+    <div class="lce-conteneur fil">
+      <a routerLink="/"><lce-icone nom="accueil" [taille]="14" />Accueil</a>
       <lce-icone nom="chevron-droite" [taille]="14" />
       <a [routerLink]="['/categorie', p.categorie.slug]">{{ p.categorie.nom }}</a>
       <lce-icone nom="chevron-droite" [taille]="14" />
       <span aria-current="page">{{ p.nom }}</span>
-    </nav>
+    </div>
+  </nav>
 
+  <div class="lce-conteneur page">
     <div class="haut">
       <section class="galerie" aria-label="Galerie">
-        <div class="vignettes" role="tablist" aria-label="Vues du produit">
-          @for (i of vues(); track i) {
-            <button type="button" role="tab" class="vignette" [class.on]="vue() === i" [attr.aria-selected]="vue() === i" [attr.aria-label]="'Vue ' + (i + 1)" (click)="vue.set(i)">
-              @if (p.images[i]; as image) {
-                <img [src]="image.url200" alt="" loading="lazy" />
-              } @else {
-                <lce-icone [nom]="i === 2 ? 'colis' : ico(p.icone)" [taille]="i === 0 ? 36 : 28" />
-              }
-            </button>
-          }
-        </div>
         <div class="visuel">
           @if (imageCourante(); as image) {
-            <img [src]="image.url800" [srcset]="image.url400 + ' 400w, ' + image.url800 + ' 800w'" sizes="(max-width: 860px) 100vw, 50vw" [alt]="p.nom" />
+            <img [src]="image.url800" [srcset]="image.url400 + ' 400w, ' + image.url800 + ' 800w'" sizes="(max-width: 860px) 100vw, 45vw" width="800" height="800" fetchpriority="high" [alt]="p.nom" />
           } @else {
-            <lce-icone [nom]="vue() === 2 ? 'colis' : ico(p.icone)" [taille]="vue() === 1 ? 260 : 200" />
+            <lce-icone [nom]="ico(p.icone)" [taille]="160" />
           }
-          <div class="badges">
-            @if (remise()) {
-              <lce-badge type="promo">−{{ remise() }} %</lce-badge>
-            }
-            @if (p.nouveau) {
-              <lce-badge type="nouveau">Nouveau</lce-badge>
+        </div>
+        @if (p.images.length > 1) {
+          <div class="vignettes" role="tablist" aria-label="Vues du produit">
+            @for (i of vues(); track i) {
+              <button type="button" role="tab" class="vignette" [class.on]="vue() === i" [attr.aria-selected]="vue() === i" [attr.aria-label]="'Vue ' + (i + 1)" (click)="vue.set(i)">
+                <img [src]="p.images[i].url200" alt="" loading="lazy" width="200" height="200" />
+              </button>
             }
           </div>
-        </div>
+        }
       </section>
 
       <section class="infos" aria-label="Informations produit">
-        <div class="empile">
-          <h1 class="titre-1">{{ p.nom }}</h1>
-          @if (p.nbAvis) {
-            <button type="button" class="note" (click)="onglet.set('avis')">
-              <lce-etoiles [note]="p.noteMoyenne" [taille]="18" />
-              <b>{{ p.noteMoyenne.toLocaleString('fr-FR') }}</b>
-              <span class="attenue petit">({{ p.nbAvis }})</span>
-            </button>
+        @if (p.nbAvis) {
+          <button type="button" class="note" (click)="onglet.set('avis')">
+            <lce-etoiles [note]="p.noteMoyenne" [taille]="18" />
+            <b>{{ p.noteMoyenne.toLocaleString('fr-FR') }}</b>
+            <span class="attenue petit">({{ p.nbAvis }} avis)</span>
+          </button>
+        }
+        <h1>{{ p.nom }}</h1>
+        <dl class="fiche">
+          @if (p.reference) {
+            <div><dt>Réf.</dt><dd>{{ p.reference }}</dd></div>
           }
-        </div>
+          <div><dt>Disponibilité</dt>
+            <dd class="stock" [class.rupture]="p.stock === 0" [class.faible]="p.stock > 0 && p.stock <= 5">
+              {{ p.stock === 0 ? 'Rupture de stock' : p.stock <= 5 ? 'Plus que ' + p.stock : 'En stock' }}
+            </dd>
+          </div>
+          <div><dt>Catégorie</dt><dd>{{ p.categorie.nom }}</dd></div>
+        </dl>
 
         <div class="prix">
-          <b [class.promo]="remise()" class="chiffres">{{ p.prix | fcfa }}</b>
+          <b class="chiffres">{{ p.prix | fcfa }}</b>
           @if (remise()) {
             <s class="chiffres"><span class="lce-visuellement-masque">au lieu de </span>{{ p.prixBarre | fcfa }}</s>
+            <lce-badge type="promo">−{{ remise() }} %</lce-badge>
           }
         </div>
         <hr class="filet" />
 
         @if (p.stock > 0) {
-          <span class="stock" [class.faible]="p.stock <= 5">
-            <lce-icone nom="valide-rond" [taille]="18" />
-            {{ p.stock <= 5 ? 'Plus que ' + p.stock : 'En stock' }}
-          </span>
           @if (maximum() > 0) {
             <div class="achat">
               <lce-quantite [(valeur)]="quantite" [max]="maximum()" />
-              <button lceBouton variante="primaire" type="button" class="ajouter" (click)="ajouter()">
-                <lce-icone nom="panier-ajouter" [taille]="20" />Ajouter au panier
-              </button>
-              <button
-                type="button"
-                class="favori"
-                [class.actif]="favoris.ensemble().has(p.id)"
-                [attr.aria-pressed]="favoris.ensemble().has(p.id)"
-                [attr.aria-label]="favoris.ensemble().has(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-                (click)="actions.basculerFavori(p)"
-              >
-                <lce-icone nom="favoris" [taille]="22" [plein]="favoris.ensemble().has(p.id)" />
-              </button>
+              <button lceBouton type="button" class="acheter" (click)="acheterMaintenant()">Acheter maintenant</button>
+              <button lceBouton variante="bleu" type="button" class="ajouter" (click)="ajouter()"><lce-icone nom="panier" [taille]="18" />Ajouter</button>
             </div>
-            <button lceBouton variante="doux" type="button" [pleineLargeur]="true" (click)="acheterMaintenant()">Acheter maintenant</button>
           } @else {
             <p class="info-panier">
               <lce-icone nom="information" [taille]="18" />Stock déjà dans le panier.
               <a routerLink="/panier">Voir le panier</a>
             </p>
           }
-        } @else {
-          <span class="stock rupture"><lce-icone nom="alerte" [taille]="18" />Rupture</span>
-          <button lceBouton variante="contour" type="button" (click)="actions.basculerFavori(p)">
-            <lce-icone nom="favoris" [taille]="20" [plein]="favoris.ensemble().has(p.id)" />
-            Favoris
-          </button>
         }
 
-        <ul class="rassurance">
-          <li><lce-icone nom="livraison" [taille]="20" />Livraison 24–48 h à Bamako</li>
-          <li><lce-icone nom="mobile" [taille]="20" />Orange Money, Moov Money, carte, espèces</li>
-        </ul>
+        <div class="liens-produit">
+          <button type="button" [class.actif]="favoris.ensemble().has(p.id)" [attr.aria-pressed]="favoris.ensemble().has(p.id)" (click)="actions.basculerFavori(p)">
+            <lce-icone nom="favoris" [taille]="18" [plein]="favoris.ensemble().has(p.id)" />Favoris
+          </button>
+        </div>
+
+        <div class="paiement-sur">
+          <span>Paiement sécurisé</span>
+          <ul>
+            <li>Orange Money</li>
+            <li>Moov Money</li>
+            <li>Visa</li>
+            <li>Mastercard</li>
+            <li>Espèces</li>
+          </ul>
+        </div>
       </section>
     </div>
 
@@ -111,13 +103,25 @@
 
       @switch (onglet()) {
         @case ('description') {
-          <div id="p-desc" role="tabpanel" aria-labelledby="t-desc" class="panneau-onglet">
-            <p>{{ p.description }}</p>
+          <div id="p-desc" role="tabpanel" aria-labelledby="t-desc" class="panneau-onglet colonnes-description">
+            <div>
+              <h2>Description</h2>
+              <p>{{ p.description }}</p>
+            </div>
+            <div>
+              <h2>Avantages</h2>
+              <ul class="avantages">
+                <li><lce-icone nom="livraison" [taille]="20" />Livraison 24–48 h à Bamako</li>
+                <li><lce-icone nom="mobile" [taille]="20" />Orange Money et Moov Money</li>
+                <li><lce-icone nom="especes" [taille]="20" />Paiement à la livraison</li>
+                <li><lce-icone nom="support" [taille]="20" />Service client</li>
+              </ul>
+            </div>
           </div>
         }
         @case ('caracteristiques') {
           <div id="p-car" role="tabpanel" aria-labelledby="t-car" class="panneau-onglet">
-            <table class="specs large">
+            <table class="specs">
               <tbody>
                 <tr><th scope="row">Référence</th><td>{{ p.reference }}</td></tr>
                 <tr><th scope="row">Catégorie</th><td>{{ p.categorie.nom }}</td></tr>
@@ -144,8 +148,8 @@
     @if (similaires().length) {
       <section aria-labelledby="similaires">
         <div class="sec-tete">
-          <h2 id="similaires" class="titre-2">Produits similaires</h2>
-          <a class="lien" [routerLink]="['/categorie', p.categorie.slug]">Tout voir<lce-icone nom="chevron-droite" [taille]="16" /></a>
+          <h2 id="similaires" class="titre-section">Produits <em>similaires</em></h2>
+          <a class="voir-tout" [routerLink]="['/categorie', p.categorie.slug]">Voir tout</a>
         </div>
         <lce-cartes [produits]="similaires()" />
       </section>
@@ -157,8 +161,11 @@
   <div class="a-venir">
     <lce-icone nom="recherche" [taille]="48" />
     <h1 class="titre-2">Produit introuvable</h1>
-    <a lceBouton variante="primaire" routerLink="/boutique">Voir la boutique</a>
+    <a lceBouton routerLink="/boutique">Voir la boutique</a>
   </div>
 } @else {
-  <p class="attente" role="status">Chargement du produit…</p>
+  <div class="lce-conteneur page attente" role="status" aria-label="Chargement du produit">
+    <div class="attente-photo"></div>
+    <div class="attente-texte"><span></span><span></span><span></span></div>
+  </div>
 }

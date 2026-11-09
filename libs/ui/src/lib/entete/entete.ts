@@ -7,14 +7,15 @@ import { NomIcone } from '../icone/icones';
 export interface CategorieMenu {
   slug: string;
   nom: string;
+  /** Libellé court de la rangée de pastilles. */
+  court?: string;
   icone?: NomIcone;
 }
 
 /**
- * En-tête du site : menu, logo, zone de livraison, recherche en pastille,
- * notifications, compte, favoris et panier ; puis barre secondaire avec le
- * panneau des catégories et les raccourcis. Sur téléphone, la recherche passe
- * sur sa propre ligne et la barre secondaire défile.
+ * En-tête du site : bandeau noir, logo, pastille promotions, recherche, offres,
+ * compte, favoris et panier, puis pastilles des catégories. Le bouton menu ouvre
+ * le panneau complet ; sur téléphone, la recherche passe sur sa propre ligne.
  */
 @Component({
   selector: 'lce-entete',
@@ -27,6 +28,17 @@ export interface CategorieMenu {
   template: `
     <a class="evitement" href="#contenu">Aller au contenu</a>
 
+    <div class="bandeau">
+      <div class="lce-conteneur bandeau-ligne">
+        <span>Bienvenue aux Champs Élysées</span>
+        <nav aria-label="Services">
+          <span class="zone"><lce-icone nom="localisation" [taille]="14" />Bamako, Mali</span>
+          <a routerLink="/compte/commandes"><lce-icone nom="livraison" [taille]="14" />Suivre ma commande</a>
+          <a routerLink="/aide"><lce-icone nom="aide" [taille]="14" />Aide</a>
+        </nav>
+      </div>
+    </div>
+
     <header class="barre">
       <div class="lce-conteneur ligne">
         <button
@@ -37,35 +49,34 @@ export interface CategorieMenu {
           [attr.aria-label]="menuOuvert() ? 'Fermer le menu des catégories' : 'Ouvrir le menu des catégories'"
           (click)="menuOuvert.set(!menuOuvert())"
         >
-          <lce-icone [nom]="menuOuvert() ? 'fermer' : 'menu'" [taille]="20" />
+          <lce-icone [nom]="menuOuvert() ? 'fermer' : 'menu'" [taille]="22" />
         </button>
 
         <a routerLink="/" class="marque" aria-label="Les Champs Élysées, accueil">
           <img src="/logo-lce.png" alt="" width="44" height="44" />
-          <span>Les Champs Élysées</span>
+          <span>LES CHAMPS ÉLYSÉES</span>
         </a>
 
-        <span class="zone"><lce-icone nom="localisation" [taille]="18" />Bamako, Mali</span>
+        <a routerLink="/promotions" class="vignette-promo"><span>PROMOS</span></a>
 
         <form class="recherche" role="search" (ngSubmit)="rechercher.emit(requete.trim())">
           <button type="submit" aria-label="Lancer la recherche"><lce-icone nom="recherche" [taille]="18" /></button>
           <label for="lce-recherche" class="lce-visuellement-masque">Rechercher un produit</label>
-          <input id="lce-recherche" name="q" type="search" autocomplete="off" placeholder="Rechercher" [(ngModel)]="requete" />
+          <input id="lce-recherche" name="q" type="search" autocomplete="off" placeholder="Rechercher un produit, une marque…" [(ngModel)]="requete" />
         </form>
 
         <nav class="actions" aria-label="Mon espace">
-          <a routerLink="/compte/notifications" aria-label="Notifications" title="Notifications"><lce-icone nom="cloche" [taille]="22" /></a>
-          <a routerLink="/compte" routerLinkActive="actif" [attr.aria-label]="prenom() ? 'Mon compte, ' + prenom() : 'Mon compte'" [title]="prenom() || 'Mon compte'">
-            <lce-icone nom="compte" [taille]="22" />
-          </a>
-          <a routerLink="/favoris" routerLinkActive="actif" [attr.aria-label]="'Favoris, ' + nbFavoris()" title="Favoris">
-            <lce-icone nom="favoris" [taille]="22" [plein]="nbFavoris() > 0" />
+          <a routerLink="/favoris" routerLinkActive="actif" class="offres">
+            <lce-icone nom="favoris" [taille]="20" [plein]="nbFavoris() > 0" /><span>Favoris</span>
             @if (nbFavoris() > 0) {
               <b class="compteur" aria-hidden="true">{{ nbFavoris() }}</b>
             }
           </a>
-          <a routerLink="/panier" routerLinkActive="actif" [attr.aria-label]="'Panier, ' + nbArticles() + ' article' + (nbArticles() > 1 ? 's' : '')" title="Panier">
-            <lce-icone nom="panier" [taille]="22" />
+          <a routerLink="/compte" routerLinkActive="actif">
+            <lce-icone nom="compte" [taille]="20" /><span>{{ prenom() || 'Se connecter' }}</span>
+          </a>
+          <a routerLink="/panier" routerLinkActive="actif" [attr.aria-label]="'Panier, ' + nbArticles() + ' article' + (nbArticles() > 1 ? 's' : '')">
+            <lce-icone nom="panier" [taille]="20" /><span>Panier</span>
             @if (nbArticles() > 0) {
               <b class="compteur" aria-hidden="true">{{ nbArticles() > 99 ? '99+' : nbArticles() }}</b>
             }
@@ -73,18 +84,13 @@ export interface CategorieMenu {
         </nav>
       </div>
 
-      <div class="secondaire">
-        <div class="lce-conteneur secondaire-ligne">
-          <button type="button" class="tout" [attr.aria-expanded]="menuOuvert()" aria-controls="lce-categories" (click)="menuOuvert.set(!menuOuvert())">
-            <lce-icone nom="categories" [taille]="16" />Catégories
-          </button>
-          <nav aria-label="Raccourcis" class="raccourcis">
-            <a routerLink="/promotions" routerLinkActive="on">Promotions</a>
-            <a routerLink="/boutique" [queryParams]="{ filtre: 'nouveautes' }">Nouveautés</a>
-            <a routerLink="/boutique" [queryParams]="{ filtre: 'meilleures-ventes' }">Meilleures ventes</a>
-          </nav>
-          <a routerLink="/aide" class="aide">Aide</a>
-        </div>
+      <div class="pastilles">
+        <nav class="lce-conteneur pastilles-ligne" aria-label="Rayons">
+          @for (categorie of categories(); track categorie.slug) {
+            <a [routerLink]="['/categorie', categorie.slug]" routerLinkActive="on">{{ categorie.court ?? categorie.nom }}</a>
+          }
+          <a routerLink="/promotions" routerLinkActive="on">Promotions</a>
+        </nav>
       </div>
 
       <div class="lce-conteneur ancre">
@@ -101,57 +107,94 @@ export interface CategorieMenu {
   styles: `
     :host {
       display: block;
+      view-transition-name: entete;
     }
     .evitement {
       position: absolute;
       left: -9999px;
-      z-index: 10;
+      z-index: 20;
       padding: 8px 16px;
-      background: var(--lce-surface);
-      color: var(--lce-navy);
+      background: var(--lce-gold);
+      color: var(--lce-on-gold);
     }
     .evitement:focus {
       left: 16px;
       top: 8px;
     }
 
+    .bandeau {
+      background: var(--lce-navy-700);
+      color: var(--lce-on-navy);
+      font-size: 13px;
+      line-height: 18px;
+    }
+    .bandeau-ligne {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      min-height: 36px;
+    }
+    .bandeau nav {
+      display: flex;
+    }
+    .bandeau nav > * {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding-inline: 16px;
+      border-left: 1px solid rgb(255 255 255 / 30%);
+    }
+    .bandeau nav > :first-child {
+      border-left: 0;
+    }
+    .bandeau nav > :last-child {
+      padding-right: 0;
+    }
+    .bandeau a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .bandeau a:hover {
+      text-decoration: underline;
+    }
+
     .barre {
       position: relative;
       z-index: 15;
-      background: var(--lce-navy);
-      color: var(--lce-on-navy);
+      background: var(--lce-surface);
+      color: var(--lce-ink);
     }
     .ligne {
       display: flex;
       align-items: center;
-      gap: 24px;
-      padding-block: 10px;
+      gap: 20px;
+      padding-block: 12px;
     }
     .bouton-menu {
       flex: none;
       display: grid;
       place-items: center;
-      width: 36px;
-      height: 36px;
-      margin-right: -4px;
+      width: 44px;
+      height: 44px;
       border: 0;
-      border-radius: 6px;
-      background: var(--lce-nuit-claire);
-      color: inherit;
+      border-radius: var(--lce-rayon-controle);
+      background: var(--lce-info-soft);
+      color: var(--lce-ink);
       cursor: pointer;
+      transition: background-color 150ms;
     }
     .bouton-menu:hover {
-      background: var(--lce-navy-500);
+      background: var(--lce-neutre-soft);
     }
     .marque {
       flex: none;
       display: flex;
       align-items: center;
       gap: 8px;
-      color: inherit;
+      color: var(--lce-noir);
       text-decoration: none;
-      font: 700 18px/22px var(--lce-police-titre);
-      letter-spacing: -0.01em;
+      font: 900 20px/24px var(--lce-police-titre);
       white-space: nowrap;
     }
     .marque img {
@@ -160,27 +203,34 @@ export interface CategorieMenu {
       height: 44px;
       object-fit: contain;
     }
-    .zone {
+    .vignette-promo {
       flex: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font: 500 13px/18px var(--lce-police-texte);
-      white-space: nowrap;
+      padding: 4px 10px;
+      background: var(--lce-promo);
+      color: var(--lce-gold-bright);
+      font: italic 900 13px/18px var(--lce-police-titre);
+      text-decoration: none;
+      transform: skewX(-10deg);
+      transition: transform 150ms;
+    }
+    .vignette-promo:hover {
+      transform: skewX(-10deg) scale(1.06);
+    }
+    .vignette-promo span {
+      display: block;
     }
     .recherche {
       flex: 1;
       min-width: 0;
       display: flex;
       align-items: center;
-      height: 40px;
+      height: 44px;
       padding-inline: 6px 16px;
-      border-radius: var(--lce-rayon-pastille);
-      background: var(--lce-surface);
+      border-radius: var(--lce-rayon-controle);
+      background: var(--lce-info-soft);
     }
     .recherche:focus-within {
-      outline: 2px solid var(--lce-on-navy);
-      outline-offset: 2px;
+      outline: 2px solid var(--lce-navy-500);
     }
     .recherche button {
       flex: none;
@@ -189,13 +239,9 @@ export interface CategorieMenu {
       width: 32px;
       height: 32px;
       border: 0;
-      border-radius: 50%;
       background: none;
-      color: var(--lce-ink-muted);
+      color: var(--lce-ink);
       cursor: pointer;
-    }
-    .recherche button:hover {
-      color: var(--lce-navy);
     }
     .recherche input {
       flex: 1;
@@ -214,25 +260,42 @@ export interface CategorieMenu {
       flex: none;
       display: flex;
       align-items: center;
-      gap: 4px;
     }
     .actions a {
       position: relative;
-      display: grid;
-      place-items: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      color: var(--lce-on-navy);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-left: 1px solid var(--lce-line);
+      color: var(--lce-ink-muted);
+      font: 700 14px/20px var(--lce-police-texte);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 150ms;
+    }
+    .actions a:first-child {
+      border-left: 0;
+    }
+    .actions a:last-child {
+      padding-right: 0;
+    }
+    .actions a span {
+      overflow: hidden;
+      max-width: 110px;
+      text-overflow: ellipsis;
     }
     .actions a:hover,
     .actions a.actif {
-      background: var(--lce-nuit-claire);
+      color: var(--lce-noir);
+    }
+    .actions .offres {
+      color: var(--lce-orange);
     }
     .compteur {
       position: absolute;
-      top: 1px;
-      right: 0;
+      top: -4px;
+      left: 26px;
       min-width: 16px;
       height: 16px;
       padding: 0 4px;
@@ -243,57 +306,46 @@ export interface CategorieMenu {
       text-align: center;
     }
 
-    .secondaire {
-      background: var(--lce-navy-700);
+    .pastilles {
+      border-block: 1px solid var(--lce-line);
     }
-    .secondaire-ligne {
+    .pastilles-ligne {
       display: flex;
-      align-items: center;
-      gap: 32px;
-      height: 44px;
-      font: 500 13px/18px var(--lce-police-texte);
-    }
-    .tout {
-      flex: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0;
-      border: 0;
-      background: none;
-      color: inherit;
-      font: 600 13px/18px var(--lce-police-texte);
-      cursor: pointer;
-    }
-    .raccourcis {
-      display: flex;
-      gap: 20px;
-      min-width: 0;
+      gap: 12px;
+      padding-block: 10px;
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .secondaire a {
-      color: #dfe0f5;
-      text-decoration: none;
-      white-space: nowrap;
+    .pastilles-ligne::-webkit-scrollbar {
+      display: none;
     }
-    .secondaire a:hover,
-    .secondaire a.on,
-    .tout:hover {
-      color: var(--lce-on-navy);
-      text-decoration: underline;
-      text-underline-offset: 4px;
-    }
-    .aide {
+    .pastilles a {
       flex: none;
-      margin-left: auto;
+      padding: 7px 16px;
+      border: 1px solid var(--lce-line);
+      border-radius: var(--lce-rayon-pastille);
+      background: var(--lce-surface);
+      color: var(--lce-ink);
+      font: 500 13px/18px var(--lce-police-texte);
+      text-decoration: none;
+      transition:
+        background-color 150ms,
+        color 150ms,
+        border-color 150ms;
+    }
+    .pastilles a:hover {
+      border-color: var(--lce-noir);
+    }
+    .pastilles a.on {
+      border-color: var(--lce-noir);
+      background: var(--lce-noir);
+      color: var(--lce-on-navy);
     }
 
     .ancre {
       position: relative;
     }
     .panneau {
-      display: none;
       position: absolute;
       z-index: 15;
       top: 0;
@@ -302,48 +354,66 @@ export interface CategorieMenu {
       padding: 8px;
       border-radius: 0 0 var(--lce-rayon-carte) var(--lce-rayon-carte);
       background: var(--lce-surface);
-      box-shadow: 0 16px 40px rgb(20 20 70 / 22%);
+      box-shadow: 0 16px 40px rgb(0 0 0 / 18%);
+      opacity: 0;
+      transform: translateY(-6px);
+      visibility: hidden;
+      transition:
+        opacity 150ms,
+        transform 150ms,
+        visibility 150ms;
     }
     .panneau.ouvert {
-      display: block;
+      opacity: 1;
+      transform: none;
+      visibility: visible;
     }
     .panneau a {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 10px 12px;
-      border-radius: 8px;
+      border-radius: var(--lce-rayon-controle);
       color: var(--lce-ink);
-      text-decoration: none;
       font: 500 14px/20px var(--lce-police-texte);
-    }
-    .panneau a lce-icone {
-      color: var(--lce-navy);
+      text-decoration: none;
     }
     .panneau a:hover {
-      background: var(--lce-primaire-soft);
+      background: var(--lce-info-soft);
     }
     .panneau .promo,
     .panneau .promo lce-icone {
       color: var(--lce-promo);
     }
 
-    @media (max-width: 1100px) {
-      .zone {
+    @media (max-width: 1180px) {
+      .vignette-promo {
         display: none;
       }
-      .ligne {
-        gap: 16px;
+      .actions a span {
+        display: none;
+      }
+      .compteur {
+        left: 24px;
       }
     }
     @media (max-width: 767px) {
+      .bandeau nav {
+        display: none;
+      }
+      .bandeau-ligne {
+        justify-content: center;
+        min-height: 30px;
+        font-size: 12px;
+      }
       .ligne {
         flex-wrap: wrap;
         gap: 8px 10px;
         padding-block: 8px 10px;
       }
       .bouton-menu {
-        margin: 0;
+        width: 38px;
+        height: 38px;
       }
       .marque {
         flex: 1;
@@ -356,26 +426,16 @@ export interface CategorieMenu {
         text-overflow: ellipsis;
       }
       .marque img {
-        width: 36px;
-        height: 36px;
-      }
-      .actions {
-        gap: 0;
+        width: 34px;
+        height: 34px;
       }
       .actions a {
-        width: 36px;
-        height: 36px;
-      }
-      .actions a:first-child {
-        display: none;
+        padding: 4px 7px;
+        border-left: 0;
       }
       .recherche {
         order: 3;
         flex-basis: 100%;
-      }
-      .tout,
-      .aide {
-        display: none;
       }
       .panneau {
         left: var(--lce-marge-mobile);

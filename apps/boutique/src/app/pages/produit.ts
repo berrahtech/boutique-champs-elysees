@@ -1,5 +1,5 @@
 import { HttpErrorResponse, httpResource } from '@angular/common/http';
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import type { DetailProduit } from '@lce/contrats';
@@ -8,6 +8,7 @@ import { Badge, Bouton, Etoiles, FcfaPipe, Icone, NomIcone, Quantite } from '@lc
 import { ActionsProduit } from '../composants/actions-produit';
 import { Cartes } from '../composants/cartes';
 import { ErreurChargement } from '../composants/etats';
+import { CacheProduits } from '../donnees/cache-produits';
 import { remiseDe } from '../donnees/catalogue';
 import { Favoris } from '../etat/favoris';
 import { Panier } from '../etat/panier';
@@ -26,6 +27,7 @@ type Onglet = 'description' | 'caracteristiques' | 'avis';
 export class FicheProduit {
   private readonly panier = inject(Panier);
   private readonly recents = inject(Recents);
+  private readonly cache = inject(CacheProduits);
   private readonly router = inject(Router);
   private readonly titre = inject(Title);
   private readonly meta = inject(Meta);
@@ -36,7 +38,9 @@ export class FicheProduit {
 
   protected readonly ressource = httpResource<DetailProduit>(() => `${API}/produits/${encodeURIComponent(this.slug())}`);
   private readonly detail = computed(() => (this.ressource.hasValue() ? this.ressource.value() : undefined));
-  protected readonly produit = computed(() => this.detail()?.produit);
+  /** Le produit vu dans une liste s'affiche aussitôt ; la réponse de l'API le remplace. */
+  protected readonly produit = computed(() => (this.introuvable() ? undefined : (this.detail()?.produit ?? this.cache.lire(this.slug()))));
+  private readonly produitId = computed(() => this.produit()?.id);
   protected readonly similaires = computed(() => this.detail()?.similaires ?? []);
   protected readonly introuvable = computed(() => {
     const e = this.ressource.error();
@@ -57,21 +61,26 @@ export class FicheProduit {
   protected readonly quantite = signal(1);
   protected readonly onglet = signal<Onglet>('description');
   protected readonly vue = signal(0);
-  /** Photos si le produit en a ; sinon l'icône dorée sous trois présentations, comme les maquettes. */
   protected readonly vues = computed(() => {
     const images = this.produit()?.images ?? [];
-    return images.length ? images.map((_, i) => i) : [0, 1, 2];
+    return images.map((_, i) => i);
   });
   protected readonly imageCourante = computed(() => this.produit()?.images[this.vue()] ?? null);
 
   constructor() {
+    // Sur l'identifiant : la réponse de l'API ne doit pas effacer ce que la personne vient de choisir.
+    effect(() => {
+      const id = this.produitId();
+      untracked(() => {
+        this.quantite.set(1);
+        this.vue.set(0);
+        this.onglet.set('description');
+        if (id) this.recents.noter(id);
+      });
+    });
     effect(() => {
       const p = this.produit();
-      this.quantite.set(1);
-      this.vue.set(0);
-      this.onglet.set('description');
       if (p) {
-        this.recents.noter(p.id);
         this.titre.setTitle(titreDePage(p.nom));
         this.meta.updateTag({ name: 'description', content: p.description.slice(0, 160) });
       } else if (this.introuvable()) {

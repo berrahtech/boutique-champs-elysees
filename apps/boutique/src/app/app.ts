@@ -116,7 +116,7 @@ export class App {
   protected readonly notifications = inject(Notifications);
 
   private readonly catalogue = inject(Catalogue);
-  protected readonly categories = computed<CategorieMenu[]>(() => this.catalogue.categories().map((c) => ({ slug: c.slug, nom: c.nom, icone: c.icone as NomIcone })));
+  protected readonly categories = computed<CategorieMenu[]>(() => this.catalogue.categories().map((c) => ({ slug: c.slug, nom: c.nom, court: c.court, icone: c.icone as NomIcone })));
 
   // Provisoire : coordonnées à fournir par Les Champs Élysées.
   protected readonly coordonnees: Coordonnees = {

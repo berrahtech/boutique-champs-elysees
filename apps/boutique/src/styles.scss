@@ -2,6 +2,50 @@
 // des maquettes). Les couleurs viennent toutes des jetons --lce-*.
 @use 'typographie' as t;
 
+// Titres de section en capitales, un mot en jaune ; bouton jaune « Voir tout ».
+.titre-section {
+  margin: 0;
+  color: var(--lce-noir);
+  font: 700 22px/28px var(--lce-police-titre);
+  letter-spacing: 0;
+  text-transform: uppercase;
+
+  em {
+    color: var(--lce-gold);
+    font-style: normal;
+  }
+}
+.voir-tout {
+  flex: none;
+  padding: 6px 14px;
+  border-radius: var(--lce-rayon-badge);
+  background: var(--lce-gold);
+  color: var(--lce-on-gold);
+  font: 900 11px/16px var(--lce-police-titre);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 150ms;
+
+  &:hover {
+    background: var(--lce-gold-bright);
+  }
+}
+
+// Changement de page : fondu court, l'en-tête ne bouge pas.
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 140ms;
+}
+::view-transition-group(entete) {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 .sec {
   padding-block: 40px;
 

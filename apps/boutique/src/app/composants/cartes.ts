@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input } from '@angular/core';
 import type { ProduitPublic } from '@lce/contrats';
 import { CarteProduit, FormatCarte, NomIcone, ProduitCarte } from '@lce/ui';
+import { CacheProduits } from '../donnees/cache-produits';
 import { Favoris } from '../etat/favoris';
 import { ActionsProduit } from './actions-produit';
 
@@ -86,11 +87,16 @@ export function versCarte(p: ProduitPublic): ProduitCarte {
 })
 export class Cartes {
   readonly produits = input.required<ProduitPublic[]>();
-  readonly colonnes = input<'grille-4' | 'grille-3' | 'grille-2' | 'ligne-5' | 'ligne-6'>('grille-4');
+  readonly colonnes = input<'grille-4' | 'grille-3' | 'ligne-5' | 'ligne-6'>('grille-4');
 
   readonly format = input<FormatCarte>('standard');
 
   protected readonly favoris = inject(Favoris);
   protected readonly actions = inject(ActionsProduit);
   protected readonly cartes = computed(() => this.produits().map(versCarte));
+
+  constructor() {
+    const cache = inject(CacheProduits);
+    effect(() => cache.retenir(this.produits()));
+  }
 }

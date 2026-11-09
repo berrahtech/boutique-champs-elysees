@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 export type TypeBadge = 'promo' | 'nouveau' | 'premium';
 
-/** Badge produit : pastille rouge « −20 % », étiquette violette « Nouveauté », « Premium ». */
+/** Badge produit, jaune : « −20 % », « Nouveau » ; sombre : « Premium ». */
 @Component({
   selector: 'lce-badge',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,15 +14,13 @@ export type TypeBadge = 'promo' | 'nouveau' | 'premium';
       padding: 2px 8px;
       border-radius: var(--lce-rayon-badge);
       color: var(--lce-on-navy);
-      font: 600 12px/18px var(--lce-police-texte);
+      font: 700 12px/18px var(--lce-police-texte);
       white-space: nowrap;
     }
-    :host(.lce-badge--promo) {
-      border-radius: var(--lce-rayon-pastille);
-      background: var(--lce-promo);
-    }
+    :host(.lce-badge--promo),
     :host(.lce-badge--nouveau) {
-      background: var(--lce-nouveaute);
+      background: var(--lce-gold);
+      color: var(--lce-on-gold);
     }
     :host(.lce-badge--premium) {
       background: var(--lce-navy);

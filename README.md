@@ -115,7 +115,7 @@ Règle de sécurité : un compte existant n'est rattaché à Google que si son a
 ## À fournir ou à décider
 
 - **Photos :** celles de `apps/api/prisma/photos-demo` et `apps/boutique/public/bannieres` sont des photos Unsplash de démonstration (`CREDITS.md`). Elles sont à remplacer par les vraies photos avant la mise en ligne.
-- **Polices :** les fichiers `.ttf` de Figtree sont à placer dans `mobile/lce_ui/fonts`. Voir `pubspec.yaml`.
+- **Polices :** les fichiers `.ttf` de Lato sont à placer dans `mobile/lce_ui/fonts`. Voir `pubspec.yaml`.
 - **E-mails :** le service d'envoi (`SMTP_URL`) reste à choisir pour la production.
 - **SMS :** le prestataire (Orange, Moov ou un agrégateur) reste à choisir. Il faudra une implémentation de `PasserelleSms`.
 - **Rubriques :** les 10 rubriques de l'espace client et les 8 catégories sont à confronter aux maquettes.

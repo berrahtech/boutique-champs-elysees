@@ -12,15 +12,15 @@ import { Icone } from '@lce/ui';
   template: `
     <div class="tete">
       <div class="titres">
-        <h2>{{ titre() }}</h2>
+        <h2 class="titre-section">{{ titre() }}@if (accent()) {<em>{{ accent() }}</em>}</h2>
       </div>
       <ng-content select="[action]" />
       @if (debordement()) {
         <div class="fleches">
-          <button type="button" [disabled]="auDebut()" [attr.aria-label]="titre() + ' : précédent'" (click)="defiler(-1)">
+          <button type="button" [disabled]="auDebut()" [attr.aria-label]="titre() + (accent() ?? '') + ' : précédent'" (click)="defiler(-1)">
             <lce-icone nom="chevron-gauche" [taille]="18" />
           </button>
-          <button type="button" [disabled]="aLaFin()" [attr.aria-label]="titre() + ' : suivant'" (click)="defiler(1)">
+          <button type="button" [disabled]="aLaFin()" [attr.aria-label]="titre() + (accent() ?? '') + ' : suivant'" (click)="defiler(1)">
             <lce-icone nom="chevron-droite" [taille]="18" />
           </button>
         </div>
@@ -39,16 +39,11 @@ import { Icone } from '@lce/ui';
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .titres {
       flex: 1;
       min-width: 0;
-    }
-    h2 {
-      margin: 0;
-      font: 600 22px/28px var(--lce-police-titre);
-      letter-spacing: -0.01em;
     }
     .fleches {
       flex: none;
@@ -60,10 +55,9 @@ import { Icone } from '@lce/ui';
       place-items: center;
       width: 32px;
       height: 32px;
-      border: 0;
       border-radius: 50%;
       background: var(--lce-surface);
-      box-shadow: 0 1px 4px rgb(22 24 70 / 12%);
+      border: 1px solid var(--lce-line);
       color: var(--lce-ink);
       cursor: pointer;
     }
@@ -92,10 +86,6 @@ import { Icone } from '@lce/ui';
       }
     }
     @media (max-width: 767px) {
-      h2 {
-        font-size: 22px;
-        line-height: 28px;
-      }
       .fleches {
         display: none;
       }
@@ -104,6 +94,8 @@ import { Icone } from '@lce/ui';
 })
 export class Carrousel {
   readonly titre = input.required<string>();
+  /** Fin du titre, en jaune. */
+  readonly accent = input<string>();
 
   private readonly piste = viewChild.required<ElementRef<HTMLElement>>('piste');
 

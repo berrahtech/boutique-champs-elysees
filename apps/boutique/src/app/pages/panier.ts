@@ -6,7 +6,7 @@ import type { ProduitPublic, ZonePublique } from '@lce/contrats';
 import { API, Session } from '@lce/session';
 import { Bouton, FcfaPipe, Icone, NomIcone, Quantite } from '@lce/ui';
 import { ActionsProduit } from '../composants/actions-produit';
-import { ErreurChargement } from '../composants/etats';
+import { ErreurChargement, Squelettes } from '../composants/etats';
 import { Favoris } from '../etat/favoris';
 import { Notifications } from '../etat/notifications';
 import { Panier } from '../etat/panier';
@@ -21,7 +21,7 @@ export function libelleDelai(heures: number): string {
 /** Panier (maquette « Panier ») : les montants affichés sont ceux calculés par le serveur. */
 @Component({
   selector: 'lce-panier',
-  imports: [ErreurChargement, FormsModule, RouterLink, Bouton, FcfaPipe, Icone, Quantite],
+  imports: [ErreurChargement, Squelettes, FormsModule, RouterLink, Bouton, FcfaPipe, Icone, Quantite],
   templateUrl: './panier.html',
   styleUrl: './panier.scss',
 })

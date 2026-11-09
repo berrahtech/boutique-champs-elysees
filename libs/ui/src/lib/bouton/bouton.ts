@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/** primaire = bleu plein ; doux = fond bleu pâle ; contour ; clair = fond blanc ; fantome = contour blanc sur fond bleu. */
-export type VarianteBouton = 'primaire' | 'doux' | 'contour' | 'clair' | 'fantome';
+/** primaire = noir ; doux = fond pâle ; bleu = contour bleu ; bleu-plein ; contour ; clair = fond blanc ; fantome = contour blanc sur fond sombre. */
+export type VarianteBouton = 'primaire' | 'doux' | 'bleu' | 'bleu-plein' | 'contour' | 'clair' | 'fantome';
 
 /**
  * Bouton LCE, posé sur un vrai <button> ou <a> :
@@ -16,6 +16,8 @@ export type VarianteBouton = 'primaire' | 'doux' | 'contour' | 'clair' | 'fantom
     class: 'lce-bouton',
     '[class.lce-bouton--primaire]': 'variante() === "primaire"',
     '[class.lce-bouton--doux]': 'variante() === "doux"',
+    '[class.lce-bouton--bleu]': 'variante() === "bleu"',
+    '[class.lce-bouton--bleu-plein]': 'variante() === "bleu-plein"',
     '[class.lce-bouton--contour]': 'variante() === "contour"',
     '[class.lce-bouton--clair]': 'variante() === "clair"',
     '[class.lce-bouton--fantome]': 'variante() === "fantome"',
@@ -34,12 +36,12 @@ export type VarianteBouton = 'primaire' | 'doux' | 'contour' | 'clair' | 'fantom
       gap: var(--lce-espace-2);
       height: 44px;
       padding-inline: var(--lce-espace-5);
-      border-radius: var(--lce-rayon-pastille);
+      border-radius: var(--lce-rayon-controle);
       border: 1px solid transparent;
       text-decoration: none;
       cursor: pointer;
       white-space: nowrap;
-      transition: background-color 150ms, box-shadow 150ms;
+      transition: background-color 150ms, color 150ms, transform 100ms;
 
       @media (max-width: 767px) {
         height: var(--lce-bouton-mobile);
@@ -58,7 +60,25 @@ export type VarianteBouton = 'primaire' | 'doux' | 'contour' | 'clair' | 'fantom
       color: var(--lce-on-navy);
     }
     :host(.lce-bouton--primaire:hover) {
+      background: var(--lce-noir);
+    }
+    :host(:active:not([disabled])) {
+      transform: scale(0.98);
+    }
+    :host(.lce-bouton--bleu) {
+      background: var(--lce-surface);
+      color: var(--lce-navy-500);
+      border-color: var(--lce-navy-500);
+    }
+    :host(.lce-bouton--bleu:hover) {
+      background: var(--lce-primaire-soft);
+    }
+    :host(.lce-bouton--bleu-plein) {
       background: var(--lce-navy-500);
+      color: var(--lce-on-navy);
+    }
+    :host(.lce-bouton--bleu-plein:hover) {
+      filter: brightness(0.92);
     }
     :host(.lce-bouton--doux) {
       background: var(--lce-primaire-soft);

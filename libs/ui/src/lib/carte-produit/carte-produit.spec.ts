@@ -26,10 +26,10 @@ async function rendre(produit: ProduitCarte) {
 }
 
 describe('CarteProduit', () => {
-  it('affiche la pastille de réduction à côté de l’étiquette « Nouveauté »', async () => {
+  it('affiche le badge de réduction à la place de « Nouveau » quand le produit est réduit', async () => {
     const fixture = await rendre({ ...base, prixBarre: 50000 });
     const badges = [...(fixture.nativeElement as HTMLElement).querySelectorAll('lce-badge')].map((b) => b.textContent?.trim());
-    expect(badges).toEqual(['Nouveauté', '−20 %']);
+    expect(badges).toEqual(['−20 %']);
   });
 
   it('prévient quand le stock est faible, et n’affiche rien sinon', async () => {
@@ -37,19 +37,19 @@ describe('CarteProduit', () => {
     expect((faible.nativeElement as HTMLElement).textContent).toContain('Plus que 3');
     faible.componentRef.setInput('produit', { ...base, nouveau: false, stock: 40 });
     await faible.whenStable();
-    expect((faible.nativeElement as HTMLElement).querySelector('.etiquette')).toBeNull();
+    expect((faible.nativeElement as HTMLElement).querySelector('.alerte')).toBeNull();
   });
 
-  it('affiche « Nouveauté » sans réduction', async () => {
+  it('affiche « Nouveau » sans réduction', async () => {
     const fixture = await rendre(base);
-    expect((fixture.nativeElement as HTMLElement).querySelector('lce-badge')?.textContent?.trim()).toBe('Nouveauté');
+    expect((fixture.nativeElement as HTMLElement).querySelector('lce-badge')?.textContent?.trim()).toBe('Nouveau');
   });
 
   it('désactive le bouton en cas de rupture', async () => {
     const fixture = await rendre({ ...base, enRupture: true });
     const page = fixture.nativeElement as HTMLElement;
     expect((page.querySelector('.ajouter') as HTMLButtonElement).disabled).toBe(true);
-    expect(page.querySelector('.etiquette')?.textContent).toContain('Rupture');
+    expect(page.textContent).toContain('Rupture');
   });
 
   it("émet l'identifiant au clic sur « Ajouter au panier »", async () => {
