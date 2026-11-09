@@ -1,5 +1,5 @@
 import { httpResource } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import type { ProduitPublic, ZonePublique } from '@lce/contrats';
@@ -46,7 +46,6 @@ export class PagePanier {
 
   protected saisieCode = this.panier.codePromo() ?? '';
   protected readonly apercu = this.panier.apercu;
-  protected readonly commandeAnnoncee = signal(false);
 
   protected ico(nom: string | null): NomIcone {
     return (nom ?? 'sac') as NomIcone;
@@ -73,9 +72,9 @@ export class PagePanier {
 
   protected commander(): void {
     if (!this.session.connecte()) {
-      void this.router.navigate(['/connexion'], { queryParams: { retour: '/panier' } });
+      void this.router.navigate(['/connexion'], { queryParams: { retour: '/commande' } });
       return;
     }
-    this.commandeAnnoncee.set(true);
+    void this.router.navigateByUrl('/commande');
   }
 }

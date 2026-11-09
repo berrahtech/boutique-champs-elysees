@@ -1,9 +1,10 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Session } from '@lce/session';
-import { BarreAdmin, MenuAdmin, SECTIONS_ADMIN, SectionAdmin } from '@lce/ui';
+import { BarreAdmin, MenuAdmin, RubriqueAdmin, SECTIONS_ADMIN, SectionAdmin } from '@lce/ui';
 import { filter } from 'rxjs';
 import { EtatStocks } from './etat-stocks';
+import { EtatVentes } from './etat-ventes';
 
 /**
  * Mise en page de l'administration : menu selon les permissions, barre supérieure, contenu.
@@ -89,14 +90,18 @@ export class Coquille {
   protected readonly session = inject(Session);
   private readonly router = inject(Router);
   private readonly stocks = inject(EtatStocks);
+  private readonly ventes = inject(EtatVentes);
 
   protected readonly menuOuvert = signal(false);
 
   protected readonly sections = computed<SectionAdmin[]>(() => {
-    const alertes = this.stocks.alertes();
+    const pastilles: Record<string, RubriqueAdmin['pastille']> = {
+      '/admin/stocks': { nombre: this.stocks.alertes(), niveau: 'alerte' },
+      '/admin/commandes': { nombre: this.ventes.aTraiter(), niveau: 'a-traiter' },
+    };
     return SECTIONS_ADMIN.map((s) => ({
       ...s,
-      rubriques: s.rubriques.map((r) => (r.lien === '/admin/stocks' ? { ...r, pastille: { nombre: alertes, niveau: 'alerte' as const } } : r)),
+      rubriques: s.rubriques.map((r) => (pastilles[r.lien] ? { ...r, pastille: pastilles[r.lien] } : r)),
     }));
   });
 

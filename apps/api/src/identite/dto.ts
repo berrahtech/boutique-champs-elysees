@@ -9,8 +9,8 @@ const IDENTIFIANT_VALIDE = /^(\+223\d{8}|[^\s@]+@[^\s@]+)$/;
 const MESSAGE_IDENTIFIANT = 'identifiant : numéro malien à 8 chiffres ou adresse e-mail attendu';
 
 // 8 caractères minimum, avec au moins une lettre et un chiffre.
-const MOT_DE_PASSE = /^(?=.*[A-Za-zÀ-ÿ])(?=.*\d).{8,128}$/;
-const MESSAGE_MOT_DE_PASSE = 'motDePasse : 8 caractères minimum, avec au moins une lettre et un chiffre';
+export const MOT_DE_PASSE = /^(?=.*[A-Za-zÀ-ÿ])(?=.*\d).{8,128}$/;
+export const MESSAGE_MOT_DE_PASSE = 'motDePasse : 8 caractères minimum, avec au moins une lettre et un chiffre';
 
 export class DemandeOtpDto {
   @Identifiant()

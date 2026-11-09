@@ -51,7 +51,7 @@ export const SECTIONS_ADMIN: SectionAdmin[] = [
   },
   {
     titre: 'Administration',
-    rubriques: [{ libelle: 'Utilisateurs et rôles', lien: '/admin/roles', icone: 'roles', permission: 'role.gerer' }],
+    rubriques: [{ libelle: 'Utilisateurs et rôles', lien: '/admin/roles', icone: 'roles', permission: 'utilisateur.gerer' }],
   },
 ];
 

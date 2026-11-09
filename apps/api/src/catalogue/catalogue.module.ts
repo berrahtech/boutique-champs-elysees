@@ -9,5 +9,6 @@ import { CatalogueService } from './catalogue.service';
 @Module({
   controllers: [CatalogueController, PanierController, AdminProduitsController],
   providers: [CatalogueService, PanierService, AdminProduitsService],
+  exports: [PanierService],
 })
 export class CatalogueModule {}

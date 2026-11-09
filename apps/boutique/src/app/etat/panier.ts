@@ -55,6 +55,8 @@ export class Panier {
 
   readonly nbArticles = computed(() => this.lignesBrutes().reduce((n, l) => n + l.quantite, 0));
   readonly estVide = computed(() => this.lignesBrutes().length === 0);
+  /** Lignes telles qu'envoyées au serveur (identifiant et quantité). */
+  readonly lignes = computed(() => this.lignesBrutes());
 
   private fusionFaite = signal(false);
   private minuteur?: ReturnType<typeof setTimeout>;

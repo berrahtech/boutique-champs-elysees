@@ -4,16 +4,17 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { ListeProduitsAdmin } from '@lce/contrats';
 import { API, Session } from '@lce/session';
-import { Bouton, Icone, NomIcone } from '@lce/ui';
+import { Bouton, FcfaPipe, Icone, NomIcone, PastilleStatut, STATUTS_COMMANDE } from '@lce/ui';
 import { EtatStocks, LIBELLES_MOUVEMENT, signeMouvement } from '../etat-stocks';
+import { EtatVentes } from '../etat-ventes';
 
 /**
- * Tableau de bord : seulement des chiffres réels. Les ventes et les commandes
- * arriveront avec le module commande.
+ * Tableau de bord : seulement des chiffres réels, selon les droits de la personne :
+ * ventes du jour, commandes à traiter, état des stocks.
  */
 @Component({
   selector: 'lce-tableau-de-bord',
-  imports: [DatePipe, RouterLink, Bouton, Icone],
+  imports: [DatePipe, RouterLink, Bouton, FcfaPipe, Icone, PastilleStatut],
   template: `
     <div class="adm-corps">
       <section class="accueil">
@@ -21,13 +22,19 @@ import { EtatStocks, LIBELLES_MOUVEMENT, signeMouvement } from '../etat-stocks';
           <span class="date">{{ aujourdhui | date: 'EEEE d MMMM' }}</span>
           <h1>Bonjour {{ session.prenom() }}</h1>
           <p>
+            @if (aTraiter() > 0) {
+              {{ aTraiter() }} commande{{ aTraiter() > 1 ? 's attendent' : ' attend' }} votre action.
+            }
             @if (alertes() > 0) {
               {{ alertes() }} article{{ alertes() > 1 ? 's demandent' : ' demande' }} votre attention dans les stocks.
-            } @else {
-              Tout est en ordre dans les stocks.
+            } @else if (!aTraiter()) {
+              Tout est en ordre.
             }
           </p>
           <div class="outils">
+            @if (peut('commande.voir') && aTraiter()) {
+              <a lceBouton variante="clair" routerLink="/admin/commandes"><lce-icone nom="commandes" [taille]="18" />Traiter les commandes</a>
+            }
             @if (peut('produit.modifier')) {
               <a lceBouton variante="clair" routerLink="/admin/produits/nouveau"><lce-icone nom="plus" [taille]="18" />Nouveau produit</a>
             }
@@ -38,6 +45,58 @@ import { EtatStocks, LIBELLES_MOUVEMENT, signeMouvement } from '../etat-stocks';
         </div>
         <img src="/logo-lce.png" alt="" width="148" height="148" />
       </section>
+
+      @if (peut('commande.voir')) {
+        <div class="indicateurs">
+          @if (ventes(); as v) {
+            <a class="indicateur" routerLink="/admin/commandes">
+              <span class="icone-teinte noir"><lce-icone nom="commandes" [taille]="22" /></span>
+              <span class="l">À traiter</span><span class="v">{{ v.aTraiter }}</span>
+            </a>
+            <a class="indicateur" routerLink="/admin/commandes" [queryParams]="{ statut: 'EN_COURS_LIVRAISON' }">
+              <span class="icone-teinte"><lce-icone nom="livraison" [taille]="22" /></span>
+              <span class="l">En livraison</span><span class="v">{{ v.enLivraison }}</span>
+            </a>
+            <a class="indicateur" routerLink="/admin/commandes" [queryParams]="{ statut: '' }">
+              <span class="icone-teinte vert"><lce-icone nom="panier" [taille]="22" /></span>
+              <span class="l">Commandes du jour</span><span class="v">{{ v.commandesDuJour }}</span>
+            </a>
+            <a class="indicateur" [routerLink]="peut('rapport.voir') ? '/admin/finances' : '/admin/commandes'">
+              <span class="icone-teinte or"><lce-icone nom="finances" [taille]="22" /></span>
+              <span class="l">Ventes du jour</span><span class="v">{{ v.chiffreDuJour | fcfa }}</span>
+            </a>
+          } @else {
+            @for (n of [1, 2, 3, 4]; track n) {
+              <div class="indicateur"><span class="squelette" style="width: 44px; height: 44px; grid-row: span 2"></span><span class="squelette" style="height: 14px; width: 70%"></span><span class="squelette" style="height: 26px; width: 40%"></span></div>
+            }
+          }
+        </div>
+
+        @if (ventes(); as v) {
+          <section class="carte">
+            <div class="entre tete">
+              <h2 class="titre-carte">Dernières commandes</h2>
+              <a class="lien" routerLink="/admin/commandes" [queryParams]="{ statut: '' }">Toutes les commandes<lce-icone nom="chevron-droite" [taille]="16" /></a>
+            </div>
+            <ul class="liste commandes">
+              @for (c of v.dernieres; track c.id) {
+                <li>
+                  <a [routerLink]="['/admin/commandes', c.id]">
+                    <span class="nom"><b>{{ c.numero }}</b><small>{{ c.client.nom }} · {{ c.zone }} · {{ c.creeLe | date: 'd MMM, HH:mm' }}</small></span>
+                    <lce-pastille-statut [statut]="statuts[c.statut]" />
+                    <b class="chiffres montant">{{ c.total | fcfa }}</b>
+                  </a>
+                </li>
+              } @empty {
+                <li class="vide">
+                  <span class="icone-teinte"><lce-icone nom="panier" [taille]="22" /></span>
+                  Aucune commande pour l'instant : elles arrivent ici dès qu'un client valide son panier.
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      }
 
       @if (peut('stock.ajuster')) {
         <div class="indicateurs">
@@ -128,14 +187,6 @@ import { EtatStocks, LIBELLES_MOUVEMENT, signeMouvement } from '../etat-stocks';
           </section>
         </div>
       }
-
-      <section class="bientot">
-        <span class="icone-teinte noir"><lce-icone nom="commandes" [taille]="22" /></span>
-        <span class="empile">
-          <b>Ventes, commandes et livraisons</b>
-          <span class="petit attenue">Ces chiffres s'afficheront ici dès l'ouverture du module commande.</span>
-        </span>
-      </section>
     </div>
   `,
   styles: `
@@ -338,13 +389,17 @@ import { EtatStocks, LIBELLES_MOUVEMENT, signeMouvement } from '../etat-stocks';
       color: var(--lce-danger);
     }
 
-    .bientot {
+    .commandes a {
       display: flex;
+      flex: 1;
       align-items: center;
-      gap: 16px;
-      padding: 18px 22px;
-      border: 1px dashed var(--lce-line-fort);
-      border-radius: var(--adm-rayon);
+      gap: 14px;
+      color: var(--lce-ink);
+      text-decoration: none;
+    }
+    .montant {
+      min-width: 100px;
+      text-align: right;
     }
 
     @media (max-width: 1100px) {
@@ -374,6 +429,10 @@ import { EtatStocks, LIBELLES_MOUVEMENT, signeMouvement } from '../etat-stocks';
 export class TableauDeBord {
   protected readonly session = inject(Session);
   private readonly stocks = inject(EtatStocks);
+  private readonly etatVentes = inject(EtatVentes);
+  protected readonly ventes = this.etatVentes.resume;
+  protected readonly aTraiter = this.etatVentes.aTraiter;
+  protected readonly statuts = STATUTS_COMMANDE;
 
   protected readonly aujourdhui = new Date();
   protected readonly vue = this.stocks.vue;

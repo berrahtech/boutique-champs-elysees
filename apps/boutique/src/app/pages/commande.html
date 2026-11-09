@@ -1,0 +1,121 @@
+<nav class="fil-bande" aria-label="Étapes de la commande">
+  <ol class="lce-conteneur fil">
+    <li><a routerLink="/panier">Panier</a></li>
+    <li aria-current="step">Livraison et paiement</li>
+    <li>Confirmation</li>
+  </ol>
+</nav>
+
+<div class="lce-conteneur page">
+  <a routerLink="/panier" class="retour"><span><lce-icone nom="chevron-gauche" [taille]="20" /></span>Retour au panier</a>
+  <h1>Finaliser ma commande</h1>
+
+  @if (panier.estVide()) {
+    <div class="vide">
+      <lce-icone nom="panier" [taille]="48" />
+      <h2 class="titre-3">Votre panier est vide</h2>
+      <a lceBouton routerLink="/boutique">Voir la boutique</a>
+    </div>
+  } @else {
+    <form class="disposition" (ngSubmit)="confirmer()" novalidate>
+      <div class="etapes">
+        <section class="bloc" aria-labelledby="titre-livraison">
+          <h2 id="titre-livraison"><span class="numero">1</span>Adresse de livraison</h2>
+          <div class="grille-champs">
+            <div class="champ">
+              <label for="nom">Nom complet</label>
+              <input id="nom" name="nom" class="saisie" autocomplete="name" [(ngModel)]="nom" [attr.aria-invalid]="champManquant(nom) || null" />
+            </div>
+            <div class="champ">
+              <label for="tel">Téléphone</label>
+              <span class="telephone">
+                <span>+223</span>
+                <input id="tel" name="tel" class="saisie" inputmode="tel" autocomplete="tel-national" placeholder="70 00 00 00" [(ngModel)]="telephone" [attr.aria-invalid]="champManquant(telephone, 8) || null" />
+              </span>
+              <span class="aide">Le livreur vous appelle à ce numéro.</span>
+            </div>
+            <div class="champ large">
+              <label for="zone">Zone</label>
+              <select id="zone" name="zone" class="liste-deroulante" [ngModel]="zone()?.id" (ngModelChange)="panier.zoneId.set($event)">
+                @for (z of zones(); track z.id) {
+                  <option [value]="z.id">{{ z.nom }} · {{ z.frais ? (z.frais | fcfa) : 'gratuite' }}</option>
+                }
+              </select>
+              <span class="aide">{{ delai(zone()) }}</span>
+            </div>
+            <div class="champ">
+              <label for="quartier">Quartier</label>
+              <input id="quartier" name="quartier" class="saisie" placeholder="Hamdallaye ACI 2000" [(ngModel)]="quartier" [attr.aria-invalid]="champManquant(quartier) || null" />
+            </div>
+            <div class="champ">
+              <label for="repere">Point de repère</label>
+              <input id="repere" name="repere" class="saisie" placeholder="Près de la pharmacie du marché" [(ngModel)]="repere" [attr.aria-invalid]="champManquant(repere, 3) || null" />
+            </div>
+            <div class="champ large">
+              <label for="note">Instructions au livreur (facultatif)</label>
+              <textarea id="note" name="note" class="saisie zone-note" maxlength="500" placeholder="Portail bleu, appeler avant d'arriver…" [(ngModel)]="note"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="bloc" aria-labelledby="titre-paiement">
+          <h2 id="titre-paiement"><span class="numero">2</span>Paiement</h2>
+          <div class="moyens" role="radiogroup" aria-labelledby="titre-paiement">
+            @for (m of moyens; track m.id) {
+              <label class="moyen" [class.on]="moyen() === m.id" [class.indisponible]="!m.disponible">
+                <input type="radio" name="moyen" [value]="m.id" [checked]="moyen() === m.id" [disabled]="!m.disponible" (change)="moyen.set(m.id)" />
+                <span class="pastille"><lce-icone [nom]="m.icone" [taille]="22" /></span>
+                <span class="textes"><b>{{ m.libelle }}</b><small>{{ m.detail }}</small></span>
+                <span class="coche" aria-hidden="true"></span>
+              </label>
+            }
+          </div>
+        </section>
+      </div>
+
+      <aside class="recapitulatif" aria-labelledby="recap-titre">
+        <h2 id="recap-titre">Ma commande <span>· {{ panier.nbArticles() }} article{{ panier.nbArticles() > 1 ? 's' : '' }}</span></h2>
+        @if (apercu(); as a) {
+          <ul class="lignes">
+            @for (l of a.lignes; track l.produit.id) {
+              <li>
+                <span class="vignette">
+                  @if (l.produit.images[0]; as image) {
+                    <img [src]="image.url200" alt="" width="52" height="52" loading="lazy" />
+                  } @else {
+                    <lce-icone [nom]="ico(l.produit.icone)" [taille]="24" />
+                  }
+                  <span class="quantite">{{ l.quantite }}</span>
+                </span>
+                <span class="nom">{{ l.produit.nom }}</span>
+                <b class="chiffres">{{ l.sousTotal | fcfa }}</b>
+              </li>
+            }
+          </ul>
+          <hr class="filet" />
+          <div class="ligne-montant"><span>Sous-total</span><b class="chiffres">{{ a.sousTotal | fcfa }}</b></div>
+          <div class="ligne-montant"><span>Livraison</span><b class="chiffres">{{ a.frais ? (a.frais | fcfa) : 'Offerte' }}</b></div>
+          @if (a.remise) {
+            <div class="ligne-montant"><span>Réduction {{ a.codeApplique?.code }}</span><b class="chiffres promo">− {{ a.remise | fcfa }}</b></div>
+          }
+          <hr class="filet" />
+          <div class="ligne-montant"><span class="total-libelle">Total à payer</span><b class="total chiffres">{{ a.total | fcfa }}</b></div>
+
+          @if (erreur()) {
+            <p class="erreur" role="alert"><lce-icone nom="alerte" [taille]="18" />{{ erreur() }}</p>
+          }
+          <button lceBouton variante="bleu-plein" type="submit" [pleineLargeur]="true" [disabled]="envoi() || panier.chargement()">
+            @if (envoi()) {
+              Envoi de la commande…
+            } @else {
+              Confirmer la commande<lce-icone nom="fleche-droite" [taille]="18" />
+            }
+          </button>
+          <p class="rassurance"><lce-icone nom="securite" [taille]="16" />Vous payez à la réception, après avoir vérifié vos articles.</p>
+        } @else {
+          <span class="squelette-bloc"></span>
+        }
+      </aside>
+    </form>
+  }
+</div>

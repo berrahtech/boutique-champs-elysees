@@ -2,9 +2,11 @@ import { Controller, Get, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { CatalogueModule } from '../catalogue/catalogue.module';
+import { CommandesModule } from '../commandes/commandes.module';
 import { CommunModule } from '../commun/commun.module';
 import { PrismaService } from '../commun/prisma/prisma.service';
 import { validerConfiguration } from '../config/configuration';
+import { GestionModule } from '../gestion/gestion.module';
 import { Public } from '../identite/gardes';
 import { IdentiteModule } from '../identite/identite.module';
 
@@ -37,6 +39,8 @@ class SanteController {
     CommunModule,
     IdentiteModule,
     CatalogueModule,
+    CommandesModule,
+    GestionModule,
   ],
   controllers: [SanteController],
 })

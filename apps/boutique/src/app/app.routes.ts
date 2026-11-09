@@ -2,6 +2,7 @@ import { Route } from '@angular/router';
 
 const aVenir = () => import('./pages/a-venir').then((m) => m.AVenir);
 const liste = () => import('./pages/liste').then((m) => m.Liste);
+const mesCommandes = () => import('./pages/mes-commandes').then((m) => m.MesCommandes);
 
 // Routes de la boutique (dossier UX, § Inventaire des écrans). Les titres
 // d'onglet des pages à données (produit, catégorie, recherche) sont posés par la page.
@@ -17,12 +18,10 @@ export const appRoutes: Route[] = [
   { path: 'connexion', title: 'Connexion', loadComponent: () => import('./pages/connexion').then((m) => m.Connexion) },
   { path: 'inscription', title: 'Créer un compte', loadComponent: () => import('./pages/inscription').then((m) => m.Inscription) },
   { path: 'compte', title: 'Mon compte', loadComponent: () => import('./pages/compte').then((m) => m.Compte) },
-  {
-    path: 'compte/commandes',
-    title: 'Mes commandes',
-    loadComponent: aVenir,
-    data: { titre: 'Suivi de commande', icone: 'colis' },
-  },
+  { path: 'commande', title: 'Finaliser ma commande', loadComponent: () => import('./pages/commande').then((m) => m.PageCommande) },
+  { path: 'compte/commandes', title: 'Mes commandes', loadComponent: mesCommandes },
+  { path: 'compte/commandes/:numero', title: 'Suivi de commande', loadComponent: mesCommandes },
+  { path: 'compte/suivi', title: 'Mes commandes', loadComponent: mesCommandes },
   {
     path: 'compte/:rubrique',
     title: 'Mon compte',
