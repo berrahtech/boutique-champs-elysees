@@ -110,6 +110,15 @@ Les règles critiques sont tenues par la base elle-même, même si le code a un 
 2. Ajoutez aux « origines JavaScript autorisées » `http://localhost:4200` et l'adresse du site.
 3. Copiez l'identifiant dans `GOOGLE_CLIENT_ID` (`apps/api/.env`) et relancez l'API : le bouton apparaît.
 
+**Applications Android.** Chaque application a son propre « ID client OAuth » de type *Android*, défini par son nom de package et l'empreinte SHA-1 de sa clé de signature. Google le reconnaît tout seul : il ne se copie nulle part dans le code. Le SDK Flutter reçoit l'identifiant **Web** (`serverClientId`), avec lequel l'API vérifie les jetons.
+
+| Application | Package | ID client Android |
+|---|---|---|
+| Client | `ml.lce.lce_client` | `625818833470-6k6ubiq8pi0ige9l1o3bdqrgvj8md4gm.apps.googleusercontent.com` |
+| Livreur | `ml.lce.lce_livreur` | à créer |
+
+Le SHA-1 enregistré est celui de la clé de développement (`~/.android/debug.keystore`). Avant la publication, ajoutez celui de la clé de signature Google Play (Play Console → Intégrité de l'application).
+
 Règle de sécurité : un compte existant n'est rattaché à Google que si son adresse est déjà vérifiée, et les comptes à double authentification (personnel) ne passent jamais par Google.
 
 ## À fournir ou à décider

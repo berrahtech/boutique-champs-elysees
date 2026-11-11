@@ -83,7 +83,8 @@
         }
       },
       "options": {
-        "proxyConfig": "apps/boutique/proxy.conf.json"
+        "proxyConfig": "apps/boutique/proxy.conf.json",
+        "allowedHosts": [".ngrok-free.app", ".ngrok-free.dev", ".ngrok.app"]
       }
     },
     "serve-static": {
