@@ -59,6 +59,7 @@ class LceCarteProduit extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(EspacesLce.e3),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AspectRatio(
@@ -87,9 +88,15 @@ class LceCarteProduit extends StatelessWidget {
                     Positioned(
                       top: 0,
                       right: 0,
+                      // Pastille blanche : le cœur reste lisible sur une photo sombre.
                       child: IconButton(
                         tooltip: favori ? 'Retirer des favoris' : 'Ajouter aux favoris',
                         onPressed: onFavori,
+                        style: IconButton.styleFrom(
+                          backgroundColor: CouleursLce.surface.withValues(alpha: 0.92),
+                          shadowColor: CouleursLce.navy,
+                          elevation: 1,
+                        ),
                         icon: LceIcone(
                           IconeLce.coeur,
                           taille: 22,

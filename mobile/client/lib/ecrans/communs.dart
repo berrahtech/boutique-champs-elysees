@@ -212,7 +212,9 @@ class GrilleProduits extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colonnes = MediaQuery.sizeOf(context).width > 700 ? 4 : 2;
+    final largeur = MediaQuery.sizeOf(context).width;
+    final colonnes = largeur > 700 ? 4 : 2;
+    final carte = (largeur - 2 * MiseEnPageLce.margeMobile - (colonnes - 1) * EspacesLce.e3) / colonnes;
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: MiseEnPageLce.margeMobile),
       sliver: SliverGrid.builder(
@@ -220,10 +222,13 @@ class GrilleProduits extends StatelessWidget {
           crossAxisCount: colonnes,
           mainAxisSpacing: EspacesLce.e3,
           crossAxisSpacing: EspacesLce.e3,
-          childAspectRatio: 0.6,
+          // Photo carrée (largeur de la carte) + nom sur deux lignes et prix,
+          // qui grandissent avec la taille de police du téléphone.
+          mainAxisExtent: carte + MediaQuery.textScalerOf(context).scale(130),
         ),
         itemCount: produits.length,
-        itemBuilder: (_, i) => CarteProduit(produits[i]),
+        // La carte garde sa hauteur naturelle au lieu de s'étirer sur la case.
+        itemBuilder: (_, i) => Align(alignment: Alignment.topCenter, child: CarteProduit(produits[i])),
       ),
     );
   }
@@ -269,13 +274,14 @@ class BandeProduits extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 310,
+      // Photo carrée de 168 + texte, qui grandit avec la taille de police du téléphone.
+      height: 168 + MediaQuery.textScalerOf(context).scale(130),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: MiseEnPageLce.margeMobile),
         itemCount: produits.length,
         separatorBuilder: (_, _) => const SizedBox(width: EspacesLce.e3),
-        itemBuilder: (_, i) => SizedBox(width: 168, child: CarteProduit(produits[i])),
+        itemBuilder: (_, i) => Align(alignment: Alignment.topCenter, child: SizedBox(width: 168, child: CarteProduit(produits[i]))),
       ),
     );
   }

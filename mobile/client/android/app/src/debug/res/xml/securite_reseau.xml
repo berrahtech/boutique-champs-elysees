@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Développement seulement : l'API locale est en HTTP simple.
+     localhost passe par « adb reverse », 10.0.2.2 est le PC vu de l'émulateur.
+     La version de production n'autorise que HTTPS. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

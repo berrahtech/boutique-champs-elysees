@@ -64,7 +64,7 @@ class EcranCompte extends StatelessWidget {
                           Text('Connectez-vous pour commander, suivre vos livraisons et retrouver vos favoris partout.',
                               style: TextesLce.body.copyWith(color: CouleursLce.onNavy.withValues(alpha: 0.8))),
                           const SizedBox(height: EspacesLce.e4),
-                          LceBouton(libelle: 'Se connecter ou créer un compte', onPressed: () => ouvrirConnexion(context)),
+                          LceBouton(libelle: 'Se connecter ou créer un compte', variante: VarianteBouton.or, onPressed: () => ouvrirConnexion(context)),
                         ],
                       ),
               ),
@@ -168,6 +168,24 @@ class _EcranConnexionState extends State<EcranConnexion> {
     });
     try {
       await action();
+    } on ErreurApi catch (e) {
+      if (mounted) setState(() => _erreur = e.messageUtilisateur);
+    } finally {
+      if (mounted) setState(() => _envoi = false);
+    }
+  }
+
+  late final Future<String?> _google = Etat.of(context).session.googleDisponible();
+
+  /// Google crée le compte s'il n'existe pas : connexion et inscription ne font qu'un.
+  Future<void> _viaGoogle() async {
+    setState(() {
+      _envoi = true;
+      _erreur = null;
+    });
+    try {
+      final ok = await Etat.of(context).session.connecterAvecGoogle();
+      if (ok && mounted) Navigator.of(context).pop(true);
     } on ErreurApi catch (e) {
       if (mounted) setState(() => _erreur = e.messageUtilisateur);
     } finally {
@@ -296,6 +314,35 @@ class _EcranConnexionState extends State<EcranConnexion> {
               pleineLargeur: true,
               onPressed: _envoi ? null : _valider,
             ),
+            if (_mode != _Mode.code)
+              FutureBuilder<String?>(
+                future: _google,
+                builder: (context, s) => s.data == null
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
+                          const SizedBox(height: EspacesLce.e4),
+                          Row(
+                            children: [
+                              const Expanded(child: Divider()),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: EspacesLce.e3),
+                                child: Text('ou', style: TextesLce.small.copyWith(color: CouleursLce.inkMuted)),
+                              ),
+                              const Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: EspacesLce.e4),
+                          LceBouton(
+                            libelle: inscription ? "S'inscrire avec Google" : 'Continuer avec Google',
+                            variante: VarianteBouton.contour,
+                            pleineLargeur: true,
+                            icone: const _LogoGoogle(),
+                            onPressed: _envoi ? null : _viaGoogle,
+                          ),
+                        ],
+                      ),
+              ),
             const SizedBox(height: EspacesLce.e4),
             Center(
               child: TextButton(
@@ -313,4 +360,39 @@ class _EcranConnexionState extends State<EcranConnexion> {
       ),
     );
   }
+}
+
+/// « G » aux quatre couleurs de Google, dessiné sans image.
+class _LogoGoogle extends StatelessWidget {
+  const _LogoGoogle();
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.square(dimension: 20, child: CustomPaint(painter: _PeintreG()));
+}
+
+class _PeintreG extends CustomPainter {
+  const _PeintreG();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final epaisseur = size.width * 0.2;
+    final cadre = Rect.fromLTWH(epaisseur / 2, epaisseur / 2, size.width - epaisseur, size.height - epaisseur);
+    final p = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = epaisseur;
+    const tour = 6.283185307179586;
+    // Rouge en haut, jaune à gauche, vert en bas, bleu à droite.
+    for (final (debut, angle, couleur) in const [
+      (-2.4, 1.55, Color(0xFFEA4335)),
+      (2.35, 1.6, Color(0xFFFBBC05)),
+      (0.75, 1.6, Color(0xFF34A853)),
+      (0.0, 0.75, Color(0xFF4285F4)),
+    ]) {
+      canvas.drawArc(cadre, debut, angle * tour / 6.283185307179586, false, p..color = couleur);
+    }
+    canvas.drawLine(Offset(size.width / 2, size.height / 2), Offset(size.width - epaisseur / 2, size.height / 2), p..color = const Color(0xFF4285F4));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

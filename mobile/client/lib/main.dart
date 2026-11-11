@@ -38,9 +38,8 @@ class ApplicationClient extends StatelessWidget {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         }),
         appBarTheme: theme.appBarTheme.copyWith(
-          backgroundColor: CouleursLce.surfaceDouce,
           surfaceTintColor: Colors.transparent,
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          systemOverlayStyle: SystemUiOverlayStyle.light,
         ),
       ),
       home: const Coquille(),

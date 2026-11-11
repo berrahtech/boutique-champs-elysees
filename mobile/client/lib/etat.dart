@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api/api.dart';
@@ -49,7 +51,40 @@ class Session extends ChangeNotifier {
     await _ouvrir(await api.post('/auth/inscription', {'preuveOtp': preuve['preuveOtp'], 'nom': nom, 'motDePasse': motDePasse}) as Json);
   }
 
+  /// Identifiant Google « Web » fourni par l'API (null : Google désactivé).
+  /// Le SDK l'utilise comme `serverClientId` : le jeton reçu est destiné à l'API.
+  Future<String?>? _googleId;
+  Future<String?> googleDisponible() {
+    if (kIsWeb || !GoogleSignIn.instance.supportsAuthenticate()) return Future.value();
+    return _googleId ??= () async {
+      try {
+        final id = (await api.get('/auth/options') as Json)['googleClientId'] as String?;
+        if (id != null) await GoogleSignIn.instance.initialize(serverClientId: id);
+        return id;
+      } on Object {
+        _googleId = null;
+        return null;
+      }
+    }();
+  }
+
+  /// Connexion ou inscription Google. Renvoie false si la personne a annulé.
+  Future<bool> connecterAvecGoogle() async {
+    if (await googleDisponible() == null) throw ErreurApi('google-indisponible', 'La connexion Google est indisponible pour le moment.');
+    try {
+      final compte = await GoogleSignIn.instance.authenticate();
+      final jeton = compte.authentication.idToken;
+      if (jeton == null) throw ErreurApi('google-indisponible', 'Google n’a pas fourni d’identité. Réessayez.');
+      await _ouvrir(await api.post('/auth/google', {'jeton': jeton}) as Json);
+      return true;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled || e.code == GoogleSignInExceptionCode.interrupted) return false;
+      throw ErreurApi('google-indisponible', 'La connexion Google a échoué. Réessayez ou utilisez votre téléphone.');
+    }
+  }
+
   Future<void> deconnecter() async {
+    if (_googleId != null) unawaited(GoogleSignIn.instance.signOut().catchError((_) {}));
     final jeton = _rafraichissement;
     _effacer();
     if (jeton != null) unawaited(api.post('/auth/deconnexion', {'jetonRafraichissement': jeton}).catchError((_) => null));
